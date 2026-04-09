@@ -1,42 +1,86 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/not-found";
+import { useState, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
+import { Home, PiggyBank, Gamepad2 } from "lucide-react";
+import { loadState, saveState, accrueDailyIncome, GameState } from "@/lib/storage";
+import HomePage from "@/pages/HomePage";
+import SavingsPage from "@/pages/SavingsPage";
+import GamePage from "@/pages/GamePage";
+import "@/bank.css";
 
-const queryClient = new QueryClient();
+type Tab = "home" | "savings" | "game";
 
-function Home() {
+const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
+  { id: "home", label: "Главная", icon: Home },
+  { id: "savings", label: "Вклады", icon: PiggyBank },
+  { id: "game", label: "Игра", icon: Gamepad2 },
+];
+
+export default function App() {
+  const [tab, setTab] = useState<Tab>("home");
+  const [state, setState] = useState<GameState>(() => {
+    const s = loadState();
+    return accrueDailyIncome(s);
+  });
+
+  useEffect(() => {
+    saveState(state);
+  }, [state]);
+
+  const handleStateChange = useCallback((next: GameState) => {
+    setState(next);
+  }, []);
+
+  function handleTabChange(t: Tab | "game") {
+    setTab(t as Tab);
+  }
+
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900">Replit Agent is building...</h1>
-        <p className="mt-2 text-sm text-gray-600">Your app will appear here once it's ready.</p>
-      </div>
+    <div className="bank-app">
+      {/* Status bar space */}
+      <div className="status-bar" />
+
+      {/* App header */}
+      <header className="bank-header">
+        <div className="bank-header-inner">
+          <div className="bank-logo">
+            <span className="bank-logo-icon">🌳</span>
+            <span className="bank-logo-text">TreeBank</span>
+          </div>
+          <div className="bank-header-badge">Бета</div>
+        </div>
+      </header>
+
+      {/* Page content */}
+      <main className="bank-main">
+        <motion.div
+          key={tab}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.18 }}
+          className="bank-page"
+        >
+          {tab === "home" && <HomePage state={state} />}
+          {tab === "savings" && <SavingsPage state={state} onTabChange={handleTabChange} />}
+          {tab === "game" && <GamePage state={state} onStateChange={handleStateChange} />}
+        </motion.div>
+      </main>
+
+      {/* Bottom tabs */}
+      <nav className="bank-nav">
+        {TABS.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            className={`bank-nav-btn ${tab === id ? "bank-nav-btn-active" : ""}`}
+            onClick={() => setTab(id)}
+          >
+            <Icon size={22} strokeWidth={tab === id ? 2.2 : 1.6} />
+            <span>{label}</span>
+            {id === "game" && (
+              <span className="bank-nav-badge" />
+            )}
+          </button>
+        ))}
+      </nav>
     </div>
   );
 }
-
-function Router() {
-  return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
-
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-        </WouterRouter>
-        <Toaster />
-      </TooltipProvider>
-    </QueryClientProvider>
-  );
-}
-
-export default App;
