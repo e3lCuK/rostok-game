@@ -277,4 +277,41 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
   }
 });
 
+// POST /api/game/debug/reset-session — clear cooldown only (debug)
+router.post("/game/debug/reset-session", requireAuth, async (req: any, res) => {
+  const userId = req.userId;
+  try {
+    await pool.query(
+      `UPDATE game_state SET
+        last_session_time = NULL,
+        session_in_progress = FALSE,
+        current_session_water = FALSE,
+        current_session_sun = FALSE,
+        current_session_fertilizer = FALSE,
+        streak_days = 0,
+        updated_at = NOW()
+       WHERE user_id = $1`,
+      [userId],
+    );
+    return res.json({ success: true });
+  } catch (err) {
+    req.log.error({ err }, "Error resetting session (debug)");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// DELETE /api/game/debug/reset-all — wipe all user data (debug)
+router.delete("/game/debug/reset-all", requireAuth, async (req: any, res) => {
+  const userId = req.userId;
+  try {
+    await pool.query("DELETE FROM income_history WHERE user_id = $1", [userId]);
+    await pool.query("DELETE FROM game_state WHERE user_id = $1", [userId]);
+    await pool.query("DELETE FROM accounts WHERE user_id = $1", [userId]);
+    return res.json({ success: true });
+  } catch (err) {
+    req.log.error({ err }, "Error wiping user data (debug)");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 export default router;

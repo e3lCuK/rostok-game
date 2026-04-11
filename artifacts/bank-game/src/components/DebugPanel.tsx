@@ -1,18 +1,29 @@
 import { useState } from "react";
 import { UserState } from "@/lib/engine";
+import { api } from "@/lib/api";
 
 interface Props {
   state: UserState;
   onStateChange: (s: UserState) => void;
   onResetPending: () => void;
+  onTriggerOnboarding: () => void;
 }
 
-export default function DebugPanel({ state, onStateChange, onResetPending }: Props) {
+export default function DebugPanel({ state, onStateChange, onResetPending, onTriggerOnboarding }: Props) {
   const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   const { balances, game } = state;
 
-  function resetSession() {
+  async function resetSession() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await api.debugResetSession();
+      console.log("[Debug] Session reset in DB");
+    } catch (e) {
+      console.warn("[Debug] DB reset-session failed, resetting locally only", e);
+    }
     onResetPending();
     onStateChange({
       ...state,
@@ -23,8 +34,10 @@ export default function DebugPanel({ state, onStateChange, onResetPending }: Pro
         water: false,
         sun: false,
         fertilizer: false,
+        streakDays: 0,
       },
     });
+    setBusy(false);
   }
 
   function addMoney() {
@@ -52,28 +65,19 @@ export default function DebugPanel({ state, onStateChange, onResetPending }: Pro
     });
   }
 
-  function clearAll() {
+  async function clearAll() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await api.debugResetAll();
+      console.log("[Debug] All user data deleted from DB");
+    } catch (e) {
+      console.warn("[Debug] DB reset-all failed", e);
+    }
     onResetPending();
-    onStateChange({
-      ...state,
-      balances: {
-        ...balances,
-        standard: 0,
-        active: 0,
-        standardEarned: 0,
-        activeEarned: 0,
-        totalDaysEarned: 0,
-      },
-      game: {
-        lastSessionTime: null,
-        sessionInProgress: false,
-        water: false,
-        sun: false,
-        fertilizer: false,
-        streakDays: 0,
-      },
-      history: [],
-    });
+    localStorage.clear();
+    setBusy(false);
+    onTriggerOnboarding();
   }
 
   const buttons: { label: string; fn: () => void; danger?: boolean }[] = [

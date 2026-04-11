@@ -221,7 +221,13 @@ function AppShell() {
           >
             {tab === "home" && <HomePage state={state} />}
             {tab === "savings" && <SavingsPage state={state} onTabChange={handleTabChange} />}
-            {tab === "game" && <GamePage state={state} onStateChange={handleStateChange} />}
+            {tab === "game" && (
+              <GamePage
+                state={state}
+                onStateChange={handleStateChange}
+                onResetToOnboarding={() => { setState(null); setOnboarding(true); }}
+              />
+            )}
           </motion.div>
         </AnimatePresence>
       </main>

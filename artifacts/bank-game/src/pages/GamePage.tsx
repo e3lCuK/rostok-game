@@ -21,6 +21,7 @@ import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2 } from "lucide-react";
 interface Props {
   state: UserState;
   onStateChange: (s: UserState) => void;
+  onResetToOnboarding?: () => void;
 }
 
 interface Floater {
@@ -30,7 +31,7 @@ interface Floater {
   label: string;
 }
 
-export default function GamePage({ state, onStateChange }: Props) {
+export default function GamePage({ state, onStateChange, onResetToOnboarding }: Props) {
   const [now, setNow] = useState(Date.now());
   const [floaters, setFloaters] = useState<Floater[]>([]);
   const [actionLoading, setActionLoading] = useState(false);
@@ -68,15 +69,22 @@ export default function GamePage({ state, onStateChange }: Props) {
 
   async function handleStartSession() {
     if (locked || game.sessionInProgress || actionLoading) return;
+    console.log("[Session] Start button clicked, locked:", locked, "inProgress:", game.sessionInProgress);
     setActionLoading(true);
     try {
       await api.startSession();
+      console.log("[Session] Started successfully");
       onStateChange({
         ...state,
         game: { ...game, sessionInProgress: true, water: false, sun: false, fertilizer: false },
       });
-    } catch {
-      // ignore
+    } catch (err: any) {
+      const status = err?.status ?? 0;
+      if (status === 429) {
+        console.warn("[Session] Still on cooldown (429) — try Debug > Сброс сессии");
+      } else {
+        console.error("[Session] Failed to start:", err);
+      }
     } finally {
       setActionLoading(false);
     }
@@ -300,6 +308,7 @@ export default function GamePage({ state, onStateChange }: Props) {
         state={state}
         onStateChange={onStateChange}
         onResetPending={() => { setPendingReward(0); setSessionPerformance(0); }}
+        onTriggerOnboarding={() => onResetToOnboarding?.()}
       />
     </div>
   );

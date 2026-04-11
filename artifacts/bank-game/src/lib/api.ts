@@ -55,4 +55,10 @@ export const api = {
       "/game/session/action",
       { method: "POST", body: JSON.stringify({ action, skillScore }) },
     ),
+
+  debugResetSession: () =>
+    request<{ success: boolean }>("/game/debug/reset-session", { method: "POST" }),
+
+  debugResetAll: () =>
+    request<{ success: boolean }>("/game/debug/reset-all", { method: "DELETE" }),
 };
