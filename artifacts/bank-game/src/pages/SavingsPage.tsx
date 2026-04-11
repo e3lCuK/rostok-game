@@ -15,11 +15,14 @@ interface Props {
 export default function SavingsPage({ state, onTabChange }: Props) {
   const { standard, active, standardEarned, activeEarned } = state.balances;
 
+  const { streakDays } = state.game;
+  const totalBalance = standard + active;
+
   const standardAnnual = standard * 0.12;
   const activeAnnual = active * 0.15;
   const stdDaily = calcStandardDaily(standard);
   const actDaily = calcActiveDaily(active);
-  const sessionReward = calcSessionReward(active);
+  const sessionReward = calcSessionReward(active, totalBalance, streakDays);
 
   return (
     <div className="savings-page">

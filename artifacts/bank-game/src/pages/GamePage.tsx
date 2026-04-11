@@ -46,7 +46,7 @@ export default function GamePage({ state, onStateChange }: Props) {
   const locked = isSessionLocked(game.lastSessionTime, now);
   const nextTime = getNextSessionTime(game.lastSessionTime);
   const msLeft = nextTime ? Math.max(0, nextTime - now) : null;
-  const sessionReward = calcSessionReward(balances.active);
+  const sessionReward = calcSessionReward(balances.active, totalBalance, game.streakDays);
   const actionsLeft = getSessionActionsLeft(game);
 
   const progress = getTreeProgress(balances.startDate, now, totalBalance);

@@ -28,6 +28,7 @@ export interface GameStateResponse {
     lastSessionTime: number | null;
     sessionInProgress: boolean;
     water: boolean;
+    streakDays: number;
     sun: boolean;
     fertilizer: boolean;
   };

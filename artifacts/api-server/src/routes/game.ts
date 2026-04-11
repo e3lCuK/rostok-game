@@ -50,6 +50,7 @@ router.get("/game/state", requireAuth, async (req: any, res) => {
         water: game.current_session_water || false,
         sun: game.current_session_sun || false,
         fertilizer: game.current_session_fertilizer || false,
+        streakDays: game.streak_days || 0,
       },
       history: historyRows.rows.map((r: any) => ({
         amount: parseFloat(r.amount),
@@ -224,14 +225,35 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
     let reward = 0;
     if (allDone) {
       const activeBalance = parseFloat(acc.active_balance);
-      const dailyActive = activeBalance * 0.15 / 365;
-      reward = dailyActive / 3;
+      const standardBalance = parseFloat(acc.standard_balance);
+      const totalBalance = activeBalance + standardBalance;
       const now = Date.now();
+
+      // Streak logic: increment if last session was within 48h, reset otherwise
+      const STREAK_WINDOW_MS = 48 * 60 * 60 * 1000;
+      const lastSessionTime = g.last_session_time ? parseInt(g.last_session_time) : null;
+      const currentStreak: number = g.streak_days || 0;
+      let newStreak: number;
+      if (!lastSessionTime || now - lastSessionTime > STREAK_WINDOW_MS) {
+        newStreak = 1;
+      } else {
+        newStreak = Math.min(currentStreak + 1, 7);
+      }
+
+      // F = baseBonus + skillResult + streakBonus, capped at 100%
+      // skillResult = 80 (all 3 actions completed = full mini-game score)
+      const baseBonus = totalBalance >= 1_000_000 ? 12 : totalBalance >= 100_000 ? 10 : 8;
+      const streakBonus = Math.min(newStreak, 7);
+      const skillResult = 80;
+      const F = Math.min(baseBonus + skillResult + streakBonus, 100);
+      const dailyIncome = activeBalance * 0.15 / 365;
+      reward = dailyIncome * (F / 100) / 3;
+
       const earnedDate = new Date(now).toLocaleDateString("ru-RU");
 
       await pool.query(
-        `UPDATE game_state SET session_in_progress = FALSE, last_session_time = $1, updated_at = NOW() WHERE user_id = $2`,
-        [now, userId],
+        `UPDATE game_state SET session_in_progress = FALSE, last_session_time = $1, streak_days = $2, updated_at = NOW() WHERE user_id = $3`,
+        [now, newStreak, userId],
       );
       await pool.query(
         `UPDATE accounts SET active_balance = active_balance + $1, active_earned = active_earned + $1 WHERE user_id = $2`,

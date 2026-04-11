@@ -30,6 +30,7 @@ export interface UserState {
     water: boolean;
     sun: boolean;
     fertilizer: boolean;
+    streakDays: number;
   };
   history: { date: string; amount: number; type: "standard" | "active" }[];
 }
@@ -43,8 +44,24 @@ export function calcActiveDaily(activeBalance: number): number {
   return activeBalance * 0.15 / 365;
 }
 
-export function calcSessionReward(activeBalance: number): number {
-  return calcActiveDaily(activeBalance) / 3;
+// ---- Session reward formula (single source of truth) ----
+// F = baseBonus + skillResult + streakBonus, capped at 100%
+// sessionReward = dailyIncome * (F / 100) / 3
+//
+// baseBonus:    10k→8%  100k→10%  1M→12%
+// skillResult:  0–80% (80 = all 3 mini-game actions completed)
+// streakBonus:  1% per consecutive day, max 7%
+export function calcSessionReward(
+  activeBalance: number,
+  totalBalance: number,
+  streakDays: number = 0,
+  skillResult: number = 80,
+): number {
+  const baseBonus = totalBalance >= 1_000_000 ? 12 : totalBalance >= 100_000 ? 10 : 8;
+  const streakBonus = Math.min(Math.max(Math.floor(streakDays), 0), 7);
+  const F = Math.min(baseBonus + skillResult + streakBonus, 100);
+  const dailyIncome = calcActiveDaily(activeBalance);
+  return dailyIncome * (F / 100) / 3;
 }
 
 // ---- Tree progression ----
