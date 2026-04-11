@@ -15,6 +15,7 @@ import {
 import { api } from "@/lib/api";
 import TreeSVG from "@/components/TreeSVG";
 import FallingGameWater from "@/components/FallingGameWater";
+import DebugPanel from "@/components/DebugPanel";
 import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2 } from "lucide-react";
 
 interface Props {
@@ -294,6 +295,12 @@ export default function GamePage({ state, onStateChange }: Props) {
           <p className="game-balance-earned">+{formatRub(balances.activeEarned)}</p>
         </div>
       </div>
+
+      <DebugPanel
+        state={state}
+        onStateChange={onStateChange}
+        onResetPending={() => { setPendingReward(0); setSessionPerformance(0); }}
+      />
     </div>
   );
 }
