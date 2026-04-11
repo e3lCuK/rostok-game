@@ -14,7 +14,7 @@ import {
 } from "@/lib/engine";
 import { api } from "@/lib/api";
 import TreeSVG from "@/components/TreeSVG";
-import FallingGameWater from "@/components/FallingGameWater";
+import FallingGameWater, { GameType } from "@/components/FallingGameWater";
 import DebugPanel from "@/components/DebugPanel";
 import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2 } from "lucide-react";
 
@@ -35,13 +35,16 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
   const [now, setNow] = useState(Date.now());
   const [floaters, setFloaters] = useState<Floater[]>([]);
   const [actionLoading, setActionLoading] = useState(false);
-  const [showWaterGame, setShowWaterGame] = useState(false);
+  const [activeMinigame, setActiveMinigame] = useState<GameType | null>(null);
   const [pendingReward, setPendingReward] = useState(0);
   const [sessionPerformance, setSessionPerformance] = useState(0);
   const [collectLoading, setCollectLoading] = useState(false);
   const floaterRef = useRef(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const skillScoreRef = useRef<number>(40);
+  const waterScoreRef = useRef<number>(40);
+  const sunScoreRef = useRef<number>(40);
+  const fertilizerScoreRef = useRef<number>(40);
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
@@ -90,14 +93,18 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
     }
   }
 
-  function handleWaterGameComplete(skillScore: number) {
-    setShowWaterGame(false);
-    skillScoreRef.current = typeof skillScore === "number" && !isNaN(skillScore) ? skillScore : 40;
-    console.log("[Water mini-game] skillScore saved:", skillScoreRef.current);
+  function handleMinigameComplete(type: GameType, skillScore: number) {
+    setActiveMinigame(null);
+    const safe = typeof skillScore === "number" && !isNaN(skillScore) ? skillScore : 40;
+    if (type === "water")      waterScoreRef.current = safe;
+    if (type === "sun")        sunScoreRef.current = safe;
+    if (type === "fertilizer") fertilizerScoreRef.current = safe;
+    skillScoreRef.current = safe;
+    console.log(`[Mini-game:${type}] skillScore saved:`, safe);
     const rect = gameAreaRef.current?.getBoundingClientRect();
     const x = (rect?.width ?? 200) / 2;
     const y = (rect?.height ?? 200) / 2;
-    doAction("water", x, y);
+    doAction(type, x, y);
   }
 
   async function handleAction(action: "water" | "sun" | "fertilizer", e: React.MouseEvent) {
@@ -211,10 +218,13 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
           </div>
         ))}
 
-        {/* Water mini-game overlay */}
-        {showWaterGame && (
+        {/* Mini-game overlay */}
+        {activeMinigame && (
           <div className="water-game-overlay">
-            <FallingGameWater onComplete={handleWaterGameComplete} />
+            <FallingGameWater
+              type={activeMinigame}
+              onComplete={(score) => handleMinigameComplete(activeMinigame, score)}
+            />
           </div>
         )}
 
@@ -258,11 +268,7 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
                   key={btn.key}
                   className={`action-btn-bank ${btn.done ? "action-btn-done" : ""}`}
                   style={{ "--ac": btn.color } as React.CSSProperties}
-                  onClick={
-                    btn.key === "water" && !btn.done
-                      ? () => setShowWaterGame(true)
-                      : (e) => handleAction(btn.key, e)
-                  }
+                  onClick={!btn.done ? () => setActiveMinigame(btn.key) : undefined}
                   disabled={!!btn.done || actionLoading}
                   whileTap={!btn.done ? { scale: 0.91 } : {}}
                 >

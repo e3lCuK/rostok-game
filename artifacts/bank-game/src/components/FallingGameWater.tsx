@@ -1,10 +1,59 @@
 import { useEffect, useRef, useCallback } from "react";
 
+export type GameType = "water" | "sun" | "fertilizer";
+
 interface Props {
+  type?: GameType;
   onComplete: (skillScore: number) => void;
 }
 
-// ---- config ----
+// ---- visual config per type ----
+const CONFIGS = {
+  water: {
+    bg:          "rgba(239,246,255,0.97)",
+    timerBg:     "#dbeafe",
+    timerNormal: "#3b82f6",
+    timerFast:   "#f97316",
+    phaseColor:  "#93c5fd",
+    scoreFg:     "#1e40af",
+    scoreEmoji:  "💧",
+    dropColor:   "#3b82f6",
+    dropShadow:  "rgba(59,130,246,0.15)",
+    barColor:    "#1e40af",
+    resultColor: "#1d4ed8",
+    border:      "2px solid #bfdbfe",
+  },
+  sun: {
+    bg:          "rgba(255,251,235,0.97)",
+    timerBg:     "#fef3c7",
+    timerNormal: "#f59e0b",
+    timerFast:   "#ef4444",
+    phaseColor:  "#fcd34d",
+    scoreFg:     "#92400e",
+    scoreEmoji:  "☀️",
+    dropColor:   "#f59e0b",
+    dropShadow:  "rgba(245,158,11,0.15)",
+    barColor:    "#92400e",
+    resultColor: "#92400e",
+    border:      "2px solid #fde68a",
+  },
+  fertilizer: {
+    bg:          "rgba(240,253,244,0.97)",
+    timerBg:     "#dcfce7",
+    timerNormal: "#22c55e",
+    timerFast:   "#f97316",
+    phaseColor:  "#86efac",
+    scoreFg:     "#166534",
+    scoreEmoji:  "🌱",
+    dropColor:   "#22c55e",
+    dropShadow:  "rgba(34,197,94,0.15)",
+    barColor:    "#166534",
+    resultColor: "#166534",
+    border:      "2px solid #bbf7d0",
+  },
+} as const;
+
+// ---- constants ----
 const GAME_MS     = 4000;
 const TOTAL_DROPS = 22;
 const DROP_R      = 11;
@@ -14,9 +63,7 @@ const W           = 280;
 const H           = 310;
 const BAR_Y       = H - 28;
 
-// Pre-generate all drops at module level (regenerated each render via useMemo alternative)
 function makeDrop(id: number) {
-  // first half = slow, second half = fast
   const spawnAt = (id / TOTAL_DROPS) * (GAME_MS * 0.88) + (Math.random() * 120 - 60);
   const slow    = id < TOTAL_DROPS / 2;
   return {
@@ -32,12 +79,11 @@ function makeDrop(id: number) {
 
 type Drop = ReturnType<typeof makeDrop>;
 
-export default function FallingGameWater({ onComplete }: Props) {
+export default function FallingGameWater({ type = "water", onComplete }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const barX      = useRef(W / 2);
   const doneRef   = useRef(false);
 
-  // mouse / touch → update bar position
   const onMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current?.getBoundingClientRect();
     if (rect) barX.current = e.clientX - rect.left;
@@ -55,9 +101,10 @@ export default function FallingGameWater({ onComplete }: Props) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const cfg = CONFIGS[type];
+
     canvas.addEventListener("touchmove", onTouchMove, { passive: false });
 
-    // state (mutable, no re-render needed)
     const drops: Drop[] = Array.from({ length: TOTAL_DROPS }, (_, i) => makeDrop(i));
     let score     = 0;
     let spawned   = 0;
@@ -65,9 +112,7 @@ export default function FallingGameWater({ onComplete }: Props) {
     let lastTs    = -1;
     const start   = performance.now();
 
-    function drawRoundedRect(
-      x: number, y: number, w: number, h: number, r: number,
-    ) {
+    function drawRoundedRect(x: number, y: number, w: number, h: number, r: number) {
       ctx.beginPath();
       ctx.moveTo(x + r, y);
       ctx.lineTo(x + w - r, y);
@@ -87,19 +132,16 @@ export default function FallingGameWater({ onComplete }: Props) {
       cancelAnimationFrame(rafId);
 
       const skillScore = Math.round((score / TOTAL_DROPS) * 80);
-      console.log(
-        `[FallingGameWater] caught: ${score}/${TOTAL_DROPS}  skillScore: ${skillScore}/80`,
-      );
+      console.log(`[FallingGame:${type}] caught: ${score}/${TOTAL_DROPS}  skillScore: ${skillScore}/80`);
 
-      // brief result screen
       ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = "rgba(239,246,255,0.97)";
+      ctx.fillStyle = cfg.bg;
       ctx.fillRect(0, 0, W, H);
 
       ctx.textAlign = "center";
-      ctx.fillStyle = "#1d4ed8";
+      ctx.fillStyle = cfg.resultColor;
       ctx.font      = "bold 20px sans-serif";
-      ctx.fillText("💧", W / 2, H / 2 - 28);
+      ctx.fillText(cfg.scoreEmoji, W / 2, H / 2 - 28);
       ctx.font = "bold 16px sans-serif";
       ctx.fillText(`${score} / ${TOTAL_DROPS} поймано`, W / 2, H / 2 + 2);
       ctx.font      = "13px sans-serif";
@@ -112,7 +154,7 @@ export default function FallingGameWater({ onComplete }: Props) {
     function frame(ts: number) {
       if (doneRef.current) return;
       if (lastTs < 0) lastTs = ts;
-      const dt      = Math.min(ts - lastTs, 50) / 1000; // capped delta in seconds
+      const dt      = Math.min(ts - lastTs, 50) / 1000;
       lastTs        = ts;
       const elapsed = ts - start;
 
@@ -128,7 +170,6 @@ export default function FallingGameWater({ onComplete }: Props) {
         if (!d.active) continue;
         d.y += d.speed * dt;
 
-        // catch check
         if (!d.caught && d.y + DROP_R >= BAR_Y - BAR_H && d.y - DROP_R <= BAR_Y + BAR_H) {
           const bx = barX.current;
           if (d.x >= bx - BAR_W / 2 - DROP_R && d.x <= bx + BAR_W / 2 + DROP_R) {
@@ -142,47 +183,45 @@ export default function FallingGameWater({ onComplete }: Props) {
         activeCnt++;
       }
 
-      // end condition
       if (elapsed >= GAME_MS && activeCnt === 0) { finish(); return; }
 
       // ---- draw ----
       ctx.clearRect(0, 0, W, H);
 
-      // bg
-      ctx.fillStyle = "rgba(239,246,255,0.97)";
+      ctx.fillStyle = cfg.bg;
       ctx.fillRect(0, 0, W, H);
 
-      // timer bar (top)
+      // timer bar
       const pct = Math.max(0, 1 - elapsed / GAME_MS);
-      ctx.fillStyle = "#dbeafe";
+      ctx.fillStyle = cfg.timerBg;
       ctx.fillRect(0, 0, W, 5);
-      ctx.fillStyle = elapsed < 2000 ? "#3b82f6" : "#f97316";
+      ctx.fillStyle = elapsed < 2000 ? cfg.timerNormal : cfg.timerFast;
       ctx.fillRect(0, 0, W * pct, 5);
 
       // phase label
       ctx.textAlign  = "center";
       ctx.font       = "11px sans-serif";
-      ctx.fillStyle  = "#93c5fd";
+      ctx.fillStyle  = cfg.phaseColor;
       ctx.fillText(elapsed < 2000 ? "Медленно…" : "Быстрее!", W / 2, 20);
 
       // score
       ctx.textAlign  = "left";
       ctx.font       = "bold 13px sans-serif";
-      ctx.fillStyle  = "#1e40af";
-      ctx.fillText(`💧 ${score}`, 10, 20);
+      ctx.fillStyle  = cfg.scoreFg;
+      ctx.fillText(`${cfg.scoreEmoji} ${score}`, 10, 20);
 
-      // drops
+      // particles
       for (const d of drops) {
         if (!d.active) continue;
         // shadow
         ctx.beginPath();
         ctx.arc(d.x + 2, d.y + 2, DROP_R, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(59,130,246,0.15)";
+        ctx.fillStyle = cfg.dropShadow;
         ctx.fill();
         // body
         ctx.beginPath();
         ctx.arc(d.x, d.y, DROP_R, 0, Math.PI * 2);
-        ctx.fillStyle = "#3b82f6";
+        ctx.fillStyle = cfg.dropColor;
         ctx.fill();
         // shine
         ctx.beginPath();
@@ -194,9 +233,8 @@ export default function FallingGameWater({ onComplete }: Props) {
       // catch bar
       const bx = barX.current;
       drawRoundedRect(bx - BAR_W / 2, BAR_Y - BAR_H / 2, BAR_W, BAR_H, BAR_H / 2);
-      ctx.fillStyle = "#1e40af";
+      ctx.fillStyle = cfg.barColor;
       ctx.fill();
-      // shine on bar
       drawRoundedRect(bx - BAR_W / 2 + 6, BAR_Y - BAR_H / 2 + 2, BAR_W - 12, 3, 2);
       ctx.fillStyle = "rgba(255,255,255,0.3)";
       ctx.fill();
@@ -210,7 +248,9 @@ export default function FallingGameWater({ onComplete }: Props) {
       cancelAnimationFrame(rafId);
       canvas.removeEventListener("touchmove", onTouchMove);
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [type]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const cfg = CONFIGS[type];
 
   return (
     <canvas
@@ -219,12 +259,12 @@ export default function FallingGameWater({ onComplete }: Props) {
       height={H}
       onMouseMove={onMouseMove}
       style={{
-        display:       "block",
-        borderRadius:  16,
-        cursor:        "none",
-        touchAction:   "none",
-        border:        "2px solid #bfdbfe",
-        userSelect:    "none",
+        display:      "block",
+        borderRadius: 16,
+        cursor:       "none",
+        touchAction:  "none",
+        border:       cfg.border,
+        userSelect:   "none",
       }}
     />
   );
