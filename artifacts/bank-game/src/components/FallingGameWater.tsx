@@ -319,7 +319,7 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
       style={{
         display:      "block",
         borderRadius: 16,
-        cursor:       "none",
+        cursor:       "default",
         touchAction:  "none",
         border:       cfg.border,
         userSelect:   "none",
