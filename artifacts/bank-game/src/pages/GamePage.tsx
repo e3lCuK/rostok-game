@@ -141,8 +141,8 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
           sessionInProgress: false,
           lastSessionTime: finishedTime,
         };
-        const safeReward = Math.max(0, result.reward || 0);
-        const safeF = Math.max(0, result.f || 0);
+        const safeReward = Math.round(Math.max(0, result.reward || 0));
+        const safeF = Math.round(Math.max(0, result.f || 0));
         setPendingReward(safeReward);
         setSessionPerformance(safeF);
         console.log(`[Session complete] F=${safeF}%, reward=${safeReward}`);

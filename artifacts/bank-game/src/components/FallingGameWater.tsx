@@ -19,7 +19,7 @@ const CONFIGS = {
     scoreEmoji:  "💧",
     dropColor:   "#3b82f6",
     dropShadow:  "rgba(59,130,246,0.15)",
-    barColor:    "#1e40af",
+    barColor:    "#2563eb",   // same blue family, slightly darker than drop
     resultColor: "#1d4ed8",
     border:      "2px solid #bfdbfe",
   },
@@ -33,7 +33,7 @@ const CONFIGS = {
     scoreEmoji:  "☀️",
     dropColor:   "#f59e0b",
     dropShadow:  "rgba(245,158,11,0.15)",
-    barColor:    "#92400e",
+    barColor:    "#d97706",   // amber — same yellow family, slightly darker than drop
     resultColor: "#92400e",
     border:      "2px solid #fde68a",
   },
@@ -47,7 +47,7 @@ const CONFIGS = {
     scoreEmoji:  "🌱",
     dropColor:   "#22c55e",
     dropShadow:  "rgba(34,197,94,0.15)",
-    barColor:    "#166534",
+    barColor:    "#16a34a",   // same green family, slightly darker than drop
     resultColor: "#166534",
     border:      "2px solid #bbf7d0",
   },
@@ -95,9 +95,10 @@ function makeDrop(id: number) {
 type Drop = ReturnType<typeof makeDrop>;
 
 export default function FallingGameWater({ type = "water", onComplete }: Props) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const barX      = useRef(W / 2);
-  const doneRef   = useRef(false);
+  const canvasRef      = useRef<HTMLCanvasElement>(null);
+  const barX           = useRef(W / 2);
+  const doneRef        = useRef(false);
+  const pendingScore   = useRef<number | null>(null);
 
   const onMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current?.getBoundingClientRect();
@@ -149,26 +150,38 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
       cancelAnimationFrame(rafId);
 
       const skillScore = Math.min(80, Math.round((score / MAX_SCORE) * 80));
+      pendingScore.current = skillScore;
       console.log(`[FallingGame:${type}] score: ${score.toFixed(1)}/${MAX_SCORE}  perfect: ${perfectCount}  skillScore: ${skillScore}/80`);
 
       ctx.clearRect(0, 0, W, H);
       ctx.fillStyle = cfg.bg;
       ctx.fillRect(0, 0, W, H);
 
+      // close button (✕) — top-right
+      ctx.beginPath();
+      ctx.arc(W - 22, 22, 14, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(0,0,0,0.08)";
+      ctx.fill();
+      ctx.textAlign = "center";
+      ctx.font      = "bold 15px sans-serif";
+      ctx.fillStyle = "#6b7280";
+      ctx.fillText("✕", W - 22, 27);
+
       ctx.textAlign = "center";
       ctx.fillStyle = cfg.resultColor;
       ctx.font      = "bold 20px sans-serif";
       ctx.fillText(cfg.scoreEmoji, W / 2, H / 2 - 36);
       ctx.font = "bold 16px sans-serif";
-      ctx.fillText(`${score} / ${MAX_SCORE} очков`, W / 2, H / 2 - 6);
+      ctx.fillText(`${Math.round(score)} / ${MAX_SCORE} очков`, W / 2, H / 2 - 6);
       ctx.font      = "13px sans-serif";
       ctx.fillStyle = "#d97706";
       ctx.fillText(`⭐ ${perfectCount} perfect`, W / 2, H / 2 + 18);
       ctx.font      = "13px sans-serif";
       ctx.fillStyle = "#6b7280";
       ctx.fillText(`Результат: ${skillScore} / 80`, W / 2, H / 2 + 40);
-
-      setTimeout(() => onComplete(skillScore), 700);
+      ctx.font      = "12px sans-serif";
+      ctx.fillStyle = "#9ca3af";
+      ctx.fillText("Нажмите ✕ чтобы продолжить", W / 2, H / 2 + 64);
     }
 
     function frame(ts: number) {
@@ -265,16 +278,19 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
 
       // catch bar
       const bx = barX.current;
+      // subtle drop shadow
+      ctx.shadowColor  = "rgba(0,0,0,0.18)";
+      ctx.shadowBlur   = 4;
+      ctx.shadowOffsetY = 2;
       drawRoundedRect(bx - BAR_W / 2, BAR_Y - BAR_H / 2, BAR_W, BAR_H, BAR_H / 2);
       ctx.fillStyle = cfg.barColor;
       ctx.fill();
-      // perfect-zone highlight (center stripe, gold tint)
-      drawRoundedRect(bx - PERFECT_HALF, BAR_Y - BAR_H / 2, PERFECT_HALF * 2, BAR_H, BAR_H / 2);
-      ctx.fillStyle = "rgba(251,191,36,0.35)";
-      ctx.fill();
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur  = 0;
+      ctx.shadowOffsetY = 0;
       // shine
       drawRoundedRect(bx - BAR_W / 2 + 6, BAR_Y - BAR_H / 2 + 2, BAR_W - 12, 3, 2);
-      ctx.fillStyle = "rgba(255,255,255,0.3)";
+      ctx.fillStyle = "rgba(255,255,255,0.35)";
       ctx.fill();
 
       rafId = requestAnimationFrame(frame);
@@ -290,12 +306,19 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
 
   const cfg = CONFIGS[type];
 
+  const handleClick = useCallback(() => {
+    if (doneRef.current && pendingScore.current !== null) {
+      onComplete(pendingScore.current);
+    }
+  }, [onComplete]);
+
   return (
     <canvas
       ref={canvasRef}
       width={W}
       height={H}
       onMouseMove={onMouseMove}
+      onClick={handleClick}
       style={{
         display:      "block",
         borderRadius: 16,
