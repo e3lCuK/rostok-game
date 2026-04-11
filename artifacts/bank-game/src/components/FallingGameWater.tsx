@@ -169,16 +169,14 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
 
       ctx.textAlign = "center";
       ctx.fillStyle = cfg.resultColor;
-      ctx.font      = "bold 20px sans-serif";
-      ctx.fillText(cfg.scoreEmoji, W / 2, H / 2 - 36);
-      ctx.font = "bold 16px sans-serif";
-      ctx.fillText(`${Math.round(score)} / ${MAX_SCORE} очков`, W / 2, H / 2 - 6);
-      ctx.font      = "13px sans-serif";
-      ctx.fillStyle = "#d97706";
-      ctx.fillText(`⭐ ${perfectCount} Идеально`, W / 2, H / 2 + 18);
-      ctx.font      = "13px sans-serif";
+      ctx.font      = "bold 22px sans-serif";
+      ctx.fillText(cfg.scoreEmoji, W / 2, H / 2 - 28);
+      ctx.font      = "14px sans-serif";
       ctx.fillStyle = "#6b7280";
-      ctx.fillText(`Результат: ${skillScore} / 80`, W / 2, H / 2 + 40);
+      ctx.fillText(`Попадания: ${Math.round(score)} / ${MAX_SCORE}`, W / 2, H / 2 + 10);
+      ctx.font      = "bold 14px sans-serif";
+      ctx.fillStyle = "#d97706";
+      ctx.fillText(`Центровые: ${perfectCount}`, W / 2, H / 2 + 34);
     }
 
     function frame(ts: number) {
