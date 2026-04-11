@@ -929,6 +929,54 @@ body {
 }
 
 /* ============================
+   CARE PERCENTAGE BADGE
+==============================*/
+.care-pct-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+}
+
+.care-pct-value {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--green, #22c55e);
+  line-height: 1.2;
+}
+
+/* ============================
+   COLLECT REWARD AREA
+==============================*/
+.collect-area {
+  padding: 0 16px 4px;
+}
+
+.collect-btn {
+  width: 100%;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  letter-spacing: 0.01em;
+}
+
+.collect-btn:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.collect-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ============================
    WATER MINI-GAME OVERLAY
 ==============================*/
 .water-game-overlay {

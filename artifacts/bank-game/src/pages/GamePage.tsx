@@ -34,6 +34,9 @@ export default function GamePage({ state, onStateChange }: Props) {
   const [floaters, setFloaters] = useState<Floater[]>([]);
   const [actionLoading, setActionLoading] = useState(false);
   const [showWaterGame, setShowWaterGame] = useState(false);
+  const [pendingReward, setPendingReward] = useState(0);
+  const [sessionPerformance, setSessionPerformance] = useState(0);
+  const [collectLoading, setCollectLoading] = useState(false);
   const floaterRef = useRef(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const skillScoreRef = useRef<number>(40);
@@ -112,26 +115,16 @@ export default function GamePage({ state, onStateChange }: Props) {
         const finishedTime = Date.now();
         nextGame = {
           ...nextGame,
+          water: true, sun: true, fertilizer: true,
           sessionInProgress: false,
           lastSessionTime: finishedTime,
         };
-        onStateChange({
-          ...state,
-          balances: {
-            ...balances,
-            active: balances.active + result.reward,
-            activeEarned: balances.activeEarned + result.reward,
-          },
-          game: nextGame,
-          history: [
-            ...state.history,
-            {
-              date: new Date(finishedTime).toLocaleDateString("ru-RU"),
-              amount: result.reward,
-              type: "active",
-            },
-          ].slice(-30),
-        });
+        const safeReward = Math.max(0, result.reward || 0);
+        const safeF = Math.max(0, result.f || 0);
+        setPendingReward(safeReward);
+        setSessionPerformance(safeF);
+        console.log(`[Session complete] F=${safeF}%, reward=${safeReward}`);
+        onStateChange({ ...state, game: nextGame });
       } else {
         onStateChange({ ...state, game: nextGame });
       }
@@ -140,6 +133,31 @@ export default function GamePage({ state, onStateChange }: Props) {
     } finally {
       setActionLoading(false);
     }
+  }
+
+  async function handleCollect() {
+    if (pendingReward <= 0 || collectLoading) return;
+    setCollectLoading(true);
+    const amount = Math.max(0, pendingReward);
+    setPendingReward(0);
+    setSessionPerformance(0);
+    onStateChange({
+      ...state,
+      balances: {
+        ...balances,
+        active: balances.active + amount,
+        activeEarned: balances.activeEarned + amount,
+      },
+      history: [
+        ...state.history,
+        {
+          date: new Date().toLocaleDateString("ru-RU"),
+          amount,
+          type: "active",
+        },
+      ].slice(-30),
+    });
+    setCollectLoading(false);
   }
 
   return (
@@ -152,6 +170,14 @@ export default function GamePage({ state, onStateChange }: Props) {
             {game.sessionInProgress ? "В процессе" : locked ? "Перезарядка" : "Готова"}
           </div>
         </div>
+
+        {sessionPerformance > 0 && (
+          <div className="care-pct-block">
+            <p className="session-counter-label">Уход</p>
+            <p className="care-pct-value">{Math.round(sessionPerformance)}%</p>
+          </div>
+        )}
+
         <div className="session-counter-right">
           {locked && msLeft !== null && msLeft > 0 ? (
             <>
@@ -239,6 +265,23 @@ export default function GamePage({ state, onStateChange }: Props) {
           </div>
         )}
       </div>
+
+      {/* Collect reward area */}
+      {pendingReward > 0 && (
+        <div className="collect-area">
+          <motion.button
+            className="collect-btn"
+            onClick={handleCollect}
+            disabled={collectLoading}
+            whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+          >
+            Забрать +{formatRub(pendingReward)}
+          </motion.button>
+        </div>
+      )}
 
       {/* Balance summary */}
       <div className="game-balance-bar">

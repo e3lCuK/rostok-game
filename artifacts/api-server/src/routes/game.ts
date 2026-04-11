@@ -226,6 +226,7 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
     const allDone = u.current_session_water && u.current_session_sun && u.current_session_fertilizer;
 
     let reward = 0;
+    let sessionF = 0;
     if (allDone) {
       const activeBalance = parseFloat(acc.active_balance);
       const standardBalance = parseFloat(acc.standard_balance);
@@ -250,6 +251,7 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
       const dailyIncome = activeBalance * 0.15 / 365;
       reward = dailyIncome * (F / 100) / 3;
 
+      sessionF = F;
       req.log.info({ skillScore, baseBonus, streakBonus, F, reward }, "Session reward calculated");
 
       const earnedDate = new Date(now).toLocaleDateString("ru-RU");
@@ -268,7 +270,7 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
       );
     }
 
-    return res.json({ success: true, sessionComplete: allDone, reward });
+    return res.json({ success: true, sessionComplete: allDone, reward, f: sessionF });
   } catch (err) {
     req.log.error({ err }, "Error processing action");
     return res.status(500).json({ error: "Internal server error" });
