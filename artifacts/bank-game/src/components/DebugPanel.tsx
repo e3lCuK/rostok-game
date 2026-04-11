@@ -77,11 +77,11 @@ export default function DebugPanel({ state, onStateChange, onResetPending }: Pro
   }
 
   const buttons: { label: string; fn: () => void; danger?: boolean }[] = [
-    { label: "Reset Session", fn: resetSession },
-    { label: "+1000 ₽ Active", fn: addMoney },
-    { label: "Max Streak (7)", fn: maxStreak },
-    { label: "Reset Streak", fn: resetStreak },
-    { label: "Clear All Data", fn: clearAll, danger: true },
+    { label: "Сброс сессии", fn: resetSession },
+    { label: "+1000 ₽ (активный)", fn: addMoney },
+    { label: "Макс серия (7)", fn: maxStreak },
+    { label: "Сброс серии", fn: resetStreak },
+    { label: "Очистить всё", fn: clearAll, danger: true },
   ];
 
   return (
@@ -92,10 +92,10 @@ export default function DebugPanel({ state, onStateChange, onResetPending }: Pro
 
       {open && (
         <div className="debug-body">
-          <p className="debug-title">Debug Panel</p>
+          <p className="debug-title">ОТЛАДКА</p>
           <div className="debug-info">
-            <span>streak: {game.streakDays}</span>
-            <span>active: {Math.round(balances.active)} ₽</span>
+            <span>серия: {game.streakDays}</span>
+            <span>активный баланс: {Math.round(balances.active)} ₽</span>
           </div>
           <div className="debug-buttons">
             {buttons.map(b => (
