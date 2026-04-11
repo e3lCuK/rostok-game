@@ -36,6 +36,7 @@ export default function GamePage({ state, onStateChange }: Props) {
   const [showWaterGame, setShowWaterGame] = useState(false);
   const floaterRef = useRef(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
+  const skillScoreRef = useRef<number>(40);
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
@@ -79,7 +80,8 @@ export default function GamePage({ state, onStateChange }: Props) {
 
   function handleWaterGameComplete(skillScore: number) {
     setShowWaterGame(false);
-    console.log("[Water mini-game] skillScore:", skillScore);
+    skillScoreRef.current = typeof skillScore === "number" && !isNaN(skillScore) ? skillScore : 40;
+    console.log("[Water mini-game] skillScore saved:", skillScoreRef.current);
     const rect = gameAreaRef.current?.getBoundingClientRect();
     const x = (rect?.width ?? 200) / 2;
     const y = (rect?.height ?? 200) / 2;
@@ -99,7 +101,7 @@ export default function GamePage({ state, onStateChange }: Props) {
 
     setActionLoading(true);
     try {
-      const result = await api.doAction(action);
+      const result = await api.doAction(action, skillScoreRef.current);
       const labels: Record<string, string> = { water: "💧", sun: "☀️", fertilizer: "🌱" };
       addFloater(labels[action], x, y);
 

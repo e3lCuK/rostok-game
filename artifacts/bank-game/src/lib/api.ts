@@ -50,9 +50,9 @@ export const api = {
   startSession: () =>
     request<{ success: boolean }>("/game/session/start", { method: "POST" }),
 
-  doAction: (action: "water" | "sun" | "fertilizer") =>
+  doAction: (action: "water" | "sun" | "fertilizer", skillScore?: number) =>
     request<{ success: boolean; sessionComplete: boolean; reward: number }>(
       "/game/session/action",
-      { method: "POST", body: JSON.stringify({ action }) },
+      { method: "POST", body: JSON.stringify({ action, skillScore }) },
     ),
 };

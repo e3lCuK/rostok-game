@@ -185,7 +185,10 @@ router.post("/game/session/start", requireAuth, async (req: any, res) => {
 // POST /api/game/session/action — perform water/sun/fertilizer
 router.post("/game/session/action", requireAuth, async (req: any, res) => {
   const userId = req.userId;
-  const { action } = req.body;
+  const { action, skillScore: rawSkillScore } = req.body;
+  const skillScore: number = typeof rawSkillScore === "number" && !isNaN(rawSkillScore) && rawSkillScore >= 0 && rawSkillScore <= 80
+    ? rawSkillScore
+    : 40;
 
   if (!["water", "sun", "fertilizer"].includes(action)) {
     return res.status(400).json({ error: "Invalid action" });
@@ -240,14 +243,14 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
         newStreak = Math.min(currentStreak + 1, 7);
       }
 
-      // F = baseBonus + skillResult + streakBonus, capped at 100%
-      // skillResult = 80 (all 3 actions completed = full mini-game score)
+      // F = capitalBonus + skillScore + streakBonus, capped at 100%
       const baseBonus = totalBalance >= 1_000_000 ? 12 : totalBalance >= 100_000 ? 10 : 8;
       const streakBonus = Math.min(newStreak, 7);
-      const skillResult = 80;
-      const F = Math.min(baseBonus + skillResult + streakBonus, 100);
+      const F = Math.min(baseBonus + skillScore + streakBonus, 100);
       const dailyIncome = activeBalance * 0.15 / 365;
       reward = dailyIncome * (F / 100) / 3;
+
+      req.log.info({ skillScore, baseBonus, streakBonus, F, reward }, "Session reward calculated");
 
       const earnedDate = new Date(now).toLocaleDateString("ru-RU");
 
