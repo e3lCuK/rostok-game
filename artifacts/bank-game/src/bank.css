@@ -929,6 +929,21 @@ body {
 }
 
 /* ============================
+   WATER MINI-GAME OVERLAY
+==============================*/
+.water-game-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(239, 246, 255, 0.92);
+  border-radius: inherit;
+  backdrop-filter: blur(2px);
+}
+
+/* ============================
    SESSION STATUS BADGE
 ==============================*/
 .session-status-badge {

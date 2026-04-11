@@ -14,6 +14,7 @@ import {
 } from "@/lib/engine";
 import { api } from "@/lib/api";
 import TreeSVG from "@/components/TreeSVG";
+import FallingGameWater from "@/components/FallingGameWater";
 import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2 } from "lucide-react";
 
 interface Props {
@@ -32,6 +33,7 @@ export default function GamePage({ state, onStateChange }: Props) {
   const [now, setNow] = useState(Date.now());
   const [floaters, setFloaters] = useState<Floater[]>([]);
   const [actionLoading, setActionLoading] = useState(false);
+  const [showWaterGame, setShowWaterGame] = useState(false);
   const floaterRef = useRef(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
 
@@ -75,11 +77,25 @@ export default function GamePage({ state, onStateChange }: Props) {
     }
   }
 
+  function handleWaterGameComplete(skillScore: number) {
+    setShowWaterGame(false);
+    console.log("[Water mini-game] skillScore:", skillScore);
+    const rect = gameAreaRef.current?.getBoundingClientRect();
+    const x = (rect?.width ?? 200) / 2;
+    const y = (rect?.height ?? 200) / 2;
+    doAction("water", x, y);
+  }
+
   async function handleAction(action: "water" | "sun" | "fertilizer", e: React.MouseEvent) {
     if (game[action] || actionLoading) return;
     const rect = gameAreaRef.current?.getBoundingClientRect();
     const x = e.clientX - (rect?.left ?? 0);
     const y = e.clientY - (rect?.top ?? 0);
+    doAction(action, x, y);
+  }
+
+  async function doAction(action: "water" | "sun" | "fertilizer", x: number, y: number) {
+    if (game[action] || actionLoading) return;
 
     setActionLoading(true);
     try {
@@ -158,6 +174,13 @@ export default function GamePage({ state, onStateChange }: Props) {
           </div>
         ))}
 
+        {/* Water mini-game overlay */}
+        {showWaterGame && (
+          <div className="water-game-overlay">
+            <FallingGameWater onComplete={handleWaterGameComplete} />
+          </div>
+        )}
+
         <div className="game-tree-wrap">
           <AnimatePresence mode="wait">
             <motion.div
@@ -198,7 +221,11 @@ export default function GamePage({ state, onStateChange }: Props) {
                   key={btn.key}
                   className={`action-btn-bank ${btn.done ? "action-btn-done" : ""}`}
                   style={{ "--ac": btn.color } as React.CSSProperties}
-                  onClick={(e) => handleAction(btn.key, e)}
+                  onClick={
+                    btn.key === "water" && !btn.done
+                      ? () => setShowWaterGame(true)
+                      : (e) => handleAction(btn.key, e)
+                  }
                   disabled={!!btn.done || actionLoading}
                   whileTap={!btn.done ? { scale: 0.91 } : {}}
                 >
