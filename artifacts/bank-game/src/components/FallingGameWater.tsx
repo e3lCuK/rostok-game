@@ -54,14 +54,16 @@ const CONFIGS = {
 } as const;
 
 // ---- constants ----
-const GAME_MS     = 4000;
-const TOTAL_DROPS = 22;
-const DROP_R      = 11;
-const BAR_W       = 88;
-const BAR_H       = 11;
-const W           = 280;
-const H           = 310;
-const BAR_Y       = H - 28;
+const GAME_MS      = 4000;
+const TOTAL_DROPS  = 22;
+const DROP_R       = 11;
+const BAR_W        = 88;
+const BAR_H        = 11;
+const PERFECT_HALF = BAR_W / 4;   // center ±22 px = perfect zone
+const W            = 280;
+const H            = 310;
+const BAR_Y        = H - 28;
+const MAX_SCORE    = TOTAL_DROPS * 2; // all-perfect ceiling
 
 function makeDrop(id: number) {
   const spawnAt = (id / TOTAL_DROPS) * (GAME_MS * 0.88) + (Math.random() * 120 - 60);
@@ -106,8 +108,9 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
     canvas.addEventListener("touchmove", onTouchMove, { passive: false });
 
     const drops: Drop[] = Array.from({ length: TOTAL_DROPS }, (_, i) => makeDrop(i));
-    let score     = 0;
-    let spawned   = 0;
+    let score        = 0;
+    let perfectCount = 0;
+    let spawned      = 0;
     let rafId     = 0;
     let lastTs    = -1;
     const start   = performance.now();
@@ -131,8 +134,8 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
       doneRef.current = true;
       cancelAnimationFrame(rafId);
 
-      const skillScore = Math.round((score / TOTAL_DROPS) * 80);
-      console.log(`[FallingGame:${type}] caught: ${score}/${TOTAL_DROPS}  skillScore: ${skillScore}/80`);
+      const skillScore = Math.min(80, Math.round((score / MAX_SCORE) * 80));
+      console.log(`[FallingGame:${type}] caught: ${score}/${MAX_SCORE}  perfect: ${perfectCount}  skillScore: ${skillScore}/80`);
 
       ctx.clearRect(0, 0, W, H);
       ctx.fillStyle = cfg.bg;
@@ -141,12 +144,15 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
       ctx.textAlign = "center";
       ctx.fillStyle = cfg.resultColor;
       ctx.font      = "bold 20px sans-serif";
-      ctx.fillText(cfg.scoreEmoji, W / 2, H / 2 - 28);
+      ctx.fillText(cfg.scoreEmoji, W / 2, H / 2 - 36);
       ctx.font = "bold 16px sans-serif";
-      ctx.fillText(`${score} / ${TOTAL_DROPS} поймано`, W / 2, H / 2 + 2);
+      ctx.fillText(`${score} / ${MAX_SCORE} очков`, W / 2, H / 2 - 6);
+      ctx.font      = "13px sans-serif";
+      ctx.fillStyle = "#d97706";
+      ctx.fillText(`⭐ ${perfectCount} perfect`, W / 2, H / 2 + 18);
       ctx.font      = "13px sans-serif";
       ctx.fillStyle = "#6b7280";
-      ctx.fillText(`Результат: ${skillScore} / 80`, W / 2, H / 2 + 26);
+      ctx.fillText(`Результат: ${skillScore} / 80`, W / 2, H / 2 + 40);
 
       setTimeout(() => onComplete(skillScore), 700);
     }
@@ -175,7 +181,12 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
           if (d.x >= bx - BAR_W / 2 - DROP_R && d.x <= bx + BAR_W / 2 + DROP_R) {
             d.caught = true;
             d.active = false;
-            score++;
+            if (d.x >= bx - PERFECT_HALF && d.x <= bx + PERFECT_HALF) {
+              score += 2;   // PERFECT — center zone
+              perfectCount++;
+            } else {
+              score += 1;   // NORMAL — outer zone
+            }
             continue;
           }
         }
@@ -235,6 +246,11 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
       drawRoundedRect(bx - BAR_W / 2, BAR_Y - BAR_H / 2, BAR_W, BAR_H, BAR_H / 2);
       ctx.fillStyle = cfg.barColor;
       ctx.fill();
+      // perfect-zone highlight (center stripe, gold tint)
+      drawRoundedRect(bx - PERFECT_HALF, BAR_Y - BAR_H / 2, PERFECT_HALF * 2, BAR_H, BAR_H / 2);
+      ctx.fillStyle = "rgba(251,191,36,0.35)";
+      ctx.fill();
+      // shine
       drawRoundedRect(bx - BAR_W / 2 + 6, BAR_Y - BAR_H / 2 + 2, BAR_W - 12, 3, 2);
       ctx.fillStyle = "rgba(255,255,255,0.3)";
       ctx.fill();
