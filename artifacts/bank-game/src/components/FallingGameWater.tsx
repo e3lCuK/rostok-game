@@ -55,7 +55,10 @@ const CONFIGS = {
 
 // ---- constants ----
 const GAME_MS      = 4000;
+const BURST_AT     = 2500;   // ms — when final burst starts
 const TOTAL_DROPS  = 22;
+const BURST_DROPS  = 8;      // last N drops packed into burst window
+const NORMAL_DROPS = TOTAL_DROPS - BURST_DROPS; // 14
 const DROP_R       = 11;
 const BAR_W        = 88;
 const BAR_H        = 11;
@@ -66,13 +69,23 @@ const BAR_Y        = H - 28;
 const MAX_SCORE    = TOTAL_DROPS * 2; // all-perfect ceiling
 
 function makeDrop(id: number) {
-  const spawnAt = (id / TOTAL_DROPS) * (GAME_MS * 0.88) + (Math.random() * 120 - 60);
-  const slow    = id < TOTAL_DROPS / 2;
+  let spawnAt: number;
+  let speed: number;
+  if (id < NORMAL_DROPS) {
+    // normal phase: spread evenly across 0 → BURST_AT
+    spawnAt = (id / NORMAL_DROPS) * (BURST_AT * 0.9) + (Math.random() * 100 - 50);
+    speed   = 85 + Math.random() * 35;          // 85–120 px/s
+  } else {
+    // burst phase: pack into BURST_AT → ~3750 ms, faster fall
+    const burstId = id - NORMAL_DROPS;
+    spawnAt = BURST_AT + (burstId / BURST_DROPS) * 1150 + (Math.random() * 60 - 30);
+    speed   = 230 + Math.random() * 80;          // 230–310 px/s
+  }
   return {
     id,
     x:       DROP_R + Math.random() * (W - DROP_R * 2),
     y:       -DROP_R,
-    speed:   slow ? 85 + Math.random() * 35 : 160 + Math.random() * 55,
+    speed,
     spawnAt: Math.max(0, spawnAt),
     active:  false,
     caught:  false,
@@ -209,14 +222,14 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
       const pct = Math.max(0, 1 - elapsed / GAME_MS);
       ctx.fillStyle = cfg.timerBg;
       ctx.fillRect(0, 0, W, 5);
-      ctx.fillStyle = elapsed < 2000 ? cfg.timerNormal : cfg.timerFast;
+      ctx.fillStyle = elapsed < BURST_AT ? cfg.timerNormal : cfg.timerFast;
       ctx.fillRect(0, 0, W * pct, 5);
 
       // phase label
       ctx.textAlign  = "center";
       ctx.font       = "11px sans-serif";
       ctx.fillStyle  = cfg.phaseColor;
-      ctx.fillText(elapsed < 2000 ? "Медленно…" : "Быстрее!", W / 2, 20);
+      ctx.fillText(elapsed < BURST_AT ? "Медленно…" : "Финальный рывок!", W / 2, 20);
 
       // score
       ctx.textAlign  = "left";
