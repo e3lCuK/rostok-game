@@ -175,13 +175,10 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
       ctx.fillText(`${Math.round(score)} / ${MAX_SCORE} очков`, W / 2, H / 2 - 6);
       ctx.font      = "13px sans-serif";
       ctx.fillStyle = "#d97706";
-      ctx.fillText(`⭐ ${perfectCount} perfect`, W / 2, H / 2 + 18);
+      ctx.fillText(`⭐ ${perfectCount} Идеально`, W / 2, H / 2 + 18);
       ctx.font      = "13px sans-serif";
       ctx.fillStyle = "#6b7280";
       ctx.fillText(`Результат: ${skillScore} / 80`, W / 2, H / 2 + 40);
-      ctx.font      = "12px sans-serif";
-      ctx.fillStyle = "#9ca3af";
-      ctx.fillText("Нажмите ✕ чтобы продолжить", W / 2, H / 2 + 64);
     }
 
     function frame(ts: number) {
