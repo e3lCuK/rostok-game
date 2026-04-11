@@ -110,6 +110,7 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
     const drops: Drop[] = Array.from({ length: TOTAL_DROPS }, (_, i) => makeDrop(i));
     let score        = 0;
     let perfectCount = 0;
+    let combo        = 0;
     let spawned      = 0;
     let rafId     = 0;
     let lastTs    = -1;
@@ -135,7 +136,7 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
       cancelAnimationFrame(rafId);
 
       const skillScore = Math.min(80, Math.round((score / MAX_SCORE) * 80));
-      console.log(`[FallingGame:${type}] caught: ${score}/${MAX_SCORE}  perfect: ${perfectCount}  skillScore: ${skillScore}/80`);
+      console.log(`[FallingGame:${type}] score: ${score.toFixed(1)}/${MAX_SCORE}  perfect: ${perfectCount}  skillScore: ${skillScore}/80`);
 
       ctx.clearRect(0, 0, W, H);
       ctx.fillStyle = cfg.bg;
@@ -181,16 +182,18 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
           if (d.x >= bx - BAR_W / 2 - DROP_R && d.x <= bx + BAR_W / 2 + DROP_R) {
             d.caught = true;
             d.active = false;
+            combo++;
+            const multiplier = Math.min(2, 1 + combo * 0.05);
             if (d.x >= bx - PERFECT_HALF && d.x <= bx + PERFECT_HALF) {
-              score += 2;   // PERFECT — center zone
+              score += 2 * multiplier;   // PERFECT — center zone
               perfectCount++;
             } else {
-              score += 1;   // NORMAL — outer zone
+              score += 1 * multiplier;   // NORMAL — outer zone
             }
             continue;
           }
         }
-        if (d.y - DROP_R > H) { d.active = false; continue; }
+        if (d.y - DROP_R > H) { d.active = false; combo = 0; continue; }
         activeCnt++;
       }
 
@@ -219,7 +222,13 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
       ctx.textAlign  = "left";
       ctx.font       = "bold 13px sans-serif";
       ctx.fillStyle  = cfg.scoreFg;
-      ctx.fillText(`${cfg.scoreEmoji} ${score}`, 10, 20);
+      ctx.fillText(`${cfg.scoreEmoji} ${Math.floor(score)}`, 10, 20);
+      // combo
+      if (combo >= 2) {
+        ctx.textAlign = "right";
+        ctx.fillStyle = combo >= 10 ? "#f97316" : "#d97706";
+        ctx.fillText(`🔥×${combo}`, W - 8, 20);
+      }
 
       // particles
       for (const d of drops) {
