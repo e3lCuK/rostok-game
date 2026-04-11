@@ -99,8 +99,14 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
     if (type === "water")      waterScoreRef.current = safe;
     if (type === "sun")        sunScoreRef.current = safe;
     if (type === "fertilizer") fertilizerScoreRef.current = safe;
-    skillScoreRef.current = safe;
-    console.log(`[Mini-game:${type}] skillScore saved:`, safe);
+
+    const waterScore      = waterScoreRef.current || 0;
+    const sunScore        = sunScoreRef.current || 0;
+    const fertilizerScore = fertilizerScoreRef.current || 0;
+    const combined = Math.min(80, Math.round((waterScore + sunScore + fertilizerScore) / 3));
+    skillScoreRef.current = combined;
+
+    console.log({ waterScore, sunScore, fertilizerScore, skillScore: combined });
     const rect = gameAreaRef.current?.getBoundingClientRect();
     const x = (rect?.width ?? 200) / 2;
     const y = (rect?.height ?? 200) / 2;
