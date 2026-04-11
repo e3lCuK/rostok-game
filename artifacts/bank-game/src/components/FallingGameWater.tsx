@@ -54,32 +54,33 @@ const CONFIGS = {
 } as const;
 
 // ---- constants ----
-const GAME_MS      = 4000;
-const BURST_AT     = 2500;   // ms — when final burst starts
-const TOTAL_DROPS  = 22;
-const BURST_DROPS  = 8;      // last N drops packed into burst window
-const NORMAL_DROPS = TOTAL_DROPS - BURST_DROPS; // 14
+const GAME_MS      = 30_000;          // 30 seconds total
+const BURST_AT     = 20_000;          // last 10 s = acceleration phase
+const TOTAL_DROPS  = 40;
+const BURST_DROPS  = 18;              // packed into final 10 s
+const NORMAL_DROPS = TOTAL_DROPS - BURST_DROPS; // 22
 const DROP_R       = 11;
 const BAR_W        = 88;
 const BAR_H        = 11;
-const PERFECT_HALF = BAR_W / 4;   // center ±22 px = perfect zone
+const PERFECT_HALF = BAR_W / 4;      // center ±22 px = perfect zone
 const W            = 280;
 const H            = 310;
 const BAR_Y        = H - 28;
-const MAX_SCORE    = TOTAL_DROPS * 2; // all-perfect ceiling
+const MAX_SCORE    = TOTAL_DROPS * 2; // all-perfect ceiling (80)
 
 function makeDrop(id: number) {
   let spawnAt: number;
   let speed: number;
   if (id < NORMAL_DROPS) {
-    // normal phase: spread evenly across 0 → BURST_AT
-    spawnAt = (id / NORMAL_DROPS) * (BURST_AT * 0.9) + (Math.random() * 100 - 50);
-    speed   = 85 + Math.random() * 35;          // 85–120 px/s
+    // normal phase: 22 drops spread evenly across 0 → 18 s
+    spawnAt = (id / NORMAL_DROPS) * (BURST_AT * 0.9) + (Math.random() * 800 - 400);
+    speed   = 85 + Math.random() * 35;           // 85–120 px/s
   } else {
-    // burst phase: pack into BURST_AT → ~3750 ms, faster fall
+    // burst phase: 18 drops over 20 s → 27 s, gradually faster
     const burstId = id - NORMAL_DROPS;
-    spawnAt = BURST_AT + (burstId / BURST_DROPS) * 1150 + (Math.random() * 60 - 30);
-    speed   = 230 + Math.random() * 80;          // 230–310 px/s
+    const t = burstId / BURST_DROPS;             // 0 → 1 across burst window
+    spawnAt = BURST_AT + t * 7_000 + (Math.random() * 400 - 200);
+    speed   = 110 + t * 110 + Math.random() * 40; // 110 → 220 px/s (gradual)
   }
   return {
     id,
@@ -120,6 +121,7 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
     const cfg = CONFIGS[type];
 
     canvas.addEventListener("touchmove", onTouchMove, { passive: false });
+    canvas.style.cursor = "none";   // hide cursor during gameplay
 
     const drops: Drop[] = Array.from({ length: TOTAL_DROPS }, (_, i) => makeDrop(i));
     let score        = 0;
@@ -149,6 +151,7 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
       doneRef.current = true;
       cancelAnimationFrame(rafId);
 
+      canvas.style.cursor = "default"; // restore cursor on result screen
       const skillScore = Math.min(80, Math.round((score / MAX_SCORE) * 80));
       pendingScore.current = skillScore;
       console.log(`[FallingGame:${type}] score: ${score.toFixed(1)}/${MAX_SCORE}  perfect: ${perfectCount}  skillScore: ${skillScore}/80`);
@@ -296,6 +299,7 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
     return () => {
       cancelAnimationFrame(rafId);
       canvas.removeEventListener("touchmove", onTouchMove);
+      canvas.style.cursor = "default";
     };
   }, [type]); // eslint-disable-line react-hooks/exhaustive-deps
 
