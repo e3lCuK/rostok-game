@@ -1,20 +1,30 @@
-import { GameState, formatRub, STANDARD_DAILY, SESSION_REWARD, MAX_SESSIONS } from "@/lib/storage";
+import {
+  UserState,
+  formatRub,
+  calcStandardDaily,
+  calcActiveDaily,
+  calcSessionReward,
+} from "@/lib/engine";
 import { TrendingUp, Zap, Lock, ChevronRight } from "lucide-react";
 
 interface Props {
-  state: GameState;
+  state: UserState;
   onTabChange: (tab: "game") => void;
 }
 
 export default function SavingsPage({ state, onTabChange }: Props) {
-  const standardAnnual = state.standardBalance * 0.12;
-  const activeAnnual = state.activeBalance * 0.15;
+  const { standard, active, standardEarned, activeEarned } = state.balances;
+
+  const standardAnnual = standard * 0.12;
+  const activeAnnual = active * 0.15;
+  const stdDaily = calcStandardDaily(standard);
+  const actDaily = calcActiveDaily(active);
+  const sessionReward = calcSessionReward(active);
 
   return (
     <div className="savings-page">
       <h2 className="page-title">Мои вклады</h2>
 
-      {/* Standard deposit card */}
       <div className="deposit-card deposit-card-standard">
         <div className="deposit-header">
           <div className="deposit-icon-wrap deposit-icon-blue">
@@ -30,11 +40,11 @@ export default function SavingsPage({ state, onTabChange }: Props) {
         <div className="deposit-balance-row">
           <div>
             <p className="deposit-balance-label">Баланс</p>
-            <p className="deposit-balance">{formatRub(state.standardBalance)}</p>
+            <p className="deposit-balance">{formatRub(standard)}</p>
           </div>
           <div className="text-right">
             <p className="deposit-balance-label">Заработано</p>
-            <p className="deposit-earned">+{formatRub(state.standardEarned)}</p>
+            <p className="deposit-earned">+{formatRub(standardEarned)}</p>
           </div>
         </div>
 
@@ -47,7 +57,7 @@ export default function SavingsPage({ state, onTabChange }: Props) {
           </div>
           <div className="deposit-stat">
             <p className="deposit-stat-label">В день</p>
-            <p className="deposit-stat-value">{formatRub(STANDARD_DAILY)}</p>
+            <p className="deposit-stat-value">{formatRub(stdDaily)}</p>
           </div>
           <div className="deposit-stat">
             <p className="deposit-stat-label">Режим</p>
@@ -60,7 +70,6 @@ export default function SavingsPage({ state, onTabChange }: Props) {
         </div>
       </div>
 
-      {/* Active deposit card */}
       <div className="deposit-card deposit-card-green" onClick={() => onTabChange("game")}>
         <div className="deposit-header">
           <div className="deposit-icon-wrap deposit-icon-green">
@@ -76,11 +85,11 @@ export default function SavingsPage({ state, onTabChange }: Props) {
         <div className="deposit-balance-row">
           <div>
             <p className="deposit-balance-label">Баланс</p>
-            <p className="deposit-balance">{formatRub(state.activeBalance)}</p>
+            <p className="deposit-balance">{formatRub(active)}</p>
           </div>
           <div className="text-right">
             <p className="deposit-balance-label">Заработано</p>
-            <p className="deposit-earned deposit-earned-green">+{formatRub(state.activeEarned)}</p>
+            <p className="deposit-earned deposit-earned-green">+{formatRub(activeEarned)}</p>
           </div>
         </div>
 
@@ -88,21 +97,21 @@ export default function SavingsPage({ state, onTabChange }: Props) {
 
         <div className="deposit-stats">
           <div className="deposit-stat">
-            <p className="deposit-stat-label">Макс. доход</p>
+            <p className="deposit-stat-label">Макс. доход/год</p>
             <p className="deposit-stat-value">{formatRub(activeAnnual)}</p>
           </div>
           <div className="deposit-stat">
-            <p className="deposit-stat-label">За сессию</p>
-            <p className="deposit-stat-value">~{formatRub(SESSION_REWARD)}</p>
+            <p className="deposit-stat-label">В день</p>
+            <p className="deposit-stat-value">{formatRub(actDaily)}</p>
           </div>
           <div className="deposit-stat">
-            <p className="deposit-stat-label">Сессий/день</p>
-            <p className="deposit-stat-value">{MAX_SESSIONS}</p>
+            <p className="deposit-stat-label">За сессию</p>
+            <p className="deposit-stat-value">~{formatRub(sessionReward)}</p>
           </div>
         </div>
 
         <div className="deposit-info-box deposit-info-box-green">
-          <p>Доход зависит от активности. Ухаживайте за деревом — получайте повышенный процент. Нажмите, чтобы играть!</p>
+          <p>Доход зависит от активности. Ухаживайте за деревом раз в 8 часов — получайте повышенный процент.</p>
         </div>
       </div>
     </div>

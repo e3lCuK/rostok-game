@@ -1,25 +1,35 @@
-import { GameState, formatRub, getTreeProgress, getTreeStage } from "@/lib/storage";
+import {
+  UserState,
+  formatRub,
+  getTreeProgress,
+  getTreeStage,
+  calcStandardDaily,
+  calcActiveDaily,
+  TREE_STAGE_NAMES,
+} from "@/lib/engine";
 import TreeSVG from "@/components/TreeSVG";
 import { motion } from "framer-motion";
 import { TrendingUp, Sprout, Zap } from "lucide-react";
 
 interface Props {
-  state: GameState;
+  state: UserState;
 }
 
 export default function HomePage({ state }: Props) {
   const now = Date.now();
-  const totalBalance = state.standardBalance + state.activeBalance;
-  const totalEarned = state.standardEarned + state.activeEarned;
-  const progress = getTreeProgress(state.startDate, now);
+  const { standard, active, standardEarned, activeEarned, startDate } = state.balances;
+  const totalBalance = standard + active;
+  const totalEarned = standardEarned + activeEarned;
+
+  const progress = getTreeProgress(startDate, now, totalBalance);
   const stage = getTreeStage(progress);
   const pct = Math.round(progress * 100);
 
-  const stageNames = ["Росток", "Саженец", "Деревце", "Молодое дерево", "Могучее дерево"];
+  const dailyStd = calcStandardDaily(standard);
+  const dailyAct = calcActiveDaily(active);
 
   return (
     <div className="home-page">
-      {/* Hero balance card */}
       <div className="hero-card">
         <div className="hero-card-inner">
           <div className="hero-left">
@@ -35,12 +45,11 @@ export default function HomePage({ state }: Props) {
           </div>
         </div>
 
-        {/* Tree growth bar */}
         <div className="tree-growth-section">
           <div className="tree-growth-header">
             <span className="tree-stage-name">
               <Sprout size={13} />
-              {stageNames[stage]}
+              {TREE_STAGE_NAMES[stage]}
             </span>
             <span className="tree-growth-pct">{pct}% роста</span>
           </div>
@@ -52,12 +61,13 @@ export default function HomePage({ state }: Props) {
             />
           </div>
           <p className="tree-growth-caption">
-            {progress < 1 ? "Дерево вырастет через 1 год от начала" : "Дерево достигло максимума!"}
+            {progress < 1
+              ? "Дерево растёт быстрее с большим балансом"
+              : "Дерево достигло максимума!"}
           </p>
         </div>
       </div>
 
-      {/* Stats row */}
       <div className="stats-row">
         <div className="stat-card">
           <div className="stat-icon stat-icon-blue">
@@ -65,8 +75,8 @@ export default function HomePage({ state }: Props) {
           </div>
           <div>
             <p className="stat-label">Стандартный</p>
-            <p className="stat-value">{formatRub(state.standardBalance)}</p>
-            <p className="stat-sub">12% год.</p>
+            <p className="stat-value">{formatRub(standard)}</p>
+            <p className="stat-sub">~{formatRub(dailyStd)}/день</p>
           </div>
         </div>
         <div className="stat-card">
@@ -75,13 +85,12 @@ export default function HomePage({ state }: Props) {
           </div>
           <div>
             <p className="stat-label">Активный</p>
-            <p className="stat-value">{formatRub(state.activeBalance)}</p>
-            <p className="stat-sub">до 15% год.</p>
+            <p className="stat-value">{formatRub(active)}</p>
+            <p className="stat-sub">~{formatRub(dailyAct)}/день</p>
           </div>
         </div>
       </div>
 
-      {/* Recent history */}
       {state.history.length > 0 && (
         <div className="history-card">
           <h3 className="history-title">Последние начисления</h3>
@@ -90,7 +99,9 @@ export default function HomePage({ state }: Props) {
               <div key={i} className="history-item">
                 <div className="history-dot" data-type={item.type} />
                 <div className="history-info">
-                  <span className="history-type">{item.type === "standard" ? "Стандартный вклад" : "Активный вклад"}</span>
+                  <span className="history-type">
+                    {item.type === "standard" ? "Стандартный вклад" : "Активный вклад"}
+                  </span>
                   <span className="history-date">{item.date}</span>
                 </div>
                 <span className="history-amount">+{formatRub(item.amount)}</span>
