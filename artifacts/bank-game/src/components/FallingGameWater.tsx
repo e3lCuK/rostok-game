@@ -54,11 +54,11 @@ const CONFIGS = {
 } as const;
 
 // ---- constants ----
-const GAME_MS      = 30_000;          // 30 seconds total
-const BURST_AT     = 20_000;          // last 10 s = acceleration phase
-const TOTAL_DROPS  = 40;
-const BURST_DROPS  = 18;              // packed into final 10 s
-const NORMAL_DROPS = TOTAL_DROPS - BURST_DROPS; // 22
+const GAME_MS      = 15_000;          // 15 seconds total
+const BURST_AT     = 10_000;          // last 5 s = acceleration phase
+const TOTAL_DROPS  = 30;
+const BURST_DROPS  = 10;              // packed into final 5 s
+const NORMAL_DROPS = TOTAL_DROPS - BURST_DROPS; // 20
 const DROP_R       = 11;
 const BAR_W        = 88;
 const BAR_H        = 11;
@@ -72,14 +72,14 @@ function makeDrop(id: number) {
   let spawnAt: number;
   let speed: number;
   if (id < NORMAL_DROPS) {
-    // normal phase: 22 drops spread evenly across 0 → 18 s
-    spawnAt = (id / NORMAL_DROPS) * (BURST_AT * 0.9) + (Math.random() * 800 - 400);
+    // normal phase: 20 drops spread evenly across 0 → 9 s
+    spawnAt = (id / NORMAL_DROPS) * (BURST_AT * 0.9) + (Math.random() * 400 - 200);
     speed   = 85 + Math.random() * 35;           // 85–120 px/s
   } else {
-    // burst phase: 18 drops over 20 s → 27 s, gradually faster
+    // burst phase: 10 drops over 10 s → 13.5 s, gradually faster
     const burstId = id - NORMAL_DROPS;
     const t = burstId / BURST_DROPS;             // 0 → 1 across burst window
-    spawnAt = BURST_AT + t * 7_000 + (Math.random() * 400 - 200);
+    spawnAt = BURST_AT + t * 3_500 + (Math.random() * 200 - 100);
     speed   = 110 + t * 110 + Math.random() * 40; // 110 → 220 px/s (gradual)
   }
   return {
