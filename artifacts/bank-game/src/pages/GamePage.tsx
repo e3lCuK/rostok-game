@@ -77,6 +77,14 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
     try {
       await api.startSession();
       console.log("[Session] Started successfully");
+      // reset per-session scores
+      waterScoreRef.current = 40;
+      sunScoreRef.current = 40;
+      fertilizerScoreRef.current = 40;
+      skillScoreRef.current = 40;
+      // reset UI state from any previous session
+      setPendingReward(0);
+      setSessionPerformance(0);
       onStateChange({
         ...state,
         game: { ...game, sessionInProgress: true, water: false, sun: false, fertilizer: false },

@@ -257,7 +257,15 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
       const earnedDate = new Date(now).toLocaleDateString("ru-RU");
 
       await pool.query(
-        `UPDATE game_state SET session_in_progress = FALSE, last_session_time = $1, streak_days = $2, updated_at = NOW() WHERE user_id = $3`,
+        `UPDATE game_state SET
+          session_in_progress = FALSE,
+          last_session_time = $1,
+          streak_days = $2,
+          current_session_water = FALSE,
+          current_session_sun = FALSE,
+          current_session_fertilizer = FALSE,
+          updated_at = NOW()
+         WHERE user_id = $3`,
         [now, newStreak, userId],
       );
       await pool.query(
