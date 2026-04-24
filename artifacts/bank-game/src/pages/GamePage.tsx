@@ -15,6 +15,7 @@ import {
 import { api } from "@/lib/api";
 import TreeSVG from "@/components/TreeSVG";
 import FallingGameWater, { GameType } from "@/components/FallingGameWater";
+import ClickGameSun from "@/components/ClickGameSun";
 import DebugPanel from "@/components/DebugPanel";
 import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2 } from "lucide-react";
 
@@ -235,10 +236,16 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
         {/* Mini-game overlay */}
         {activeMinigame && (
           <div className="water-game-overlay">
-            <FallingGameWater
-              type={activeMinigame}
-              onComplete={(score) => handleMinigameComplete(activeMinigame, score)}
-            />
+            {activeMinigame === "sun" ? (
+              <ClickGameSun
+                onComplete={(score) => handleMinigameComplete("sun", score)}
+              />
+            ) : (
+              <FallingGameWater
+                type={activeMinigame}
+                onComplete={(score) => handleMinigameComplete(activeMinigame, score)}
+              />
+            )}
           </div>
         )}
 
