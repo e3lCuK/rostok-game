@@ -11,7 +11,7 @@ export const SESSION_COOLDOWN_MS = 8 * 60 * 60 * 1000;
 export const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 
 // Starting capital options
-export const CAPITAL_OPTIONS = [10_000, 100_000, 1_000_000] as const;
+export const CAPITAL_OPTIONS = [20_000, 200_000, 2_000_000] as const;
 export type CapitalOption = (typeof CAPITAL_OPTIONS)[number];
 
 // ---- Canonical user state shape ----
