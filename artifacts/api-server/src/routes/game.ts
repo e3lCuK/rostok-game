@@ -69,12 +69,12 @@ router.post("/game/init", requireAuth, async (req: any, res) => {
   const userId = req.userId;
   const { startingCapital } = req.body;
 
-  const allowed = [10_000, 100_000, 1_000_000];
-  if (!allowed.includes(Number(startingCapital))) {
+  const capital = Number(startingCapital);
+  if (!capital || capital <= 0 || !Number.isFinite(capital)) {
     return res.status(400).json({ error: "Invalid starting capital" });
   }
 
-  const half = Number(startingCapital) / 2;
+  const half = capital / 2;
   const now = Date.now();
 
   try {
