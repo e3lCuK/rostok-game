@@ -1,0 +1,106 @@
+Implement a "bonus degradation system" based on missed sessions.
+
+IMPORTANT:
+Do NOT break existing reward logic.
+Do NOT refactor architecture.
+Only extend current logic.
+
+========================
+CORE LOGIC
+========================
+
+1. Base income (12%)
+- Always applied
+- Works even if user is offline
+- Applies to both:
+  - standard account
+  - active account
+
+2. Activity bonus (was +3%)
+Now depends on missed sessions:
+
+missedSessions = number of missed sessions
+
+Rules:
+
+if (missedSessions <= 3)
+  bonus = 3%
+
+if (missedSessions > 3 && missedSessions <= 9)
+  bonus = 2%
+
+if (missedSessions > 9 && missedSessions <= 21)
+  bonus = 1%
+
+if (missedSessions > 21)
+  bonus = 0.5%
+
+3. Final income:
+
+totalPercent = 12% + bonus
+
+4. If user actively plays:
+- reward is applied instantly (same as current system)
+- use totalPercent at that moment
+
+5. If user is offline:
+- ONLY 12% accumulates automatically
+- bonus is NOT auto-applied
+- bonus is only applied via gameplay
+
+========================
+MISSED SESSIONS
+========================
+
+missedSessions must be calculated based on:
+- session cooldown timing
+- how many sessions user skipped
+
+Store it in state / backend if needed.
+
+========================
+UI CHANGES
+========================
+
+IF missedSessions > 1:
+
+Show a new UI row inside the deposit screen:
+
+LEFT:
+"Пропущенные сессии: X"
+- color: red
+
+CENTER:
+Button: "Супер-сессия"
+- currently disabled (no logic yet)
+
+RIGHT:
+Icon: "(?)"
+
+ON CLICK "(?)":
+Show tooltip or modal with explanation:
+
+"Бонус к доходу уменьшается, если вы пропускаете сессии:
+1–3 сессии → +3%
+3–9 → +2%
+10–21 → +1%
+21+ → +0.5%
+Вы можете восстановить бонус, играя."
+
+========================
+IMPORTANT
+========================
+
+- Do NOT implement super-session logic yet
+- Only UI + bonus degradation
+- Keep all existing reward flows intact
+- Ensure no regressions
+
+========================
+RESULT
+========================
+
+- Passive income always = 12%
+- Bonus depends on activity
+- Player sees missed sessions
+- Player understands system via tooltip

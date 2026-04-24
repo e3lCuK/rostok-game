@@ -2,6 +2,15 @@ import { Router } from "express";
 import { getAuth } from "@clerk/express";
 import { pool } from "@workspace/db";
 
+const COOLDOWN_MS = 8 * 60 * 60 * 1000;
+
+function calcActivityBonus(missedSessions: number): number {
+  if (missedSessions <= 3) return 3;
+  if (missedSessions <= 9) return 2;
+  if (missedSessions <= 21) return 1;
+  return 0.5;
+}
+
 const router = Router();
 
 function requireAuth(req: any, res: any, next: any) {
@@ -51,6 +60,7 @@ router.get("/game/state", requireAuth, async (req: any, res) => {
         sun: game.current_session_sun || false,
         fertilizer: game.current_session_fertilizer || false,
         streakDays: game.streak_days || 0,
+        missedSessions: game.missed_sessions || 0,
       },
       history: historyRows.rows.map((r: any) => ({
         amount: parseFloat(r.amount),
@@ -151,7 +161,6 @@ router.post("/game/accrue", requireAuth, async (req: any, res) => {
 // POST /api/game/session/start — begin a session
 router.post("/game/session/start", requireAuth, async (req: any, res) => {
   const userId = req.userId;
-  const COOLDOWN_MS = 8 * 60 * 60 * 1000;
 
   try {
     const gameRow = await pool.query("SELECT * FROM game_state WHERE user_id = $1", [userId]);
@@ -169,10 +178,25 @@ router.post("/game/session/start", requireAuth, async (req: any, res) => {
       return res.status(429).json({ error: "Session locked", nextAvailable });
     }
 
+    // Calculate how many sessions were missed since the last one
+    let additionalMissed = 0;
+    if (g.last_session_time) {
+      const elapsed = now - parseInt(g.last_session_time);
+      // Each COOLDOWN_MS window is one session slot; first one is the expected slot
+      additionalMissed = Math.max(0, Math.floor(elapsed / COOLDOWN_MS) - 1);
+    }
+    const newMissedSessions = (g.missed_sessions || 0) + additionalMissed;
+
     await pool.query(
-      `UPDATE game_state SET session_in_progress = TRUE, current_session_water = FALSE, current_session_sun = FALSE, current_session_fertilizer = FALSE, updated_at = NOW()
+      `UPDATE game_state
+       SET session_in_progress = TRUE,
+           current_session_water = FALSE,
+           current_session_sun = FALSE,
+           current_session_fertilizer = FALSE,
+           missed_sessions = $2,
+           updated_at = NOW()
        WHERE user_id = $1`,
-      [userId],
+      [userId, newMissedSessions],
     );
 
     return res.json({ success: true });
@@ -244,15 +268,15 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
         newStreak = Math.min(currentStreak + 1, 7);
       }
 
-      // F = capitalBonus + skillScore + streakBonus, capped at 100%
-      const baseBonus = totalBalance >= 1_000_000 ? 12 : totalBalance >= 100_000 ? 10 : 8;
+      // F = activityBonus + skillScore + streakBonus, capped at 100%
+      const activityBonus = calcActivityBonus(g.missed_sessions || 0);
       const streakBonus = Math.min(newStreak, 7);
-      const F = Math.min(baseBonus + skillScore + streakBonus, 100);
+      const F = Math.min(activityBonus + skillScore + streakBonus, 100);
       const dailyIncome = activeBalance * 0.15 / 365;
       reward = dailyIncome * (F / 100) / 3;
 
       sessionF = F;
-      req.log.info({ skillScore, baseBonus, streakBonus, F, reward }, "Session reward calculated");
+      req.log.info({ skillScore, activityBonus, streakBonus, F, reward }, "Session reward calculated");
 
       const earnedDate = new Date(now).toLocaleDateString("ru-RU");
 
@@ -297,6 +321,7 @@ router.post("/game/debug/reset-session", requireAuth, async (req: any, res) => {
         current_session_sun = FALSE,
         current_session_fertilizer = FALSE,
         streak_days = 0,
+        missed_sessions = 0,
         updated_at = NOW()
        WHERE user_id = $1`,
       [userId],

@@ -44,9 +44,10 @@ export interface GameStateResponse {
     lastSessionTime: number | null;
     sessionInProgress: boolean;
     water: boolean;
-    streakDays: number;
     sun: boolean;
     fertilizer: boolean;
+    streakDays: number;
+    missedSessions: number;
   };
   history?: { amount: number; type: "standard" | "active"; date: string }[];
 }
