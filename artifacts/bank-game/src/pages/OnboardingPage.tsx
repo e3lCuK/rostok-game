@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
+import { useAuth } from "@clerk/react";
 import { CAPITAL_OPTIONS, formatCapital, calcStandardDaily, calcSessionReward } from "@/lib/engine";
 
 interface Props {
@@ -10,6 +11,8 @@ export default function OnboardingPage({ onComplete }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isSubmitting = useRef(false);
+  const { getToken } = useAuth();
 
   const labels: Record<number, string> = {
     20_000: "Начальный",
@@ -25,16 +28,30 @@ export default function OnboardingPage({ onComplete }: Props) {
 
   async function handleStart() {
     if (selected === null) return;
-    console.log("CLICK FIRED", selected);
-    console.log("loading:", loading);
+    if (loading) return;
+    if (isSubmitting.current) return;
+
+    const token = await getToken();
+    if (!token) {
+      console.warn("Token not ready");
+      setError("Сессия не готова. Попробуйте снова.");
+      return;
+    }
+
+    isSubmitting.current = true;
     setError(null);
     setLoading(true);
+    console.log("CLICK FIRED", selected);
+    console.log("loading:", loading);
+
     try {
       await onComplete(selected);
     } catch (e: unknown) {
       console.error("Account creation failed:", e);
       setError("Ошибка создания счёта. Попробуйте ещё раз.");
+    } finally {
       setLoading(false);
+      isSubmitting.current = false;
     }
   }
 
