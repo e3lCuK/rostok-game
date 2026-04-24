@@ -9,6 +9,7 @@ interface Props {
 export default function OnboardingPage({ onComplete }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const labels: Record<number, string> = {
     20_000: "Начальный",
@@ -24,11 +25,15 @@ export default function OnboardingPage({ onComplete }: Props) {
 
   async function handleStart() {
     if (selected === null) return;
-    console.log("Selected:", selected);
+    console.log("CLICK FIRED", selected);
+    console.log("loading:", loading);
+    setError(null);
     setLoading(true);
     try {
       await onComplete(selected);
-    } catch {
+    } catch (e: unknown) {
+      console.error("Account creation failed:", e);
+      setError("Ошибка создания счёта. Попробуйте ещё раз.");
       setLoading(false);
     }
   }
@@ -77,6 +82,8 @@ export default function OnboardingPage({ onComplete }: Props) {
           );
         })}
       </div>
+
+      {error && <p style={{ color: "red", textAlign: "center", fontSize: 14, marginBottom: 8 }}>{error}</p>}
 
       <motion.button
         className={`onboarding-start-btn ${selected === null ? "onboarding-start-btn-disabled" : ""}`}
