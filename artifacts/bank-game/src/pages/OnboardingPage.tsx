@@ -23,7 +23,8 @@ export default function OnboardingPage({ onComplete }: Props) {
   };
 
   async function handleStart() {
-    if (!selected) return;
+    if (selected === null) return;
+    console.log("Selected:", selected);
     setLoading(true);
     try {
       await onComplete(selected);
@@ -78,10 +79,10 @@ export default function OnboardingPage({ onComplete }: Props) {
       </div>
 
       <motion.button
-        className={`onboarding-start-btn ${!selected ? "onboarding-start-btn-disabled" : ""}`}
+        className={`onboarding-start-btn ${selected === null ? "onboarding-start-btn-disabled" : ""}`}
         onClick={handleStart}
-        disabled={!selected || loading}
-        whileTap={selected ? { scale: 0.97 } : {}}
+        disabled={selected === null || loading}
+        whileTap={selected !== null ? { scale: 0.97 } : {}}
       >
         {loading ? "Создание счёта..." : "Открыть счёт"}
       </motion.button>
