@@ -12,81 +12,59 @@ const CONFIGS = {
   water: {
     bg:          "rgba(239,246,255,0.97)",
     timerBg:     "#dbeafe",
-    timerNormal: "#3b82f6",
-    timerFast:   "#f97316",
-    phaseColor:  "#93c5fd",
+    timerColor:  "#3b82f6",
     scoreFg:     "#1e40af",
     scoreEmoji:  "💧",
     dropColor:   "#3b82f6",
     dropShadow:  "rgba(59,130,246,0.15)",
-    barColor:    "#2563eb",   // same blue family, slightly darker than drop
+    barColor:    "#2563eb",
     resultColor: "#1d4ed8",
     border:      "2px solid #bfdbfe",
   },
   sun: {
     bg:          "rgba(255,251,235,0.97)",
     timerBg:     "#fef3c7",
-    timerNormal: "#f59e0b",
-    timerFast:   "#ef4444",
-    phaseColor:  "#fcd34d",
+    timerColor:  "#f59e0b",
     scoreFg:     "#92400e",
     scoreEmoji:  "☀️",
     dropColor:   "#f59e0b",
     dropShadow:  "rgba(245,158,11,0.15)",
-    barColor:    "#d97706",   // amber — same yellow family, slightly darker than drop
+    barColor:    "#d97706",
     resultColor: "#92400e",
     border:      "2px solid #fde68a",
   },
   fertilizer: {
     bg:          "rgba(240,253,244,0.97)",
     timerBg:     "#dcfce7",
-    timerNormal: "#22c55e",
-    timerFast:   "#f97316",
-    phaseColor:  "#86efac",
+    timerColor:  "#22c55e",
     scoreFg:     "#166534",
     scoreEmoji:  "🌱",
     dropColor:   "#22c55e",
     dropShadow:  "rgba(34,197,94,0.15)",
-    barColor:    "#16a34a",   // same green family, slightly darker than drop
+    barColor:    "#16a34a",
     resultColor: "#166534",
     border:      "2px solid #bbf7d0",
   },
 } as const;
 
 // ---- constants ----
-const GAME_MS      = 15_000;          // 15 seconds total
-const BURST_AT     = 10_000;          // last 5 s = acceleration phase
-const TOTAL_DROPS  = 30;
-const BURST_DROPS  = 10;              // packed into final 5 s
-const NORMAL_DROPS = TOTAL_DROPS - BURST_DROPS; // 20
-const DROP_R       = 11;
-const BAR_W        = 88;
-const BAR_H        = 11;
-const PERFECT_HALF = BAR_W / 4;      // center ±22 px = perfect zone
-const W            = 280;
-const H            = 310;
-const BAR_Y        = H - 28;
-const MAX_SCORE    = TOTAL_DROPS * 2; // all-perfect ceiling (80)
+const GAME_MS     = 15_000;   // 15 seconds total
+const TOTAL_DROPS = 30;       // objects to catch
+const DROP_R      = 11;
+const BAR_W       = 88;
+const BAR_H       = 11;
+const W           = 280;
+const H           = 310;
+const BAR_Y       = H - 28;
+const DROP_SPEED  = 100;      // constant px/s — no acceleration
 
 function makeDrop(id: number) {
-  let spawnAt: number;
-  let speed: number;
-  if (id < NORMAL_DROPS) {
-    // normal phase: 20 drops spread evenly across 0 → 9 s
-    spawnAt = (id / NORMAL_DROPS) * (BURST_AT * 0.9) + (Math.random() * 400 - 200);
-    speed   = 85 + Math.random() * 35;           // 85–120 px/s
-  } else {
-    // burst phase: 10 drops over 10 s → 13.5 s, gradually faster
-    const burstId = id - NORMAL_DROPS;
-    const t = burstId / BURST_DROPS;             // 0 → 1 across burst window
-    spawnAt = BURST_AT + t * 3_500 + (Math.random() * 200 - 100);
-    speed   = 110 + t * 110 + Math.random() * 40; // 110 → 220 px/s (gradual)
-  }
+  // spread evenly across the first 13 s so last drops land before time ends
+  const spawnAt = (id / TOTAL_DROPS) * (GAME_MS * 0.87) + (Math.random() * 300 - 150);
   return {
     id,
     x:       DROP_R + Math.random() * (W - DROP_R * 2),
     y:       -DROP_R,
-    speed,
     spawnAt: Math.max(0, spawnAt),
     active:  false,
     caught:  false,
@@ -96,10 +74,10 @@ function makeDrop(id: number) {
 type Drop = ReturnType<typeof makeDrop>;
 
 export default function FallingGameWater({ type = "water", onComplete }: Props) {
-  const canvasRef      = useRef<HTMLCanvasElement>(null);
-  const barX           = useRef(W / 2);
-  const doneRef        = useRef(false);
-  const pendingScore   = useRef<number | null>(null);
+  const canvasRef    = useRef<HTMLCanvasElement>(null);
+  const barX         = useRef(W / 2);
+  const doneRef      = useRef(false);
+  const pendingScore = useRef<number | null>(null);
 
   const onMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current?.getBoundingClientRect();
@@ -121,16 +99,14 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
     const cfg = CONFIGS[type];
 
     canvas.addEventListener("touchmove", onTouchMove, { passive: false });
-    canvas.style.cursor = "none";   // hide cursor during gameplay
+    canvas.style.cursor = "none";
 
     const drops: Drop[] = Array.from({ length: TOTAL_DROPS }, (_, i) => makeDrop(i));
-    let score        = 0;
-    let perfectCount = 0;
-    let combo        = 0;
-    let spawned      = 0;
-    let rafId     = 0;
-    let lastTs    = -1;
-    const start   = performance.now();
+    let catches  = 0;
+    let spawned  = 0;
+    let rafId    = 0;
+    let lastTs   = -1;
+    const start  = performance.now();
 
     function drawRoundedRect(x: number, y: number, w: number, h: number, r: number) {
       ctx.beginPath();
@@ -146,21 +122,29 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
       ctx.closePath();
     }
 
+    function feedbackLabel(n: number): string {
+      if (n >= 20) return "Отлично!";
+      if (n >= 10) return "Хорошо";
+      return "Попробуйте ещё";
+    }
+
     function finish() {
       if (doneRef.current) return;
       doneRef.current = true;
       cancelAnimationFrame(rafId);
+      canvas.style.cursor = "default";
 
-      canvas.style.cursor = "default"; // restore cursor on result screen
-      const skillScore = Math.min(80, Math.round((score / MAX_SCORE) * 80));
+      // map catches (0–30) → skillScore (0–80)
+      const skillScore = Math.min(80, Math.round((catches / TOTAL_DROPS) * 80));
       pendingScore.current = skillScore;
-      console.log(`[FallingGame:${type}] score: ${score.toFixed(1)}/${MAX_SCORE}  perfect: ${perfectCount}  skillScore: ${skillScore}/80`);
+      console.log(`[FallingGame:${type}] catches: ${catches}/${TOTAL_DROPS}  skillScore: ${skillScore}/80`);
 
+      // ---- result screen ----
       ctx.clearRect(0, 0, W, H);
       ctx.fillStyle = cfg.bg;
       ctx.fillRect(0, 0, W, H);
 
-      // close button (✕) — top-right
+      // close button
       ctx.beginPath();
       ctx.arc(W - 22, 22, 14, 0, Math.PI * 2);
       ctx.fillStyle = "rgba(0,0,0,0.08)";
@@ -170,16 +154,20 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
       ctx.fillStyle = "#6b7280";
       ctx.fillText("✕", W - 22, 27);
 
+      // emoji
       ctx.textAlign = "center";
+      ctx.font      = "bold 36px sans-serif";
+      ctx.fillText(cfg.scoreEmoji, W / 2, H / 2 - 32);
+
+      // main result
+      ctx.font      = "bold 20px sans-serif";
       ctx.fillStyle = cfg.resultColor;
-      ctx.font      = "bold 22px sans-serif";
-      ctx.fillText(cfg.scoreEmoji, W / 2, H / 2 - 28);
+      ctx.fillText(`Поймано: ${catches}`, W / 2, H / 2 + 8);
+
+      // feedback
       ctx.font      = "14px sans-serif";
       ctx.fillStyle = "#6b7280";
-      ctx.fillText(`Попадания: ${Math.round(score)} / ${MAX_SCORE}`, W / 2, H / 2 + 10);
-      ctx.font      = "bold 14px sans-serif";
-      ctx.fillStyle = "#d97706";
-      ctx.fillText(`Центровые: ${perfectCount}`, W / 2, H / 2 + 34);
+      ctx.fillText(feedbackLabel(catches), W / 2, H / 2 + 34);
     }
 
     function frame(ts: number) {
@@ -199,25 +187,18 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
       let activeCnt = 0;
       for (const d of drops) {
         if (!d.active) continue;
-        d.y += d.speed * dt;
+        d.y += DROP_SPEED * dt;
 
         if (!d.caught && d.y + DROP_R >= BAR_Y - BAR_H && d.y - DROP_R <= BAR_Y + BAR_H) {
           const bx = barX.current;
           if (d.x >= bx - BAR_W / 2 - DROP_R && d.x <= bx + BAR_W / 2 + DROP_R) {
             d.caught = true;
             d.active = false;
-            combo++;
-            const multiplier = Math.min(2, 1 + combo * 0.05);
-            if (d.x >= bx - PERFECT_HALF && d.x <= bx + PERFECT_HALF) {
-              score += 2 * multiplier;   // PERFECT — center zone
-              perfectCount++;
-            } else {
-              score += 1 * multiplier;   // NORMAL — outer zone
-            }
+            catches++;
             continue;
           }
         }
-        if (d.y - DROP_R > H) { d.active = false; combo = 0; continue; }
+        if (d.y - DROP_R > H) { d.active = false; continue; }
         activeCnt++;
       }
 
@@ -225,7 +206,6 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
 
       // ---- draw ----
       ctx.clearRect(0, 0, W, H);
-
       ctx.fillStyle = cfg.bg;
       ctx.fillRect(0, 0, W, H);
 
@@ -233,28 +213,16 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
       const pct = Math.max(0, 1 - elapsed / GAME_MS);
       ctx.fillStyle = cfg.timerBg;
       ctx.fillRect(0, 0, W, 5);
-      ctx.fillStyle = elapsed < BURST_AT ? cfg.timerNormal : cfg.timerFast;
+      ctx.fillStyle = cfg.timerColor;
       ctx.fillRect(0, 0, W * pct, 5);
 
-      // phase label
-      ctx.textAlign  = "center";
-      ctx.font       = "11px sans-serif";
-      ctx.fillStyle  = cfg.phaseColor;
-      ctx.fillText(elapsed < BURST_AT ? "Медленно…" : "Финальный рывок!", W / 2, 20);
+      // catch counter
+      ctx.textAlign = "left";
+      ctx.font      = "bold 13px sans-serif";
+      ctx.fillStyle = cfg.scoreFg;
+      ctx.fillText(`${cfg.scoreEmoji} ${catches}`, 10, 20);
 
-      // score
-      ctx.textAlign  = "left";
-      ctx.font       = "bold 13px sans-serif";
-      ctx.fillStyle  = cfg.scoreFg;
-      ctx.fillText(`${cfg.scoreEmoji} ${Math.floor(score)}`, 10, 20);
-      // combo
-      if (combo >= 2) {
-        ctx.textAlign = "right";
-        ctx.fillStyle = combo >= 10 ? "#f97316" : "#d97706";
-        ctx.fillText(`🔥×${combo}`, W - 8, 20);
-      }
-
-      // particles
+      // drops
       for (const d of drops) {
         if (!d.active) continue;
         // shadow
@@ -276,15 +244,14 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
 
       // catch bar
       const bx = barX.current;
-      // subtle drop shadow
-      ctx.shadowColor  = "rgba(0,0,0,0.18)";
-      ctx.shadowBlur   = 4;
+      ctx.shadowColor   = "rgba(0,0,0,0.18)";
+      ctx.shadowBlur    = 4;
       ctx.shadowOffsetY = 2;
       drawRoundedRect(bx - BAR_W / 2, BAR_Y - BAR_H / 2, BAR_W, BAR_H, BAR_H / 2);
       ctx.fillStyle = cfg.barColor;
       ctx.fill();
-      ctx.shadowColor = "transparent";
-      ctx.shadowBlur  = 0;
+      ctx.shadowColor   = "transparent";
+      ctx.shadowBlur    = 0;
       ctx.shadowOffsetY = 0;
       // shine
       drawRoundedRect(bx - BAR_W / 2 + 6, BAR_Y - BAR_H / 2 + 2, BAR_W - 12, 3, 2);
