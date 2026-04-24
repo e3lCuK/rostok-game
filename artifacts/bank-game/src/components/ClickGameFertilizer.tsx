@@ -4,125 +4,37 @@ interface Props {
   onComplete: (skillScore: number) => void;
 }
 
-const GAME_MS    = 15_000;
-const WAVE_MS    = 1_100;   // wave duration before refresh
-const OBJ_R      = 26;      // click/touch radius
-const W          = 280;
-const H          = 310;
-const SKILL_DENOM = 20;     // reference count for skillScore mapping
+// ---- layout ----
+const W    = 280;
+const H    = 310;
+const COLS = 4;
+const ROWS = 4;
+const CELL = 54;
+const GAP  = 6;
 
-type ObjType = "fertilizer" | "stone";
+const GRID_W = COLS * CELL + (COLS - 1) * GAP;   // 234
+const GRID_X = (W - GRID_W) / 2;                  // 23
+const GRID_Y = 36;
 
-interface Obj {
-  id: number;
-  x: number;
-  y: number;
-  type: ObjType;
-  clicked: boolean;
-  spawnedAt: number;        // for spawn-in animation
-}
+// ---- game ----
+const GAME_MS     = 15_000;
+const SKILL_DENOM = 6;    // catches at this level → 80/80 skill
 
-let _nextId = 0;
+type ItemType = "fertilizer" | "water" | "sun" | "stone";
 
-function generateWave(ts: number): Obj[] {
-  const count     = 3 + Math.floor(Math.random() * 3);           // 3–5 objects
-  const fertCount = 1 + Math.floor(Math.random() * 2);           // 1–2 fertilizers
-  const types: ObjType[] = [
-    ...Array<ObjType>(fertCount).fill("fertilizer"),
-    ...Array<ObjType>(count - fertCount).fill("stone"),
-  ];
-  // shuffle
-  for (let i = types.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [types[i], types[j]] = [types[j], types[i]];
-  }
+const CELL_COLOR: Record<ItemType, string> = {
+  fertilizer: "#22c55e",
+  water:      "#60a5fa",
+  sun:        "#fbbf24",
+  stone:      "#9ca3af",
+};
 
-  const margin = OBJ_R + 14;
-  const objects: Obj[] = [];
-  for (let i = 0; i < count; i++) {
-    let x = 0, y = 0, attempts = 0;
-    do {
-      x = margin + Math.random() * (W - margin * 2);
-      y = 44 + margin + Math.random() * (H - 44 - margin * 2 - 20);
-      attempts++;
-    } while (
-      attempts < 40 &&
-      objects.some(o => Math.hypot(o.x - x, o.y - y) < OBJ_R * 2.4)
-    );
-    objects.push({ id: _nextId++, x, y, type: types[i], clicked: false, spawnedAt: ts });
-  }
-  return objects;
-}
-
-function drawFertilizer(ctx: CanvasRenderingContext2D, x: number, y: number, alpha: number, scale: number) {
-  const r = OBJ_R * scale;
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.shadowColor = "rgba(34,197,94,0.45)";
-  ctx.shadowBlur  = 14;
-
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, Math.PI * 2);
-  const g = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.06, x, y, r);
-  g.addColorStop(0,   "#bbf7d0");
-  g.addColorStop(0.6, "#22c55e");
-  g.addColorStop(1,   "#15803d");
-  ctx.fillStyle = g;
-  ctx.fill();
-  ctx.shadowBlur = 0;
-
-  // white leaf stem + two branches (plant icon)
-  ctx.strokeStyle = "rgba(255,255,255,0.92)";
-  ctx.lineWidth   = 2.5;
-  ctx.lineCap     = "round";
-  ctx.beginPath();
-  ctx.moveTo(x,              y + r * 0.55);
-  ctx.lineTo(x,              y - r * 0.10);
-  ctx.moveTo(x,              y - r * 0.10);
-  ctx.lineTo(x - r * 0.48,  y - r * 0.58);
-  ctx.moveTo(x,              y - r * 0.10);
-  ctx.lineTo(x + r * 0.48,  y - r * 0.58);
-  ctx.stroke();
-  ctx.restore();
-}
-
-function drawStone(ctx: CanvasRenderingContext2D, x: number, y: number, alpha: number, scale: number) {
-  const r = OBJ_R * scale;
-  ctx.save();
-  ctx.globalAlpha    = alpha;
-  ctx.shadowColor    = "rgba(0,0,0,0.18)";
-  ctx.shadowBlur     = 6;
-  ctx.shadowOffsetY  = 2;
-
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, Math.PI * 2);
-  const g = ctx.createRadialGradient(x - r * 0.25, y - r * 0.25, r * 0.05, x, y, r);
-  g.addColorStop(0,   "#f3f4f6");
-  g.addColorStop(0.55,"#9ca3af");
-  g.addColorStop(1,   "#6b7280");
-  ctx.fillStyle = g;
-  ctx.fill();
-
-  ctx.shadowBlur    = 0;
-  ctx.shadowOffsetY = 0;
-
-  // subtle crack
-  ctx.strokeStyle = "rgba(255,255,255,0.38)";
-  ctx.lineWidth   = 1.5;
-  ctx.lineCap     = "round";
-  ctx.beginPath();
-  ctx.moveTo(x - r * 0.18, y - r * 0.42);
-  ctx.lineTo(x + r * 0.12, y + r * 0.05);
-  ctx.lineTo(x - r * 0.08, y + r * 0.38);
-  ctx.stroke();
-  ctx.restore();
-}
-
-function feedbackLabel(n: number): string {
-  if (n >= 16) return "Отлично!";
-  if (n >= 8)  return "Хорошо";
-  return "Попробуйте ещё";
-}
+const CELL_ICON: Record<ItemType, string> = {
+  fertilizer: "🌱",
+  water:      "💧",
+  sun:        "☀️",
+  stone:      "🪨",
+};
 
 const CFG = {
   bg:          "rgba(240,253,244,0.97)",
@@ -133,10 +45,51 @@ const CFG = {
   resultColor: "#166534",
 };
 
+function randomType(): ItemType {
+  const r = Math.random();
+  if (r < 0.33) return "fertilizer";
+  if (r < 0.56) return "water";
+  if (r < 0.78) return "sun";
+  return "stone";
+}
+
+function makeGrid(): ItemType[] {
+  return Array.from({ length: COLS * ROWS }, () => randomType());
+}
+
+function drawRoundedRect(
+  ctx: CanvasRenderingContext2D,
+  x: number, y: number, w: number, h: number, r: number,
+) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y,     x + w, y + r,     r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x,     y + h, x,     y + h - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x,     y,     x + r, y,         r);
+  ctx.closePath();
+}
+
+function feedbackLabel(n: number): string {
+  if (n >= 5) return "Отлично!";
+  if (n >= 3) return "Хорошо";
+  return "Попробуйте ещё";
+}
+
 export default function ClickGameFertilizer({ onComplete }: Props) {
   const canvasRef    = useRef<HTMLCanvasElement>(null);
   const doneRef      = useRef(false);
   const pendingScore = useRef<number | null>(null);
+
+  // mutable game state (refs so RAF sees latest values without stale closure)
+  const gridRef     = useRef<ItemType[]>(makeGrid());
+  const selRef      = useRef<Set<number>>(new Set());
+  const catchesRef  = useRef(0);
+  const wrongFlash  = useRef(0);  // timestamp of last wrong click (for red flash)
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -144,21 +97,62 @@ export default function ClickGameFertilizer({ onComplete }: Props) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    canvas.style.cursor = "none";
+    canvas.style.cursor = "pointer";
 
-    let catches        = 0;
-    let rafId          = 0;
-    let lastTs         = -1;
-    const start        = performance.now();
-    let wave: Obj[]    = [];
-    let waveStart      = -1;
+    let rafId   = 0;
+    const start = performance.now();
 
+    // ---------- hit logic (shared by click & touch) ----------
+    function processHit(mx: number, my: number, now: number) {
+      if (doneRef.current) return;
+      for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+          const cx = GRID_X + col * (CELL + GAP);
+          const cy = GRID_Y + row * (CELL + GAP);
+          if (mx >= cx && mx <= cx + CELL && my >= cy && my <= cy + CELL) {
+            const idx = row * COLS + col;
+            if (selRef.current.has(idx)) return;          // already in selection
+            const type = gridRef.current[idx];
+            if (type !== "fertilizer") {
+              selRef.current = new Set();                  // wrong → reset
+              wrongFlash.current = now;
+              return;
+            }
+            selRef.current.add(idx);
+            if (selRef.current.size === 3) {              // match!
+              catchesRef.current++;
+              selRef.current.forEach(i => { gridRef.current[i] = randomType(); });
+              selRef.current = new Set();
+            }
+            return;
+          }
+        }
+      }
+    }
+
+    function handleClick(e: MouseEvent) {
+      const rect = canvas.getBoundingClientRect();
+      processHit(e.clientX - rect.left, e.clientY - rect.top, performance.now());
+    }
+
+    function handleTouch(e: TouchEvent) {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const t    = e.changedTouches[0];
+      processHit(t.clientX - rect.left, t.clientY - rect.top, performance.now());
+    }
+
+    canvas.addEventListener("click",    handleClick);
+    canvas.addEventListener("touchend", handleTouch, { passive: false });
+
+    // ---------- result screen ----------
     function finish() {
       if (doneRef.current) return;
       doneRef.current = true;
       cancelAnimationFrame(rafId);
       canvas.style.cursor = "default";
 
+      const catches    = catchesRef.current;
       const skillScore = Math.min(80, Math.round((catches / SKILL_DENOM) * 80));
       pendingScore.current = skillScore;
       console.log(`[ClickGameFertilizer] catches: ${catches}  skillScore: ${skillScore}/80`);
@@ -172,74 +166,41 @@ export default function ClickGameFertilizer({ onComplete }: Props) {
       ctx.arc(W - 22, 22, 14, 0, Math.PI * 2);
       ctx.fillStyle = "rgba(0,0,0,0.08)";
       ctx.fill();
-      ctx.textAlign = "center";
-      ctx.font      = "bold 15px sans-serif";
-      ctx.fillStyle = "#6b7280";
-      ctx.fillText("✕", W - 22, 27);
+      ctx.textAlign    = "center";
+      ctx.font         = "bold 15px sans-serif";
+      ctx.fillStyle    = "#6b7280";
+      ctx.textBaseline = "middle";
+      ctx.fillText("✕", W - 22, 22);
 
-      // big emoji
-      ctx.textAlign = "center";
-      ctx.font      = "bold 36px sans-serif";
-      ctx.fillText("🌱", W / 2, H / 2 - 32);
+      ctx.font         = "bold 36px sans-serif";
+      ctx.textBaseline = "middle";
+      ctx.fillText("🌱", W / 2, H / 2 - 36);
 
-      // result
-      ctx.font      = "bold 20px sans-serif";
-      ctx.fillStyle = CFG.resultColor;
-      ctx.fillText(`Поймано: ${catches}`, W / 2, H / 2 + 8);
+      ctx.font         = "bold 20px sans-serif";
+      ctx.fillStyle    = CFG.resultColor;
+      ctx.fillText(`Поймано: ${catches}`, W / 2, H / 2 + 6);
 
-      // feedback
       ctx.font      = "14px sans-serif";
       ctx.fillStyle = "#6b7280";
-      ctx.fillText(feedbackLabel(catches), W / 2, H / 2 + 34);
+      ctx.fillText(feedbackLabel(catches), W / 2, H / 2 + 32);
     }
 
-    function hitTest(px: number, py: number) {
-      if (doneRef.current) return;
-      for (const obj of wave) {
-        if (obj.clicked) continue;
-        const dx = px - obj.x, dy = py - obj.y;
-        if (dx * dx + dy * dy <= (OBJ_R + 6) * (OBJ_R + 6)) {
-          obj.clicked = true;
-          if (obj.type === "fertilizer") catches++;
-          break; // one hit per click
-        }
-      }
-    }
-
-    function handleClick(e: MouseEvent) {
-      if (doneRef.current) return;
-      const rect = canvas.getBoundingClientRect();
-      hitTest(e.clientX - rect.left, e.clientY - rect.top);
-    }
-
-    function handleTouch(e: TouchEvent) {
-      if (doneRef.current) return;
-      e.preventDefault();
-      const rect = canvas.getBoundingClientRect();
-      hitTest(e.changedTouches[0].clientX - rect.left, e.changedTouches[0].clientY - rect.top);
-    }
-
-    canvas.addEventListener("click",      handleClick);
-    canvas.addEventListener("touchend",   handleTouch, { passive: false });
-
+    // ---------- draw loop ----------
     function frame(ts: number) {
       if (doneRef.current) return;
-      if (lastTs < 0) lastTs = ts;
-      lastTs        = ts;
       const elapsed = ts - start;
+      if (elapsed >= GAME_MS) { finish(); return; }
 
-      // first wave or wave expired → spawn new
-      if (waveStart < 0 || ts - waveStart >= WAVE_MS) {
-        wave      = elapsed < GAME_MS - 200 ? generateWave(ts) : [];
-        waveStart = ts;
-      }
-
-      if (elapsed >= GAME_MS && wave.length === 0) { finish(); return; }
-
-      // ---- draw ----
       ctx.clearRect(0, 0, W, H);
       ctx.fillStyle = CFG.bg;
       ctx.fillRect(0, 0, W, H);
+
+      // wrong-click flash (red tint)
+      const flashAge = ts - wrongFlash.current;
+      if (flashAge < 250) {
+        ctx.fillStyle = `rgba(239,68,68,${0.18 * (1 - flashAge / 250)})`;
+        ctx.fillRect(0, 0, W, H);
+      }
 
       // timer bar
       const pct = Math.max(0, 1 - elapsed / GAME_MS);
@@ -249,23 +210,70 @@ export default function ClickGameFertilizer({ onComplete }: Props) {
       ctx.fillRect(0, 0, W * pct, 5);
 
       // catch counter
-      ctx.textAlign = "left";
-      ctx.font      = "bold 13px sans-serif";
-      ctx.fillStyle = CFG.scoreFg;
-      ctx.fillText(`🌱 ${catches}`, 10, 20);
+      ctx.textAlign    = "left";
+      ctx.textBaseline = "alphabetic";
+      ctx.font         = "bold 13px sans-serif";
+      ctx.fillStyle    = CFG.scoreFg;
+      ctx.fillText(`🌱 ${catchesRef.current}`, 10, 22);
 
-      // objects
-      const age      = ts - waveStart;
-      const scaleIn  = Math.min(1, age / 130);
-      const fadeOut  = age > WAVE_MS - 200 ? Math.max(0, 1 - (age - (WAVE_MS - 200)) / 200) : 1;
+      // grid
+      const grid = gridRef.current;
+      const sel  = selRef.current;
 
-      for (const obj of wave) {
-        if (obj.clicked) continue;
-        if (obj.type === "fertilizer") {
-          drawFertilizer(ctx, obj.x, obj.y, fadeOut, scaleIn);
-        } else {
-          drawStone(ctx, obj.x, obj.y, fadeOut, scaleIn);
+      for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+          const idx        = row * COLS + col;
+          const type       = grid[idx];
+          const isSelected = sel.has(idx);
+          const x          = GRID_X + col * (CELL + GAP);
+          const y          = GRID_Y + row * (CELL + GAP);
+
+          ctx.save();
+
+          // selected glow
+          if (isSelected) {
+            ctx.shadowColor = "rgba(255,255,255,0.9)";
+            ctx.shadowBlur  = 12;
+          } else {
+            ctx.shadowColor = "rgba(0,0,0,0.10)";
+            ctx.shadowBlur  = 4;
+            ctx.shadowOffsetY = 2;
+          }
+
+          drawRoundedRect(ctx, x, y, CELL, CELL, 10);
+          ctx.fillStyle   = CELL_COLOR[type];
+          ctx.globalAlpha = isSelected ? 0.70 : 1;
+          ctx.fill();
+          ctx.shadowBlur    = 0;
+          ctx.shadowOffsetY = 0;
+
+          // selected border
+          if (isSelected) {
+            ctx.globalAlpha = 1;
+            ctx.strokeStyle = "white";
+            ctx.lineWidth   = 2.5;
+            ctx.stroke();
+          }
+
+          ctx.restore();
+
+          // icon emoji (drawn after shadow is cleared)
+          ctx.textAlign    = "center";
+          ctx.textBaseline = "middle";
+          ctx.globalAlpha  = isSelected ? 0.7 : 1;
+          ctx.font         = "22px sans-serif";
+          ctx.fillText(CELL_ICON[type], x + CELL / 2, y + CELL / 2 + 1);
+          ctx.globalAlpha  = 1;
         }
+      }
+
+      // selection counter hint
+      if (sel.size > 0) {
+        ctx.textAlign    = "right";
+        ctx.textBaseline = "alphabetic";
+        ctx.font         = "bold 12px sans-serif";
+        ctx.fillStyle    = "#166534";
+        ctx.fillText(`${sel.size}/3`, W - 10, 22);
       }
 
       rafId = requestAnimationFrame(frame);
@@ -281,6 +289,7 @@ export default function ClickGameFertilizer({ onComplete }: Props) {
     };
   }, []);
 
+  // after game: click anywhere → dismiss
   const handleCanvasClick = useCallback(() => {
     if (doneRef.current && pendingScore.current !== null) {
       onComplete(pendingScore.current);
@@ -296,7 +305,7 @@ export default function ClickGameFertilizer({ onComplete }: Props) {
       style={{
         display:      "block",
         borderRadius: 16,
-        cursor:       "default",
+        cursor:       "pointer",
         touchAction:  "none",
         border:       CFG.border,
         userSelect:   "none",
