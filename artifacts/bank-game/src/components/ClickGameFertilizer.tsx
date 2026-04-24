@@ -208,7 +208,7 @@ export default function ClickGameFertilizer({ onComplete }: Props) {
       ctx.shadowColor   = "rgba(0,0,0,0.10)";
       ctx.shadowBlur    = 6;
       ctx.shadowOffsetY = 2;
-      drawRoundedRect(BAR_X, BAR_Y, BAR_W, BAR_H, BAR_H / 2);
+      drawRoundedRect(ctx, BAR_X, BAR_Y, BAR_W, BAR_H, BAR_H / 2);
       ctx.fillStyle = "#e5e7eb";
       ctx.fill();
       ctx.shadowBlur    = 0;
@@ -217,7 +217,7 @@ export default function ClickGameFertilizer({ onComplete }: Props) {
 
       // ---- target zone (clipped to bar shape) ----
       ctx.save();
-      drawRoundedRect(BAR_X, BAR_Y, BAR_W, BAR_H, BAR_H / 2);
+      drawRoundedRect(ctx, BAR_X, BAR_Y, BAR_W, BAR_H, BAR_H / 2);
       ctx.clip();
 
       // zone fill
@@ -246,7 +246,7 @@ export default function ClickGameFertilizer({ onComplete }: Props) {
       ctx.save();
       ctx.shadowColor = inZone ? "rgba(74,222,128,0.7)" : "rgba(255,255,255,0.6)";
       ctx.shadowBlur  = inZone ? 12 : 6;
-      drawRoundedRect(indPos, indY, IND_W, indH, 4);
+      drawRoundedRect(ctx, indPos, indY, IND_W, indH, 4);
       ctx.fillStyle = inZone ? "#4ade80" : "white";
       ctx.fill();
       ctx.restore();
