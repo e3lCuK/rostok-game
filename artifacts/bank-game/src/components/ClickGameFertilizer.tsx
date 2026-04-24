@@ -4,37 +4,27 @@ interface Props {
   onComplete: (skillScore: number) => void;
 }
 
-// ---- layout ----
-const W    = 280;
-const H    = 310;
-const COLS = 4;
-const ROWS = 4;
-const CELL = 54;
-const GAP  = 6;
-
-const GRID_W = COLS * CELL + (COLS - 1) * GAP;   // 234
-const GRID_X = (W - GRID_W) / 2;                  // 23
-const GRID_Y = 36;
+// ---- canvas dimensions ----
+const W = 280;
+const H = 310;
 
 // ---- game ----
 const GAME_MS     = 15_000;
-const SKILL_DENOM = 6;    // catches at this level → 80/80 skill
+const SKILL_DENOM = 7;       // hits at this level → max skill score
+const COOLDOWN_MS = 260;     // anti-spam delay after each click
 
-type ItemType = "fertilizer" | "water" | "sun" | "stone";
+// ---- bar layout ----
+const BAR_W = 200;
+const BAR_H = 28;
+const BAR_X = (W - BAR_W) / 2;   // 40
+const BAR_Y = H / 2 - BAR_H / 2; // ~141
 
-const CELL_COLOR: Record<ItemType, string> = {
-  fertilizer: "#22c55e",
-  water:      "#60a5fa",
-  sun:        "#fbbf24",
-  stone:      "#9ca3af",
-};
+// ---- target zone (fixed size, random position on success) ----
+const ZONE_W = Math.round(BAR_W * 0.22);  // ~44 px ≈ 22% of bar
 
-const CELL_ICON: Record<ItemType, string> = {
-  fertilizer: "🌱",
-  water:      "💧",
-  sun:        "☀️",
-  stone:      "🪨",
-};
+// ---- indicator ----
+const IND_W   = 12;
+const IND_SPEED = 185;  // px/s — medium feel
 
 const CFG = {
   bg:          "rgba(240,253,244,0.97)",
@@ -45,16 +35,20 @@ const CFG = {
   resultColor: "#166534",
 };
 
-function randomType(): ItemType {
-  const r = Math.random();
-  if (r < 0.33) return "fertilizer";
-  if (r < 0.56) return "water";
-  if (r < 0.78) return "sun";
-  return "stone";
+function randomZoneX(): number {
+  const margin = 10;
+  return BAR_X + margin + Math.random() * (BAR_W - ZONE_W - margin * 2);
 }
 
-function makeGrid(): ItemType[] {
-  return Array.from({ length: COLS * ROWS }, () => randomType());
+function isInZone(indLeft: number, zoneX: number): boolean {
+  const center = indLeft + IND_W / 2;
+  return center >= zoneX && center <= zoneX + ZONE_W;
+}
+
+function feedbackLabel(n: number): string {
+  if (n >= 6) return "Отлично!";
+  if (n >= 4) return "Хорошо";
+  return "Попробуйте ещё";
 }
 
 function drawRoundedRect(
@@ -69,15 +63,9 @@ function drawRoundedRect(
   ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
   ctx.lineTo(x + r, y + h);
   ctx.arcTo(x,     y + h, x,     y + h - r, r);
-  ctx.lineTo(x, y + r);
+  ctx.lineTo(x,     y + r);
   ctx.arcTo(x,     y,     x + r, y,         r);
   ctx.closePath();
-}
-
-function feedbackLabel(n: number): string {
-  if (n >= 5) return "Отлично!";
-  if (n >= 3) return "Хорошо";
-  return "Попробуйте ещё";
 }
 
 export default function ClickGameFertilizer({ onComplete }: Props) {
@@ -85,65 +73,25 @@ export default function ClickGameFertilizer({ onComplete }: Props) {
   const doneRef      = useRef(false);
   const pendingScore = useRef<number | null>(null);
 
-  // mutable game state (refs so RAF sees latest values without stale closure)
-  const gridRef     = useRef<ItemType[]>(makeGrid());
-  const selRef      = useRef<Set<number>>(new Set());
-  const catchesRef  = useRef(0);
-  const wrongFlash  = useRef(0);  // timestamp of last wrong click (for red flash)
-
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    canvas.style.cursor = "pointer";
+    canvas.style.cursor = "none";
 
-    let rafId   = 0;
-    const start = performance.now();
+    let catches      = 0;
+    let rafId        = 0;
+    const start      = performance.now();
 
-    // ---------- hit logic (shared by click & touch) ----------
-    function processHit(mx: number, my: number, now: number) {
-      if (doneRef.current) return;
-      for (let row = 0; row < ROWS; row++) {
-        for (let col = 0; col < COLS; col++) {
-          const cx = GRID_X + col * (CELL + GAP);
-          const cy = GRID_Y + row * (CELL + GAP);
-          if (mx >= cx && mx <= cx + CELL && my >= cy && my <= cy + CELL) {
-            const idx = row * COLS + col;
-            if (selRef.current.has(idx)) return;          // already in selection
-            const type = gridRef.current[idx];
-            if (type !== "fertilizer") {
-              selRef.current = new Set();                  // wrong → reset
-              wrongFlash.current = now;
-              return;
-            }
-            selRef.current.add(idx);
-            if (selRef.current.size === 3) {              // match!
-              catchesRef.current++;
-              selRef.current.forEach(i => { gridRef.current[i] = randomType(); });
-              selRef.current = new Set();
-            }
-            return;
-          }
-        }
-      }
-    }
+    let indPos       = BAR_X;            // left edge of indicator
+    let indDir       = 1;                // 1 = right, -1 = left
+    let lastTs       = -1;
 
-    function handleClick(e: MouseEvent) {
-      const rect = canvas.getBoundingClientRect();
-      processHit(e.clientX - rect.left, e.clientY - rect.top, performance.now());
-    }
-
-    function handleTouch(e: TouchEvent) {
-      e.preventDefault();
-      const rect = canvas.getBoundingClientRect();
-      const t    = e.changedTouches[0];
-      processHit(t.clientX - rect.left, t.clientY - rect.top, performance.now());
-    }
-
-    canvas.addEventListener("click",    handleClick);
-    canvas.addEventListener("touchend", handleTouch, { passive: false });
+    let zoneX        = randomZoneX();    // position of target zone
+    let lastClickTs  = -Infinity;        // for cooldown guard
+    let hitFlashTs   = -Infinity;        // for success flash animation
 
     // ---------- result screen ----------
     function finish() {
@@ -152,7 +100,6 @@ export default function ClickGameFertilizer({ onComplete }: Props) {
       cancelAnimationFrame(rafId);
       canvas.style.cursor = "default";
 
-      const catches    = catchesRef.current;
       const skillScore = Math.min(80, Math.round((catches / SKILL_DENOM) * 80));
       pendingScore.current = skillScore;
       console.log(`[ClickGameFertilizer] catches: ${catches}  skillScore: ${skillScore}/80`);
@@ -167,17 +114,16 @@ export default function ClickGameFertilizer({ onComplete }: Props) {
       ctx.fillStyle = "rgba(0,0,0,0.08)";
       ctx.fill();
       ctx.textAlign    = "center";
+      ctx.textBaseline = "middle";
       ctx.font         = "bold 15px sans-serif";
       ctx.fillStyle    = "#6b7280";
-      ctx.textBaseline = "middle";
       ctx.fillText("✕", W - 22, 22);
 
-      ctx.font         = "bold 36px sans-serif";
-      ctx.textBaseline = "middle";
+      ctx.font = "bold 36px sans-serif";
       ctx.fillText("🌱", W / 2, H / 2 - 36);
 
-      ctx.font         = "bold 20px sans-serif";
-      ctx.fillStyle    = CFG.resultColor;
+      ctx.font      = "bold 20px sans-serif";
+      ctx.fillStyle = CFG.resultColor;
       ctx.fillText(`Поймано: ${catches}`, W / 2, H / 2 + 6);
 
       ctx.font      = "14px sans-serif";
@@ -185,95 +131,135 @@ export default function ClickGameFertilizer({ onComplete }: Props) {
       ctx.fillText(feedbackLabel(catches), W / 2, H / 2 + 32);
     }
 
+    // ---------- click / touch ----------
+    function handleClick() {
+      if (doneRef.current) return;
+      const now = performance.now();
+      if (now - lastClickTs < COOLDOWN_MS) return;
+      lastClickTs = now;
+
+      if (isInZone(indPos, zoneX)) {
+        catches++;
+        hitFlashTs = now;
+        zoneX = randomZoneX();  // move zone after each hit
+      }
+    }
+
+    function handleTouch(e: TouchEvent) {
+      e.preventDefault();
+      handleClick();
+    }
+
+    canvas.addEventListener("click",      handleClick);
+    canvas.addEventListener("touchstart", handleTouch, { passive: false });
+
     // ---------- draw loop ----------
     function frame(ts: number) {
       if (doneRef.current) return;
+      if (lastTs < 0) lastTs = ts;
+      const dt      = Math.min(ts - lastTs, 50) / 1000;
+      lastTs        = ts;
       const elapsed = ts - start;
+
       if (elapsed >= GAME_MS) { finish(); return; }
 
+      // move indicator (ping-pong)
+      indPos += IND_SPEED * dt * indDir;
+      const maxPos = BAR_X + BAR_W - IND_W;
+      if (indPos >= maxPos) { indPos = maxPos; indDir = -1; }
+      if (indPos <= BAR_X)  { indPos = BAR_X;  indDir =  1; }
+
+      const inZone = isInZone(indPos, zoneX);
+
+      // ---- background ----
       ctx.clearRect(0, 0, W, H);
       ctx.fillStyle = CFG.bg;
       ctx.fillRect(0, 0, W, H);
 
-      // wrong-click flash (red tint)
-      const flashAge = ts - wrongFlash.current;
-      if (flashAge < 250) {
-        ctx.fillStyle = `rgba(239,68,68,${0.18 * (1 - flashAge / 250)})`;
+      // success flash
+      const flashAge = ts - hitFlashTs;
+      if (flashAge < 300) {
+        ctx.fillStyle = `rgba(34,197,94,${0.20 * (1 - flashAge / 300)})`;
         ctx.fillRect(0, 0, W, H);
       }
 
-      // timer bar
+      // ---- timer bar ----
       const pct = Math.max(0, 1 - elapsed / GAME_MS);
       ctx.fillStyle = CFG.timerBg;
       ctx.fillRect(0, 0, W, 5);
       ctx.fillStyle = CFG.timerColor;
       ctx.fillRect(0, 0, W * pct, 5);
 
-      // catch counter
+      // ---- catch counter ----
       ctx.textAlign    = "left";
       ctx.textBaseline = "alphabetic";
       ctx.font         = "bold 13px sans-serif";
       ctx.fillStyle    = CFG.scoreFg;
-      ctx.fillText(`🌱 ${catchesRef.current}`, 10, 22);
+      ctx.fillText(`🌱 ${catches}`, 10, 22);
 
-      // grid
-      const grid = gridRef.current;
-      const sel  = selRef.current;
+      // ---- hint text ----
+      ctx.textAlign    = "center";
+      ctx.font         = "13px sans-serif";
+      ctx.fillStyle    = "#4b5563";
+      ctx.fillText("Нажмите в нужный момент", W / 2, BAR_Y - 22);
 
-      for (let row = 0; row < ROWS; row++) {
-        for (let col = 0; col < COLS; col++) {
-          const idx        = row * COLS + col;
-          const type       = grid[idx];
-          const isSelected = sel.has(idx);
-          const x          = GRID_X + col * (CELL + GAP);
-          const y          = GRID_Y + row * (CELL + GAP);
+      // ---- bar background ----
+      ctx.save();
+      ctx.shadowColor   = "rgba(0,0,0,0.10)";
+      ctx.shadowBlur    = 6;
+      ctx.shadowOffsetY = 2;
+      drawRoundedRect(BAR_X, BAR_Y, BAR_W, BAR_H, BAR_H / 2);
+      ctx.fillStyle = "#e5e7eb";
+      ctx.fill();
+      ctx.shadowBlur    = 0;
+      ctx.shadowOffsetY = 0;
+      ctx.restore();
 
-          ctx.save();
+      // ---- target zone (clipped to bar shape) ----
+      ctx.save();
+      drawRoundedRect(BAR_X, BAR_Y, BAR_W, BAR_H, BAR_H / 2);
+      ctx.clip();
 
-          // selected glow
-          if (isSelected) {
-            ctx.shadowColor = "rgba(255,255,255,0.9)";
-            ctx.shadowBlur  = 12;
-          } else {
-            ctx.shadowColor = "rgba(0,0,0,0.10)";
-            ctx.shadowBlur  = 4;
-            ctx.shadowOffsetY = 2;
-          }
+      // zone fill
+      ctx.fillStyle   = "#22c55e";
+      ctx.globalAlpha = 0.32;
+      ctx.fillRect(zoneX, BAR_Y, ZONE_W, BAR_H);
+      ctx.globalAlpha = 1;
 
-          drawRoundedRect(ctx, x, y, CELL, CELL, 10);
-          ctx.fillStyle   = CELL_COLOR[type];
-          ctx.globalAlpha = isSelected ? 0.70 : 1;
-          ctx.fill();
-          ctx.shadowBlur    = 0;
-          ctx.shadowOffsetY = 0;
+      // zone border lines
+      ctx.strokeStyle = "#22c55e";
+      ctx.lineWidth   = 2;
+      ctx.globalAlpha = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(zoneX, BAR_Y);
+      ctx.lineTo(zoneX, BAR_Y + BAR_H);
+      ctx.moveTo(zoneX + ZONE_W, BAR_Y);
+      ctx.lineTo(zoneX + ZONE_W, BAR_Y + BAR_H);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
 
-          // selected border
-          if (isSelected) {
-            ctx.globalAlpha = 1;
-            ctx.strokeStyle = "white";
-            ctx.lineWidth   = 2.5;
-            ctx.stroke();
-          }
+      ctx.restore();
 
-          ctx.restore();
+      // ---- indicator (drawn on top, slightly taller than bar) ----
+      const indY = BAR_Y - 5;
+      const indH = BAR_H + 10;
+      ctx.save();
+      ctx.shadowColor = inZone ? "rgba(74,222,128,0.7)" : "rgba(255,255,255,0.6)";
+      ctx.shadowBlur  = inZone ? 12 : 6;
+      drawRoundedRect(indPos, indY, IND_W, indH, 4);
+      ctx.fillStyle = inZone ? "#4ade80" : "white";
+      ctx.fill();
+      ctx.restore();
 
-          // icon emoji (drawn after shadow is cleared)
-          ctx.textAlign    = "center";
-          ctx.textBaseline = "middle";
-          ctx.globalAlpha  = isSelected ? 0.7 : 1;
-          ctx.font         = "22px sans-serif";
-          ctx.fillText(CELL_ICON[type], x + CELL / 2, y + CELL / 2 + 1);
-          ctx.globalAlpha  = 1;
-        }
-      }
-
-      // selection counter hint
-      if (sel.size > 0) {
-        ctx.textAlign    = "right";
-        ctx.textBaseline = "alphabetic";
-        ctx.font         = "bold 12px sans-serif";
-        ctx.fillStyle    = "#166534";
-        ctx.fillText(`${sel.size}/3`, W - 10, 22);
+      // ---- success ✓ floating up ----
+      if (flashAge < 500) {
+        const alpha  = Math.max(0, 1 - flashAge / 500);
+        const rise   = 36 * (flashAge / 500);
+        ctx.textAlign    = "center";
+        ctx.textBaseline = "middle";
+        ctx.font         = `bold ${20 - 4 * (flashAge / 500)}px sans-serif`;
+        ctx.fillStyle    = `rgba(22,163,74,${alpha})`;
+        ctx.fillText("✓", W / 2, BAR_Y - 10 - rise);
       }
 
       rafId = requestAnimationFrame(frame);
@@ -283,13 +269,12 @@ export default function ClickGameFertilizer({ onComplete }: Props) {
 
     return () => {
       cancelAnimationFrame(rafId);
-      canvas.removeEventListener("click",    handleClick);
-      canvas.removeEventListener("touchend", handleTouch);
+      canvas.removeEventListener("click",      handleClick);
+      canvas.removeEventListener("touchstart", handleTouch);
       canvas.style.cursor = "default";
     };
   }, []);
 
-  // after game: click anywhere → dismiss
   const handleCanvasClick = useCallback(() => {
     if (doneRef.current && pendingScore.current !== null) {
       onComplete(pendingScore.current);
@@ -305,7 +290,7 @@ export default function ClickGameFertilizer({ onComplete }: Props) {
       style={{
         display:      "block",
         borderRadius: 16,
-        cursor:       "pointer",
+        cursor:       "default",
         touchAction:  "none",
         border:       CFG.border,
         userSelect:   "none",

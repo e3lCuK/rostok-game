@@ -1,0 +1,97 @@
+Create a new mini-game for "Fertilizer" based on timing mechanics.
+
+IMPORTANT:
+Keep it simple.
+No multipliers, no penalties, no complex scoring.
+
+========================
+CORE GAMEPLAY
+========================
+
+- Duration: 15 seconds
+- Show a horizontal bar (progress bar)
+- A cursor/indicator moves left ↔ right continuously
+
+- There is a green "target zone" on the bar
+
+========================
+PLAYER ACTION
+========================
+
+- Player clicks anywhere on screen
+
+Rules:
+
+1. If click happens while indicator is inside target zone:
+   → +1 catch
+   → briefly show success feedback
+
+2. If click is outside zone:
+   → nothing happens
+
+3. After each click:
+   → small cooldown (200–300 ms) to prevent spam
+
+========================
+MOVEMENT
+========================
+
+- Indicator moves back and forth (ping-pong motion)
+- Speed is constant (no acceleration)
+- Speed should feel medium (not too fast, not too slow)
+
+========================
+TARGET ZONE
+========================
+
+- Fixed size (about 20–25% of bar width)
+- Random position each round OR fixed center (simpler)
+
+========================
+SCORING
+========================
+
+Only:
+
+catches = number of successful hits
+
+At the end:
+
+"Поймано: X"
+
+========================
+UI
+========================
+
+- Same container as other games
+- Same timer (15s)
+- Same close button
+- Hide cursor during game, show after
+
+Visual:
+- bar (gray)
+- target zone (green)
+- indicator (white or bright)
+
+========================
+TECH
+========================
+
+- New component: FertilizerTimingGame
+- Use requestAnimationFrame for smooth movement
+- Reset position after each success (optional)
+
+========================
+IMPORTANT
+========================
+
+- Do NOT add difficulty scaling yet
+- Do NOT add multipliers or combo
+- Do NOT affect reward logic
+
+========================
+RESULT
+========================
+
+Simple timing game:
+click at the right moment → gain points
