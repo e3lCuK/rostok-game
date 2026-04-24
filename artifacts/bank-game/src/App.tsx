@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ClerkProvider, SignIn, SignUp, Show, useClerk, useUser } from "@clerk/react";
+import { ClerkProvider, SignIn, SignUp, Show, useClerk, useUser, useAuth } from "@clerk/react";
 import { Switch, Route, Redirect, useLocation, Router as WouterRouter } from "wouter";
 import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { Home, PiggyBank, Gamepad2, LogOut } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
-import { api } from "@/lib/api";
+import { api, setTokenGetter } from "@/lib/api";
 import { APP_NAME, APP_VERSION, UserState, applyOfflineAccrual } from "@/lib/engine";
 import HomePage from "@/pages/HomePage";
 import SavingsPage from "@/pages/SavingsPage";
@@ -261,6 +261,15 @@ function ProtectedApp() {
   );
 }
 
+// ---- Clerk token → api.ts bridge ----
+function ClerkTokenSync() {
+  const { getToken } = useAuth();
+  useEffect(() => {
+    setTokenGetter(getToken);
+  }, [getToken]);
+  return null;
+}
+
 // ---- Query cache invalidation on user change ----
 function ClerkQueryClientCacheInvalidator() {
   const { addListener } = useClerk();
@@ -288,6 +297,7 @@ function ClerkProviderWithRoutes() {
       routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
     >
       <QueryClientProvider client={queryClient}>
+        <ClerkTokenSync />
         <ClerkQueryClientCacheInvalidator />
         <Switch>
           <Route path="/" component={HomeRedirect} />

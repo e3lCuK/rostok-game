@@ -1,11 +1,27 @@
 // API client — thin wrapper around fetch for game endpoints
 const BASE = "/api";
 
+type TokenGetter = () => Promise<string | null>;
+let _getToken: TokenGetter | null = null;
+
+export function setTokenGetter(fn: TokenGetter) {
+  _getToken = fn;
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const token = _getToken ? await _getToken() : null;
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(options?.headers as Record<string, string> ?? {}),
+  };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const { headers: _h, ...restOptions } = options ?? {};
   const res = await fetch(`${BASE}${path}`, {
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    ...options,
+    headers,
+    ...restOptions,
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
