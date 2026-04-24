@@ -16,6 +16,7 @@ import { api } from "@/lib/api";
 import TreeSVG from "@/components/TreeSVG";
 import FallingGameWater, { GameType } from "@/components/FallingGameWater";
 import ClickGameSun from "@/components/ClickGameSun";
+import ClickGameFertilizer from "@/components/ClickGameFertilizer";
 import DebugPanel from "@/components/DebugPanel";
 import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2 } from "lucide-react";
 
@@ -239,6 +240,10 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
             {activeMinigame === "sun" ? (
               <ClickGameSun
                 onComplete={(score) => handleMinigameComplete("sun", score)}
+              />
+            ) : activeMinigame === "fertilizer" ? (
+              <ClickGameFertilizer
+                onComplete={(score) => handleMinigameComplete("fertilizer", score)}
               />
             ) : (
               <FallingGameWater
