@@ -1015,6 +1015,33 @@ body {
 
 .debug-btn-danger:hover { background: #3d1a1a; }
 
+.debug-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid #f38ba8;
+  border-radius: 8px;
+  padding: 8px;
+  background: #1a0d0d;
+}
+
+.debug-confirm-text {
+  color: #f38ba8;
+  font-size: 0.63rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.debug-confirm-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.debug-confirm-buttons .debug-btn {
+  flex: 1;
+  text-align: center;
+}
+
 /* ============================
    CARE PERCENTAGE BADGE
 ==============================*/

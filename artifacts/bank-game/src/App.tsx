@@ -247,9 +247,8 @@ function AppShell() {
 
       {state && (
         <DebugPanel
-          state={state}
-          onStateChange={handleStateChange}
-          onDeleteAll={() => { setState(null); setOnboarding(true); }}
+          onResetAccount={() => { setState(null); setOnboarding(true); }}
+          onSignOut={() => signOut(() => setLocation("/"))}
         />
       )}
     </div>
