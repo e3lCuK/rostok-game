@@ -38,7 +38,7 @@ export default function SavingsPage({ state, onTabChange }: Props) {
           </div>
           <div>
             <p className="deposit-name">Стандартный вклад</p>
-            <span className="deposit-badge deposit-badge-blue">12% годовых</span>
+            <span className="deposit-badge deposit-badge-blue">12,0% годовых</span>
           </div>
           <TrendingUp size={18} className="deposit-trend" />
         </div>

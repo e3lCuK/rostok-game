@@ -11,6 +11,7 @@ import HomePage from "@/pages/HomePage";
 import SavingsPage from "@/pages/SavingsPage";
 import GamePage from "@/pages/GamePage";
 import OnboardingPage from "@/pages/OnboardingPage";
+import DebugPanel from "@/components/DebugPanel";
 import "@/bank.css";
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -225,7 +226,6 @@ function AppShell() {
               <GamePage
                 state={state}
                 onStateChange={handleStateChange}
-                onResetToOnboarding={() => { setState(null); setOnboarding(true); }}
               />
             )}
           </motion.div>
@@ -244,6 +244,14 @@ function AppShell() {
           </button>
         ))}
       </nav>
+
+      {state && (
+        <DebugPanel
+          state={state}
+          onStateChange={handleStateChange}
+          onDeleteAll={() => { setState(null); setOnboarding(true); }}
+        />
+      )}
     </div>
   );
 }

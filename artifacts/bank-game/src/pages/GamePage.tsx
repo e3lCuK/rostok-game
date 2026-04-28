@@ -17,13 +17,11 @@ import TreeSVG from "@/components/TreeSVG";
 import FallingGameWater, { GameType } from "@/components/FallingGameWater";
 import ClickGameSun from "@/components/ClickGameSun";
 import ClickGameFertilizer from "@/components/ClickGameFertilizer";
-import DebugPanel from "@/components/DebugPanel";
 import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2 } from "lucide-react";
 
 interface Props {
   state: UserState;
   onStateChange: (s: UserState) => void;
-  onResetToOnboarding?: () => void;
 }
 
 interface Floater {
@@ -33,7 +31,7 @@ interface Floater {
   label: string;
 }
 
-export default function GamePage({ state, onStateChange, onResetToOnboarding }: Props) {
+export default function GamePage({ state, onStateChange }: Props) {
   const [now, setNow] = useState(Date.now());
   const [floaters, setFloaters] = useState<Floater[]>([]);
   const [actionLoading, setActionLoading] = useState(false);
@@ -373,17 +371,6 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
         </div>
       </div>
 
-      <DebugPanel
-        state={state}
-        onStateChange={onStateChange}
-        onResetPending={() => {
-          onStateChange({
-            ...state,
-            game: { ...game, pendingBaseReward: 0, pendingBonusReward: 0 },
-          });
-        }}
-        onTriggerOnboarding={() => onResetToOnboarding?.()}
-      />
     </div>
   );
 }
