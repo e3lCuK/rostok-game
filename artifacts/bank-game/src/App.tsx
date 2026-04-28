@@ -247,6 +247,8 @@ function AppShell() {
 
       {state && (
         <DebugPanel
+          state={state}
+          onStateChange={handleStateChange}
           onResetAccount={() => { setState(null); setOnboarding(true); }}
           onSignOut={() => signOut(() => setLocation("/"))}
         />

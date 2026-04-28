@@ -1,15 +1,45 @@
 import { useState } from "react";
+import { UserState } from "@/lib/engine";
 import { api } from "@/lib/api";
 
 interface Props {
+  state: UserState;
+  onStateChange: (s: UserState) => void;
   onResetAccount: () => void;
   onSignOut: () => Promise<void>;
 }
 
-export default function DebugPanel({ onResetAccount, onSignOut }: Props) {
+export default function DebugPanel({ state, onStateChange, onResetAccount, onSignOut }: Props) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const { game } = state;
+
+  async function resetSession() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await api.debugResetSession();
+    } catch (e) {
+      console.warn("[Debug] reset-session failed", e);
+    }
+    onStateChange({
+      ...state,
+      game: {
+        ...game,
+        lastSessionTime: null,
+        sessionInProgress: false,
+        water: false,
+        sun: false,
+        fertilizer: false,
+        streakDays: 0,
+        pendingBaseReward: 0,
+        pendingBonusReward: 0,
+      },
+    });
+    setBusy(false);
+  }
 
   async function resetAccount() {
     if (busy) return;
@@ -49,7 +79,11 @@ export default function DebugPanel({ onResetAccount, onSignOut }: Props) {
         <div className="debug-body">
           <p className="debug-title">Отладка</p>
           <div className="debug-buttons">
-            <button className="debug-btn debug-btn-danger" onClick={resetAccount} disabled={busy}>
+            <button className="debug-btn" onClick={resetSession} disabled={busy}>
+              Сброс сессии
+            </button>
+
+            <button className="debug-btn" onClick={resetAccount} disabled={busy}>
               Сброс аккаунта
             </button>
 
