@@ -183,13 +183,7 @@ export default function GamePage({ state, onStateChange }: Props) {
         game: { ...game, pendingBaseReward: 0 },
         history: [
           ...state.history,
-          {
-            date: new Date().toLocaleDateString("ru-RU"),
-            amount,
-            type: "base" as const,
-            efficiency: result.efficiency ?? undefined,
-            balanceAfter: result.balanceAfter ?? undefined,
-          },
+          { date: new Date().toLocaleDateString("ru-RU"), amount, type: "base" as const },
         ].slice(-30),
       });
     } catch (err) {
@@ -217,13 +211,7 @@ export default function GamePage({ state, onStateChange }: Props) {
         game: { ...game, pendingBonusReward: 0 },
         history: [
           ...state.history,
-          {
-            date: new Date().toLocaleDateString("ru-RU"),
-            amount,
-            type: "bonus" as const,
-            efficiency: result.efficiency ?? undefined,
-            balanceAfter: result.balanceAfter ?? undefined,
-          },
+          { date: new Date().toLocaleDateString("ru-RU"), amount, type: "bonus" as const },
         ].slice(-30),
       });
     } catch (err) {

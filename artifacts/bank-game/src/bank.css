@@ -307,26 +307,11 @@ body {
   margin-bottom: 12px;
 }
 
-.history-header-row {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  gap: 12px;
-  padding: 0 0 6px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 4px;
-  font-size: 0.62rem;
-  color: var(--text3);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.history-header-row span:last-child { text-align: right; }
-
 .history-list { display: flex; flex-direction: column; gap: 10px; }
 
 .history-item {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 12px;
 }
@@ -339,9 +324,7 @@ body {
 }
 
 .history-type { font-size: 0.75rem; font-weight: 500; color: var(--text2); }
-.history-balance { font-size: 0.82rem; font-weight: 600; color: var(--text); }
 .history-date { font-size: 0.65rem; color: var(--text3); }
-.history-efficiency { font-size: 0.82rem; font-weight: 700; color: var(--green); white-space: nowrap; }
 .history-amount { font-size: 0.82rem; font-weight: 700; color: var(--green); text-align: right; white-space: nowrap; }
 
 /* ============================

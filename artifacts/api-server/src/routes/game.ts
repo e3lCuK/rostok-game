@@ -51,7 +51,7 @@ router.get("/game/state", requireAuth, async (req: any, res) => {
       pool.query("SELECT * FROM accounts WHERE user_id = $1", [userId]),
       pool.query("SELECT * FROM game_state WHERE user_id = $1", [userId]),
       pool.query(
-        "SELECT amount, type, earned_date, efficiency, balance_after FROM income_history WHERE user_id = $1 ORDER BY id DESC LIMIT 30",
+        "SELECT amount, type, earned_date FROM income_history WHERE user_id = $1 ORDER BY id DESC LIMIT 30",
         [userId],
       ),
     ]);
@@ -88,10 +88,6 @@ router.get("/game/state", requireAuth, async (req: any, res) => {
         amount: parseFloat(r.amount),
         type: r.type,
         date: r.earned_date,
-        efficiency: r.efficiency !== null && r.efficiency !== undefined ? r.efficiency : undefined,
-        balanceAfter: r.balance_after !== null && r.balance_after !== undefined
-          ? parseFloat(r.balance_after)
-          : undefined,
       })),
     });
   } catch (err) {
@@ -308,12 +304,8 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
       console.log("DAILY:", dailyBase + dailyBonus, "(activeBalance:", activeBalance, ")");
       console.log("SESSION:", baseReward + bonusReward);
 
-      // Efficiency: how close the player got to the cap (0–100%)
-      const maxBonus = getCap(missedSessions);
-      const efficiency = Math.min(100, Math.round((bonusPercent / maxBonus) * 100));
-
       req.log.info(
-        { skillScore, bonusPercent, efficiency, baseReward, bonusReward, totalBalance, dailyBase, dailyBonus },
+        { skillScore, bonusPercent, baseReward, bonusReward, totalBalance, dailyBase, dailyBonus },
         "Session rewards calculated",
       );
 
@@ -329,10 +321,9 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
           current_session_fertilizer = FALSE,
           pending_base_reward = COALESCE(pending_base_reward, 0) + $3,
           pending_bonus_reward = COALESCE(pending_bonus_reward, 0) + $4,
-          pending_efficiency = $6,
           updated_at = NOW()
          WHERE user_id = $5`,
-        [now, newStreak, baseReward, bonusReward, userId, efficiency],
+        [now, newStreak, baseReward, bonusReward, userId],
       );
     }
 
@@ -367,29 +358,24 @@ router.post("/game/session/claim", requireAuth, async (req: any, res) => {
     }
 
     const earnedDate = new Date().toLocaleDateString("ru-RU");
-    const efficiency: number | null = g.pending_efficiency !== null && g.pending_efficiency !== undefined
-      ? g.pending_efficiency
-      : null;
 
     await pool.query(
       `UPDATE game_state SET ${col} = 0, updated_at = NOW() WHERE user_id = $1`,
       [userId],
     );
-    const accResult = await pool.query(
+    await pool.query(
       `UPDATE accounts SET active_balance = active_balance + $1, active_earned = active_earned + $1
-       WHERE user_id = $2 RETURNING active_balance`,
+       WHERE user_id = $2`,
       [amount, userId],
     );
-    const balanceAfter: number = parseFloat(accResult.rows[0]?.active_balance) || 0;
-
     await pool.query(
-      `INSERT INTO income_history(user_id, amount, type, earned_date, efficiency, balance_after)
-       VALUES($1, $2, $3, $4, $5, $6)`,
-      [userId, amount, historyType, earnedDate, efficiency, balanceAfter],
+      `INSERT INTO income_history(user_id, amount, type, earned_date)
+       VALUES($1, $2, $3, $4)`,
+      [userId, amount, historyType, earnedDate],
     );
 
-    req.log.info({ type, amount, efficiency, balanceAfter }, "Reward claimed");
-    return res.json({ success: true, amount, efficiency, balanceAfter });
+    req.log.info({ type, amount }, "Reward claimed");
+    return res.json({ success: true, amount });
   } catch (err) {
     req.log.error({ err }, "Error claiming reward");
     return res.status(500).json({ error: "Internal server error" });

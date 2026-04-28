@@ -94,39 +94,24 @@ export default function HomePage({ state }: Props) {
         </div>
       </div>
 
-      {state.history.length > 0 && (() => { console.log("FRONT HISTORY:", state.history); return null; })()}
       {state.history.length > 0 && (
         <div className="history-card">
           <h3 className="history-title">Последние начисления</h3>
-          <div className="history-header-row">
-            <span>Начисление</span>
-            <span>Эффект.</span>
-            <span>Сумма</span>
-          </div>
           <div className="history-list">
-            {[...state.history].reverse().slice(0, 6).map((item, i) => {
-              console.log("HISTORY ITEM:", item);
-              return (
-                <div key={i} className="history-item">
-                  <div className="history-cell-left">
-                    <span className="history-type">
-                      {item.type === "standard" ? "Стандартный вклад"
-                        : item.type === "base" ? "Активный (база)"
-                        : item.type === "bonus" ? "Активный (бонус)"
-                        : "Активный вклад"}
-                    </span>
-                    {item.balanceAfter !== undefined
-                      ? <span className="history-balance">{formatRub(item.balanceAfter)}</span>
-                      : <span className="history-date">{item.date}</span>
-                    }
-                  </div>
-                  <span className="history-efficiency">
-                    {item.efficiency != null ? `${item.efficiency}%` : "—"}
+            {[...state.history].reverse().slice(0, 6).map((item, i) => (
+              <div key={i} className="history-item">
+                <div className="history-cell-left">
+                  <span className="history-type">
+                    {item.type === "standard" ? "Стандартный вклад"
+                      : item.type === "base" ? "Активный (база)"
+                      : item.type === "bonus" ? "Активный (бонус)"
+                      : "Активный вклад"}
                   </span>
-                  <span className="history-amount">+{formatRub(item.amount)}</span>
+                  <span className="history-date">{item.date}</span>
                 </div>
-              );
-            })}
+                <span className="history-amount">+{formatRub(item.amount)}</span>
+              </div>
+            ))}
           </div>
         </div>
       )}

@@ -40,8 +40,6 @@ export interface UserState {
     date: string;
     amount: number;
     type: "standard" | "active" | "base" | "bonus";
-    efficiency?: number;
-    balanceAfter?: number;
   }[];
 }
 
