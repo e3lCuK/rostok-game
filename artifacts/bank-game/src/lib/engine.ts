@@ -70,10 +70,12 @@ export function calcActivityBonus(missedSessions: number): number {
 }
 
 // ---- Estimate bonus percent for UI display (no actual payout) ----
-// Returns the MAX cap for the user's current activity tier
-// so that displayed daily/session values match the 15% model at full streak
-export function estimateBonusPercent(_totalBalance: number, missedSessions: number): number {
-  return getCap(missedSessions);
+// bonusPercent = cap * skillFactor
+// cap = max possible for this activity tier
+// skillFactor = 0..1, defaults to 0.5 (average expected performance)
+// Pass the real skillFactor after a session for post-session display
+export function estimateBonusPercent(missedSessions: number, skillFactor = 0.5): number {
+  return getCap(missedSessions) * Math.min(Math.max(skillFactor, 0), 1);
 }
 
 // ---- SINGLE reward calculation formula — used everywhere ----

@@ -67,7 +67,8 @@ export default function OnboardingPage({ onComplete }: Props) {
         {CAPITAL_OPTIONS.map((cap) => {
           const half = cap / 2;
           const daily = calcStandardDaily(half);
-          const { basePerSession, bonusPerSession } = calculateRewards(cap, estimateBonusPercent(cap, 0));
+          // half = active balance; estimate at 0.5 skill (average expected)
+          const { basePerSession, bonusPerSession } = calculateRewards(half, estimateBonusPercent(0));
           const sessionR = basePerSession + bonusPerSession;
           const isSelected = selected === cap;
 

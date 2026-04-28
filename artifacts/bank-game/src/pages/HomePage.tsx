@@ -27,7 +27,8 @@ export default function HomePage({ state }: Props) {
   const pct = Math.round(progress * 100);
 
   const dailyStd = calcStandardDaily(standard);
-  const { dailyBase, dailyBonus } = calculateRewards(totalBalance, estimateBonusPercent(totalBalance, state.game.missedSessions));
+  // Double-count fix: active balance only; estimate at 0.5 skill (average)
+  const { dailyBase, dailyBonus } = calculateRewards(active, estimateBonusPercent(state.game.missedSessions));
   const dailyAct = dailyBase + dailyBonus;
 
   return (

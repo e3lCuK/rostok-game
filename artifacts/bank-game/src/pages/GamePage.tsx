@@ -57,7 +57,8 @@ export default function GamePage({ state, onStateChange }: Props) {
   const locked = isSessionLocked(game.lastSessionTime, now);
   const nextTime = getNextSessionTime(game.lastSessionTime);
   const msLeft = nextTime ? Math.max(0, nextTime - now) : null;
-  const { basePerSession, bonusPerSession } = calculateRewards(totalBalance, estimateBonusPercent(totalBalance, game.missedSessions));
+  // Double-count fix: active balance only; estimate at 0.5 skill (average)
+  const { basePerSession, bonusPerSession } = calculateRewards(balances.active, estimateBonusPercent(game.missedSessions));
   const sessionReward = basePerSession + bonusPerSession;
   const actionsLeft = getSessionActionsLeft(game);
 

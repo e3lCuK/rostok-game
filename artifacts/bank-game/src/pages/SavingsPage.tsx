@@ -24,8 +24,10 @@ export default function SavingsPage({ state, onTabChange }: Props) {
   const activeAnnual = active * 0.15;
   const stdDaily = calcStandardDaily(standard);
   const activityBonus = calcActivityBonus(missedSessions);
-  const bonusEst = estimateBonusPercent(totalBalance, missedSessions);
-  const { dailyBase, dailyBonus, basePerSession, bonusPerSession } = calculateRewards(totalBalance, bonusEst);
+  // bonusPercent = cap * 0.5 (average expected skill) — display hint only
+  const bonusEst = estimateBonusPercent(missedSessions);
+  // Double-count fix: active card uses ACTIVE balance only (standard earns separately)
+  const { dailyBase, dailyBonus, basePerSession, bonusPerSession } = calculateRewards(active, bonusEst);
 
   return (
     <div className="savings-page">
