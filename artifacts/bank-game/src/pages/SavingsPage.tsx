@@ -6,6 +6,7 @@ import {
   calcActivityBonus,
   calculateRewards,
   estimateBonusPercent,
+  SESSIONS_PER_DAY,
 } from "@/lib/engine";
 import { TrendingUp, Zap, Lock, ChevronRight, HelpCircle, X } from "lucide-react";
 
@@ -28,6 +29,10 @@ export default function SavingsPage({ state, onTabChange }: Props) {
   const bonusEst = estimateBonusPercent(missedSessions);
   // Double-count fix: active card uses ACTIVE balance only (standard earns separately)
   const { dailyBase, dailyBonus, basePerSession, bonusPerSession } = calculateRewards(active, bonusEst);
+  // Max reference (15% = 12% base + 3% max bonus) — UI display only, never used in payouts
+  const MAX_PERCENT = 0.15;
+  const dailyMax = active * MAX_PERCENT / 365;
+  const sessionMax = dailyMax / SESSIONS_PER_DAY;
 
   return (
     <div className="savings-page">
@@ -110,11 +115,17 @@ export default function SavingsPage({ state, onTabChange }: Props) {
           </div>
           <div className="deposit-stat">
             <p className="deposit-stat-label">В день</p>
-            <p className="deposit-stat-value">~{formatRub(dailyBase + dailyBonus)}</p>
+            <p className="deposit-stat-value">
+              ~{formatRub(dailyBase + dailyBonus)}
+              <span className="deposit-stat-max"> (до ~{formatRub(dailyMax)})</span>
+            </p>
           </div>
           <div className="deposit-stat">
             <p className="deposit-stat-label">За сессию</p>
-            <p className="deposit-stat-value">~{formatRub(basePerSession + bonusPerSession)}</p>
+            <p className="deposit-stat-value">
+              ~{formatRub(basePerSession + bonusPerSession)}
+              <span className="deposit-stat-max"> (до ~{formatRub(sessionMax)})</span>
+            </p>
           </div>
         </div>
 
@@ -140,7 +151,7 @@ export default function SavingsPage({ state, onTabChange }: Props) {
         )}
 
         <div className="deposit-info-box deposit-info-box-green">
-          <p>Доход зависит от активности. Ухаживайте за деревом раз в 8 часов — получайте повышенный процент.</p>
+          <p>Доход зависит от активности. Максимум — 15% годовых</p>
         </div>
       </div>
 
