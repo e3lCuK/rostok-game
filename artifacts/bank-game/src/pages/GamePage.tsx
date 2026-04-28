@@ -182,7 +182,7 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
         game: { ...game, pendingBaseReward: 0 },
         history: [
           ...state.history,
-          { date: new Date().toLocaleDateString("ru-RU"), amount, type: "standard" as const },
+          { date: new Date().toLocaleDateString("ru-RU"), amount, type: "base" as const },
         ].slice(-30),
       });
     } catch (err) {
@@ -210,7 +210,7 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
         game: { ...game, pendingBonusReward: 0 },
         history: [
           ...state.history,
-          { date: new Date().toLocaleDateString("ru-RU"), amount, type: "active" as const },
+          { date: new Date().toLocaleDateString("ru-RU"), amount, type: "bonus" as const },
         ].slice(-30),
       });
     } catch (err) {

@@ -335,7 +335,7 @@ router.post("/game/session/claim", requireAuth, async (req: any, res) => {
   }
 
   const col = type === "base" ? "pending_base_reward" : "pending_bonus_reward";
-  const historyType = type === "base" ? "standard" : "active";
+  const historyType = type; // "base" or "bonus"
 
   try {
     const gameRow = await pool.query("SELECT * FROM game_state WHERE user_id = $1", [userId]);

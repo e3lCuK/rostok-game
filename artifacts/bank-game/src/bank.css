@@ -323,7 +323,9 @@ body {
 }
 
 .history-dot[data-type="standard"] { background: var(--blue); }
-.history-dot[data-type="active"] { background: var(--green); }
+.history-dot[data-type="active"]   { background: var(--green); }
+.history-dot[data-type="base"]     { background: var(--green); }
+.history-dot[data-type="bonus"]    { background: var(--green); }
 
 .history-info {
   flex: 1;

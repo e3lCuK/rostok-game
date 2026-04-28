@@ -51,7 +51,7 @@ export interface GameStateResponse {
     pendingBaseReward: number;
     pendingBonusReward: number;
   };
-  history?: { amount: number; type: "standard" | "active"; date: string }[];
+  history?: { amount: number; type: "standard" | "active" | "base" | "bonus"; date: string }[];
 }
 
 export const api = {

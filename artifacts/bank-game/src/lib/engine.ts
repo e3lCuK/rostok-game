@@ -35,7 +35,7 @@ export interface UserState {
     pendingBaseReward: number;
     pendingBonusReward: number;
   };
-  history: { date: string; amount: number; type: "standard" | "active" }[];
+  history: { date: string; amount: number; type: "standard" | "active" | "base" | "bonus" }[];
 }
 
 // ---- Income formulas ----
@@ -181,7 +181,7 @@ export function applyOfflineAccrual(state: UserState): { state: UserState; accru
   const newHistory = Array.from({ length: daysToAccrue }, (_, i) => ({
     date: new Date(startDate + (totalDaysEarned + i + 1) * 86_400_000).toLocaleDateString("ru-RU"),
     amount: daily,
-    type: "standard" as const,
+    type: "standard" as "standard",
   }));
 
   return {

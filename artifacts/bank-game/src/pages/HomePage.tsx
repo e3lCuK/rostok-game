@@ -100,7 +100,10 @@ export default function HomePage({ state }: Props) {
                 <div className="history-dot" data-type={item.type} />
                 <div className="history-info">
                   <span className="history-type">
-                    {item.type === "standard" ? "Стандартный вклад" : "Активный вклад"}
+                    {item.type === "standard" ? "Стандартный вклад"
+                      : item.type === "base" ? "Активный вклад (база)"
+                      : item.type === "bonus" ? "Активный вклад (бонус)"
+                      : "Активный вклад"}
                   </span>
                   <span className="history-date">{item.date}</span>
                 </div>
