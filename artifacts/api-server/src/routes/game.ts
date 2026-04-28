@@ -51,7 +51,7 @@ router.get("/game/state", requireAuth, async (req: any, res) => {
       pool.query("SELECT * FROM accounts WHERE user_id = $1", [userId]),
       pool.query("SELECT * FROM game_state WHERE user_id = $1", [userId]),
       pool.query(
-        "SELECT amount, type, earned_date FROM income_history WHERE user_id = $1 ORDER BY id DESC LIMIT 30",
+        "SELECT amount, type, earned_date, efficiency, balance_after FROM income_history WHERE user_id = $1 ORDER BY id DESC LIMIT 30",
         [userId],
       ),
     ]);

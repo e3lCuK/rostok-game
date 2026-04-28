@@ -103,26 +103,29 @@ export default function HomePage({ state }: Props) {
             <span>Сумма</span>
           </div>
           <div className="history-list">
-            {[...state.history].reverse().slice(0, 6).map((item, i) => (
-              <div key={i} className="history-item">
-                <div className="history-cell-left">
-                  <span className="history-type">
-                    {item.type === "standard" ? "Стандартный вклад"
-                      : item.type === "base" ? "Активный (база)"
-                      : item.type === "bonus" ? "Активный (бонус)"
-                      : "Активный вклад"}
+            {[...state.history].reverse().slice(0, 6).map((item, i) => {
+              console.log("HISTORY ITEM:", item);
+              return (
+                <div key={i} className="history-item">
+                  <div className="history-cell-left">
+                    <span className="history-type">
+                      {item.type === "standard" ? "Стандартный вклад"
+                        : item.type === "base" ? "Активный (база)"
+                        : item.type === "bonus" ? "Активный (бонус)"
+                        : "Активный вклад"}
+                    </span>
+                    {item.balanceAfter !== undefined
+                      ? <span className="history-balance">{formatRub(item.balanceAfter)}</span>
+                      : <span className="history-date">{item.date}</span>
+                    }
+                  </div>
+                  <span className="history-efficiency">
+                    {item.efficiency != null ? `${item.efficiency}%` : "—"}
                   </span>
-                  {item.balanceAfter !== undefined
-                    ? <span className="history-balance">{formatRub(item.balanceAfter)}</span>
-                    : <span className="history-date">{item.date}</span>
-                  }
+                  <span className="history-amount">+{formatRub(item.amount)}</span>
                 </div>
-                <span className="history-efficiency">
-                  {item.efficiency !== undefined ? `${item.efficiency}%` : "—"}
-                </span>
-                <span className="history-amount">+{formatRub(item.amount)}</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
