@@ -41,15 +41,30 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - `game_state` — session state (water/sun/fertilizer flags, last session time)
 - `income_history` — audit log of all earnings
 
-### Economy Formulas
-- Standard daily: `balance × 0.12 / 365`
-- Active daily: `balance × 0.15 / 365`
-- Session reward: `activeDaily / 3`
+### Economy Formulas (v2 — two-button reward system)
+- Standard daily: `balance × 0.12 / 365` (auto-accrued)
+- Base session reward: `totalBalance × 0.12 / 365 / 3` (12% annual ÷ 3 sessions/day)
+- Activity bonus: `totalBalance × bonusPercent / 365 / 3`
+  - `bonusPercent = getCap(missedSessions) × min(skillPart + capitalPart + randomPart, 1)`
+  - `skillPart = (avgSkillScore/80) × 0.75` (from 3 mini-games, 0–0.75)
+  - `capitalPart`: 0.16 / 0.18 / 0.20 based on total balance thresholds
+  - `randomPart`: 0–0.04 random
+  - `getCap`: 0.03 / 0.02 / 0.01 / 0.005 based on missed sessions
+
+### Two-Button Reward Flow
+1. Player completes all 3 mini-games (water, sun, fertilizer)
+2. Backend calculates base + bonus rewards and stores in `game_state`
+   - `pending_base_reward` NUMERIC
+   - `pending_bonus_reward` NUMERIC
+3. Frontend shows two claim buttons — blue "Базовый доход" + green "Бонус за активность"
+4. Each button calls `POST /api/game/session/claim { type: "base"|"bonus" }`
+5. Rewards persist in DB until claimed (survive page reload)
 
 ### State Flow
 - API-first: all state lives in PostgreSQL, fetched on load
 - Optimistic offline accrual for day-boundary crossings
-- Single 8-hour cooldown between sessions (no multi-session logic)
+- Single 8-hour cooldown between sessions
+- Pending rewards stored in DB, not just in-memory
 
 ### Starting Capital
 - First login shows onboarding screen: 10k / 100k / 1M ₽

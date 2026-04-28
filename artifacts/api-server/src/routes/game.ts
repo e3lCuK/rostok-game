@@ -4,11 +4,30 @@ import { pool } from "@workspace/db";
 
 const COOLDOWN_MS = 8 * 60 * 60 * 1000;
 
-function calcActivityBonus(missedSessions: number): number {
-  if (missedSessions <= 3) return 3;
-  if (missedSessions <= 9) return 2;
-  if (missedSessions <= 21) return 1;
-  return 0.5;
+// ---- New economy helpers ----
+
+function getCap(missedSessions: number): number {
+  if (missedSessions <= 3) return 0.03;
+  if (missedSessions <= 9) return 0.02;
+  if (missedSessions <= 21) return 0.01;
+  return 0.005;
+}
+
+function getCapitalPart(totalBalance: number): number {
+  if (totalBalance >= 2_000_000) return 0.20;
+  if (totalBalance >= 200_000) return 0.18;
+  return 0.16;
+}
+
+// skillScore: 0–80 average from mini-games
+function calcBonusPercent(skillScore: number, totalBalance: number, missedSessions: number): number {
+  const skillFactor = Math.min(Math.max(skillScore, 0), 80) / 80; // 0–1
+  const skillPart = skillFactor * 0.75;                            // 0–0.75
+  const capitalPart = getCapitalPart(totalBalance);                // 0.16–0.20
+  const randomPart = Math.random() * 0.04;                         // 0–0.04
+  const performance = skillPart + capitalPart + randomPart;
+  const normalized = Math.min(performance, 1);
+  return getCap(missedSessions) * normalized;
 }
 
 const router = Router();
@@ -61,6 +80,8 @@ router.get("/game/state", requireAuth, async (req: any, res) => {
         fertilizer: game.current_session_fertilizer || false,
         streakDays: game.streak_days || 0,
         missedSessions: game.missed_sessions || 0,
+        pendingBaseReward: parseFloat(game.pending_base_reward) || 0,
+        pendingBonusReward: parseFloat(game.pending_bonus_reward) || 0,
       },
       history: historyRows.rows.map((r: any) => ({
         amount: parseFloat(r.amount),
@@ -99,8 +120,8 @@ router.post("/game/init", requireAuth, async (req: any, res) => {
       [userId, half, half, now],
     );
     await pool.query(
-      `INSERT INTO game_state(user_id, last_session_time, session_in_progress, current_session_water, current_session_sun, current_session_fertilizer)
-       VALUES($1, NULL, FALSE, FALSE, FALSE, FALSE)`,
+      `INSERT INTO game_state(user_id, last_session_time, session_in_progress, current_session_water, current_session_sun, current_session_fertilizer, pending_base_reward, pending_bonus_reward)
+       VALUES($1, NULL, FALSE, FALSE, FALSE, FALSE, 0, 0)`,
       [userId],
     );
 
@@ -182,7 +203,6 @@ router.post("/game/session/start", requireAuth, async (req: any, res) => {
     let additionalMissed = 0;
     if (g.last_session_time) {
       const elapsed = now - parseInt(g.last_session_time);
-      // Each COOLDOWN_MS window is one session slot; first one is the expected slot
       additionalMissed = Math.max(0, Math.floor(elapsed / COOLDOWN_MS) - 1);
     }
     const newMissedSessions = (g.missed_sessions || 0) + additionalMissed;
@@ -249,15 +269,16 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
     const u = updated.rows[0];
     const allDone = u.current_session_water && u.current_session_sun && u.current_session_fertilizer;
 
-    let reward = 0;
-    let sessionF = 0;
+    let baseReward = 0;
+    let bonusReward = 0;
+
     if (allDone) {
       const activeBalance = parseFloat(acc.active_balance);
       const standardBalance = parseFloat(acc.standard_balance);
       const totalBalance = activeBalance + standardBalance;
       const now = Date.now();
 
-      // Streak logic: increment if last session was within 48h, reset otherwise
+      // Streak logic
       const STREAK_WINDOW_MS = 48 * 60 * 60 * 1000;
       const lastSessionTime = g.last_session_time ? parseInt(g.last_session_time) : null;
       const currentStreak: number = g.streak_days || 0;
@@ -268,18 +289,19 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
         newStreak = Math.min(currentStreak + 1, 7);
       }
 
-      // F = activityBonus + skillScore + streakBonus, capped at 100%
-      const activityBonus = calcActivityBonus(g.missed_sessions || 0);
-      const streakBonus = Math.min(newStreak, 7);
-      const F = Math.min(activityBonus + skillScore + streakBonus, 100);
-      const dailyIncome = activeBalance * 0.15 / 365;
-      reward = dailyIncome * (F / 100) / 3;
+      // New economy formula
+      const missedSessions = g.missed_sessions || 0;
+      const bonusPercent = calcBonusPercent(skillScore, totalBalance, missedSessions);
+      baseReward = totalBalance * 0.12 / 365 / 3;
+      bonusReward = totalBalance * bonusPercent / 365 / 3;
 
-      sessionF = F;
-      req.log.info({ skillScore, activityBonus, streakBonus, F, reward }, "Session reward calculated");
+      req.log.info(
+        { skillScore, bonusPercent, baseReward, bonusReward, totalBalance },
+        "Session rewards calculated",
+      );
 
-      const earnedDate = new Date(now).toLocaleDateString("ru-RU");
-
+      // Store pending rewards (accumulate in case previous unclaimed)
+      // Close session, do NOT auto-credit
       await pool.query(
         `UPDATE game_state SET
           session_in_progress = FALSE,
@@ -288,23 +310,63 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
           current_session_water = FALSE,
           current_session_sun = FALSE,
           current_session_fertilizer = FALSE,
+          pending_base_reward = COALESCE(pending_base_reward, 0) + $3,
+          pending_bonus_reward = COALESCE(pending_bonus_reward, 0) + $4,
           updated_at = NOW()
-         WHERE user_id = $3`,
-        [now, newStreak, userId],
-      );
-      await pool.query(
-        `UPDATE accounts SET active_balance = active_balance + $1, active_earned = active_earned + $1 WHERE user_id = $2`,
-        [reward, userId],
-      );
-      await pool.query(
-        "INSERT INTO income_history(user_id, amount, type, earned_date) VALUES($1, $2, 'active', $3)",
-        [userId, reward, earnedDate],
+         WHERE user_id = $5`,
+        [now, newStreak, baseReward, bonusReward, userId],
       );
     }
 
-    return res.json({ success: true, sessionComplete: allDone, reward, f: sessionF });
+    return res.json({ success: true, sessionComplete: allDone, baseReward, bonusReward });
   } catch (err) {
     req.log.error({ err }, "Error processing action");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /api/game/session/claim — claim base or bonus reward
+router.post("/game/session/claim", requireAuth, async (req: any, res) => {
+  const userId = req.userId;
+  const { type } = req.body;
+
+  if (type !== "base" && type !== "bonus") {
+    return res.status(400).json({ error: "Invalid claim type" });
+  }
+
+  const col = type === "base" ? "pending_base_reward" : "pending_bonus_reward";
+  const historyType = type === "base" ? "standard" : "active";
+
+  try {
+    const gameRow = await pool.query("SELECT * FROM game_state WHERE user_id = $1", [userId]);
+    if (gameRow.rows.length === 0) return res.status(404).json({ error: "Account not found" });
+
+    const g = gameRow.rows[0];
+    const amount = parseFloat(g[col]) || 0;
+
+    if (amount <= 0) {
+      return res.status(409).json({ error: "Nothing to claim" });
+    }
+
+    const earnedDate = new Date().toLocaleDateString("ru-RU");
+
+    await pool.query(
+      `UPDATE game_state SET ${col} = 0, updated_at = NOW() WHERE user_id = $1`,
+      [userId],
+    );
+    await pool.query(
+      `UPDATE accounts SET active_balance = active_balance + $1, active_earned = active_earned + $1 WHERE user_id = $2`,
+      [amount, userId],
+    );
+    await pool.query(
+      "INSERT INTO income_history(user_id, amount, type, earned_date) VALUES($1, $2, $3, $4)",
+      [userId, amount, historyType, earnedDate],
+    );
+
+    req.log.info({ type, amount }, "Reward claimed");
+    return res.json({ success: true, amount });
+  } catch (err) {
+    req.log.error({ err }, "Error claiming reward");
     return res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -322,6 +384,8 @@ router.post("/game/debug/reset-session", requireAuth, async (req: any, res) => {
         current_session_fertilizer = FALSE,
         streak_days = 0,
         missed_sessions = 0,
+        pending_base_reward = 0,
+        pending_bonus_reward = 0,
         updated_at = NOW()
        WHERE user_id = $1`,
       [userId],

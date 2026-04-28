@@ -24,7 +24,6 @@ export default function DebugPanel({ state, onStateChange, onResetPending, onTri
     } catch (e) {
       console.warn("[Debug] DB reset-session failed, resetting locally only", e);
     }
-    onResetPending();
     onStateChange({
       ...state,
       game: {
@@ -35,6 +34,8 @@ export default function DebugPanel({ state, onStateChange, onResetPending, onTri
         sun: false,
         fertilizer: false,
         streakDays: 0,
+        pendingBaseReward: 0,
+        pendingBonusReward: 0,
       },
     });
     setBusy(false);

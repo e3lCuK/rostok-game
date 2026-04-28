@@ -38,9 +38,8 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
   const [floaters, setFloaters] = useState<Floater[]>([]);
   const [actionLoading, setActionLoading] = useState(false);
   const [activeMinigame, setActiveMinigame] = useState<GameType | null>(null);
-  const [pendingReward, setPendingReward] = useState(0);
-  const [sessionPerformance, setSessionPerformance] = useState(0);
-  const [collectLoading, setCollectLoading] = useState(false);
+  const [claimingBase, setClaimingBase] = useState(false);
+  const [claimingBonus, setClaimingBonus] = useState(false);
   const floaterRef = useRef(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const skillScoreRef = useRef<number>(40);
@@ -59,12 +58,15 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
   const locked = isSessionLocked(game.lastSessionTime, now);
   const nextTime = getNextSessionTime(game.lastSessionTime);
   const msLeft = nextTime ? Math.max(0, nextTime - now) : null;
-  const sessionReward = calcSessionReward(balances.active, totalBalance, game.streakDays);
+  const sessionReward = calcSessionReward(balances.active, totalBalance, game.streakDays, 80, game.missedSessions);
   const actionsLeft = getSessionActionsLeft(game);
 
   const progress = getTreeProgress(balances.startDate, now, totalBalance);
   const stage = getTreeStage(progress);
   const treeGrowthPct = Math.round(progress * 100);
+
+  const pendingBase = game.pendingBaseReward ?? 0;
+  const pendingBonus = game.pendingBonusReward ?? 0;
 
   function addFloater(label: string, x: number, y: number) {
     const id = ++floaterRef.current;
@@ -84,9 +86,6 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
       sunScoreRef.current = 40;
       fertilizerScoreRef.current = 40;
       skillScoreRef.current = 40;
-      // reset UI state from any previous session
-      setPendingReward(0);
-      setSessionPerformance(0);
       onStateChange({
         ...state,
         game: { ...game, sessionInProgress: true, water: false, sun: false, fertilizer: false },
@@ -113,6 +112,7 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
     const waterScore      = waterScoreRef.current || 0;
     const sunScore        = sunScoreRef.current || 0;
     const fertilizerScore = fertilizerScoreRef.current || 0;
+    // Combined score 0-80: average of three normalized scores
     const combined = Math.min(80, Math.round((waterScore + sunScore + fertilizerScore) / 3));
     skillScoreRef.current = combined;
 
@@ -143,19 +143,16 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
       let nextGame = { ...game, [action]: true };
 
       if (result.sessionComplete) {
-        addFloater(`+${formatRub(result.reward)}`, x - 30, y - 50);
         const finishedTime = Date.now();
         nextGame = {
           ...nextGame,
           water: true, sun: true, fertilizer: true,
           sessionInProgress: false,
           lastSessionTime: finishedTime,
+          pendingBaseReward: (game.pendingBaseReward ?? 0) + (result.baseReward ?? 0),
+          pendingBonusReward: (game.pendingBonusReward ?? 0) + (result.bonusReward ?? 0),
         };
-        const safeReward = Math.round(Math.max(0, result.reward || 0));
-        const safeF = Math.round(Math.max(0, result.f || 0));
-        setPendingReward(safeReward);
-        setSessionPerformance(safeF);
-        console.log(`[Session complete] F=${safeF}%, reward=${safeReward}`);
+        console.log(`[Session complete] base=${result.baseReward} bonus=${result.bonusReward}`);
         onStateChange({ ...state, game: nextGame });
       } else {
         onStateChange({ ...state, game: nextGame });
@@ -167,29 +164,60 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
     }
   }
 
-  async function handleCollect() {
-    if (pendingReward <= 0 || collectLoading) return;
-    setCollectLoading(true);
-    const amount = Math.max(0, pendingReward);
-    setPendingReward(0);
-    setSessionPerformance(0);
-    onStateChange({
-      ...state,
-      balances: {
-        ...balances,
-        active: balances.active + amount,
-        activeEarned: balances.activeEarned + amount,
-      },
-      history: [
-        ...state.history,
-        {
-          date: new Date().toLocaleDateString("ru-RU"),
-          amount,
-          type: "active",
+  async function handleClaimBase() {
+    if (claimingBase || pendingBase <= 0) return;
+    setClaimingBase(true);
+    try {
+      const result = await api.claim("base");
+      const amount = result.amount ?? 0;
+      const rect = gameAreaRef.current?.getBoundingClientRect();
+      addFloater(`+${formatRub(amount)}`, (rect?.width ?? 200) / 2, 40);
+      onStateChange({
+        ...state,
+        balances: {
+          ...balances,
+          active: balances.active + amount,
+          activeEarned: balances.activeEarned + amount,
         },
-      ].slice(-30),
-    });
-    setCollectLoading(false);
+        game: { ...game, pendingBaseReward: 0 },
+        history: [
+          ...state.history,
+          { date: new Date().toLocaleDateString("ru-RU"), amount, type: "standard" as const },
+        ].slice(-30),
+      });
+    } catch (err) {
+      console.error("[Claim base] failed:", err);
+    } finally {
+      setClaimingBase(false);
+    }
+  }
+
+  async function handleClaimBonus() {
+    if (claimingBonus || pendingBonus <= 0) return;
+    setClaimingBonus(true);
+    try {
+      const result = await api.claim("bonus");
+      const amount = result.amount ?? 0;
+      const rect = gameAreaRef.current?.getBoundingClientRect();
+      addFloater(`+${formatRub(amount)}`, (rect?.width ?? 200) / 2 + 60, 40);
+      onStateChange({
+        ...state,
+        balances: {
+          ...balances,
+          active: balances.active + amount,
+          activeEarned: balances.activeEarned + amount,
+        },
+        game: { ...game, pendingBonusReward: 0 },
+        history: [
+          ...state.history,
+          { date: new Date().toLocaleDateString("ru-RU"), amount, type: "active" as const },
+        ].slice(-30),
+      });
+    } catch (err) {
+      console.error("[Claim bonus] failed:", err);
+    } finally {
+      setClaimingBonus(false);
+    }
   }
 
   return (
@@ -203,13 +231,6 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
           </div>
         </div>
 
-        {sessionPerformance > 0 && (
-          <div className="care-pct-block">
-            <p className="session-counter-label">Уход</p>
-            <p className="care-pct-value">{Math.round(sessionPerformance)}%</p>
-          </div>
-        )}
-
         <div className="session-counter-right">
           {locked && msLeft !== null && msLeft > 0 ? (
             <>
@@ -222,8 +243,9 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
           ) : (
             <p className="session-ready-text">Осталось: {actionsLeft} действия</p>
           )}
-          <p className="session-earn-hint">~{formatRub(sessionReward)} за сессию</p>
         </div>
+
+        <p className="session-earn-hint">~{formatRub(sessionReward)} за сессию</p>
       </div>
 
       {/* Tree + game area */}
@@ -307,20 +329,35 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
         )}
       </div>
 
-      {/* Collect reward area */}
-      {pendingReward > 0 && (
+      {/* Reward claim area — shown after session complete */}
+      {(pendingBase > 0 || pendingBonus > 0) && (
         <div className="collect-area">
-          <motion.button
-            className="collect-btn"
-            onClick={handleCollect}
-            disabled={collectLoading}
-            whileTap={{ scale: 0.95 }}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: "spring", stiffness: 200, damping: 20 }}
-          >
-            Забрать +{formatRub(pendingReward)}
-          </motion.button>
+          {pendingBase > 0 && (
+            <motion.button
+              className="collect-btn collect-btn-base"
+              onClick={handleClaimBase}
+              disabled={claimingBase}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ type: "spring", stiffness: 200, damping: 20 }}
+            >
+              Базовый доход +{formatRub(pendingBase)}
+            </motion.button>
+          )}
+          {pendingBonus > 0 && (
+            <motion.button
+              className="collect-btn collect-btn-bonus"
+              onClick={handleClaimBonus}
+              disabled={claimingBonus}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.07 }}
+            >
+              Бонус за активность +{formatRub(pendingBonus)}
+            </motion.button>
+          )}
         </div>
       )}
 
@@ -339,7 +376,12 @@ export default function GamePage({ state, onStateChange, onResetToOnboarding }: 
       <DebugPanel
         state={state}
         onStateChange={onStateChange}
-        onResetPending={() => { setPendingReward(0); setSessionPerformance(0); }}
+        onResetPending={() => {
+          onStateChange({
+            ...state,
+            game: { ...game, pendingBaseReward: 0, pendingBonusReward: 0 },
+          });
+        }}
         onTriggerOnboarding={() => onResetToOnboarding?.()}
       />
     </div>

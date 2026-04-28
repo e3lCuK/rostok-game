@@ -32,6 +32,8 @@ export interface UserState {
     fertilizer: boolean;
     streakDays: number;
     missedSessions: number;
+    pendingBaseReward: number;
+    pendingBonusReward: number;
   };
   history: { date: string; amount: number; type: "standard" | "active" }[];
 }
@@ -45,11 +47,24 @@ export function calcActiveDaily(activeBalance: number): number {
   return activeBalance * 0.15 / 365;
 }
 
-// ---- Activity bonus degradation based on missed sessions ----
-// missedSessions <= 3  → +3%
-// missedSessions 4–9   → +2%
-// missedSessions 10–21 → +1%
-// missedSessions > 21  → +0.5%
+// ---- New economy: missed-sessions cap ----
+// Returns bonus cap as a decimal (e.g. 0.03 = 3%)
+export function getCap(missedSessions: number): number {
+  if (missedSessions <= 3) return 0.03;
+  if (missedSessions <= 9) return 0.02;
+  if (missedSessions <= 21) return 0.01;
+  return 0.005;
+}
+
+// ---- Capital part based on total balance ----
+export function getCapitalPart(totalBalance: number): number {
+  if (totalBalance >= 2_000_000) return 0.20;
+  if (totalBalance >= 200_000) return 0.18;
+  return 0.16;
+}
+
+// ---- Activity bonus degradation (kept for SavingsPage display) ----
+// Returns percentage points: 3 / 2 / 1 / 0.5
 export function calcActivityBonus(missedSessions: number): number {
   if (missedSessions <= 3) return 3;
   if (missedSessions <= 9) return 2;
@@ -57,29 +72,40 @@ export function calcActivityBonus(missedSessions: number): number {
   return 0.5;
 }
 
-// ---- Session reward formula (single source of truth) ----
-// F = activityBonus + skillResult + streakBonus, capped at 100%
-// sessionReward = dailyIncome * (F / 100) / 3
-//
-// activityBonus: 3% (active) → 0.5% (21+ missed sessions)
-// skillResult:   0–80% (80 = all 3 mini-game actions completed)
-// streakBonus:   1% per consecutive day, max 7%
+// ---- Session reward estimate (hint display only — not authoritative) ----
+// Returns estimated total reward per session (base + expected bonus)
 export function calcSessionReward(
-  activeBalance: number,
-  _totalBalance?: number,
-  streakDays: number = 0,
-  skillResult: number = 80,
+  _activeBalance: number,
+  totalBalance: number = 0,
+  _streakDays: number = 0,
+  _skillResult: number = 80,
   missedSessions: number = 0,
 ): number {
-  const activityBonus = calcActivityBonus(missedSessions);
-  const streakBonus = Math.min(Math.max(Math.floor(streakDays), 0), 7);
-  const F = Math.min(activityBonus + skillResult + streakBonus, 100);
-  const dailyIncome = calcActiveDaily(activeBalance);
-  return dailyIncome * (F / 100) / 3;
+  const total = totalBalance || _activeBalance;
+  const baseReward = total * 0.12 / 365 / 3;
+  const cap = getCap(missedSessions);
+  const capitalPart = getCapitalPart(total);
+  // Estimate at average performance: skillPart=0.375 (50% skill), capitalPart, randomPart=0.02
+  const avgPerf = Math.min(0.375 + capitalPart + 0.02, 1);
+  const bonusPercent = cap * avgPerf;
+  const bonusReward = total * bonusPercent / 365 / 3;
+  return baseReward + bonusReward;
+}
+
+// ---- Base reward per session (12% annual / 365 days / 3 sessions) ----
+export function calcBaseSessionReward(totalBalance: number): number {
+  return totalBalance * 0.12 / 365 / 3;
+}
+
+// ---- Max bonus reward estimate per session ----
+export function calcMaxBonusSessionReward(totalBalance: number, missedSessions: number): number {
+  const cap = getCap(missedSessions);
+  const capitalPart = getCapitalPart(totalBalance);
+  const maxPerf = Math.min(0.75 + capitalPart + 0.04, 1);
+  return totalBalance * cap * maxPerf / 365 / 3;
 }
 
 // ---- Tree progression ----
-// Growth speed depends on balance size (higher balance = faster tree growth)
 function balanceMultiplier(total: number): number {
   if (total >= 1_000_000) return 3;
   if (total >= 100_000) return 2;

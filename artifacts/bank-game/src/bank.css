@@ -1036,12 +1036,14 @@ body {
 ==============================*/
 .collect-area {
   padding: 0 16px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .collect-btn {
   width: 100%;
   padding: 14px 20px;
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
   color: #fff;
   font-size: 1rem;
   font-weight: 700;
@@ -1050,6 +1052,14 @@ body {
   cursor: pointer;
   transition: opacity 0.15s, transform 0.1s;
   letter-spacing: 0.01em;
+}
+
+.collect-btn-base {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.collect-btn-bonus {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
 }
 
 .collect-btn:hover:not(:disabled) {

@@ -48,6 +48,8 @@ export interface GameStateResponse {
     fertilizer: boolean;
     streakDays: number;
     missedSessions: number;
+    pendingBaseReward: number;
+    pendingBonusReward: number;
   };
   history?: { amount: number; type: "standard" | "active"; date: string }[];
 }
@@ -68,9 +70,15 @@ export const api = {
     request<{ success: boolean }>("/game/session/start", { method: "POST" }),
 
   doAction: (action: "water" | "sun" | "fertilizer", skillScore?: number) =>
-    request<{ success: boolean; sessionComplete: boolean; reward: number; f: number }>(
+    request<{ success: boolean; sessionComplete: boolean; baseReward: number; bonusReward: number }>(
       "/game/session/action",
       { method: "POST", body: JSON.stringify({ action, skillScore }) },
+    ),
+
+  claim: (type: "base" | "bonus") =>
+    request<{ success: boolean; amount: number }>(
+      "/game/session/claim",
+      { method: "POST", body: JSON.stringify({ type }) },
     ),
 
   debugResetSession: () =>

@@ -1,0 +1,150 @@
+Implement new economy logic with two reward buttons and performance-based bonus.
+
+IMPORTANT:
+
+* Do NOT refactor entire architecture
+* Extend current logic carefully
+* Keep existing UI and game flow
+* Do NOT break session system
+
+---
+
+## GOAL
+
+Introduce:
+
+1. Base income (12%) via button
+2. Activity bonus (0–~3%) based on performance
+3. Two-button reward system
+4. Skill calculation from 3 mini-games
+5. Bonus degradation based on missed sessions
+
+---
+
+## PART 1 — SKILL SYSTEM
+
+Each mini-game returns a value:
+0 → 1
+
+After completing all 3 games:
+
+totalSkill = game1 + game2 + game3   // range 0–3
+
+Normalize:
+
+skillFactor = totalSkill / 3         // range 0–1
+
+Skill contribution:
+
+skillPart = skillFactor * 0.75       // max 0.75
+
+---
+
+## PART 2 — CAPITAL BONUS
+
+Based on total balance:
+
+if balance >= 2_000_000:
+capitalPart = 0.20
+else if balance >= 200_000:
+capitalPart = 0.18
+else:
+capitalPart = 0.16
+
+---
+
+## PART 3 — RANDOM FACTOR
+
+randomPart = random value between 0 and 0.04
+
+---
+
+## PART 4 — MISSED SESSIONS (CAP)
+
+Implement function:
+
+function getCap(missedSessions):
+if missedSessions <= 3: return 0.03
+if missedSessions <= 9: return 0.02
+if missedSessions <= 21: return 0.01
+return 0.005
+
+---
+
+## PART 5 — BONUS CALCULATION
+
+performance = skillPart + capitalPart + randomPart
+
+Clamp:
+
+normalized = min(performance, 1)
+
+bonusPercent = getCap(missedSessions) * normalized
+
+---
+
+## PART 6 — TWO BUTTON REWARD SYSTEM
+
+IMPORTANT: both rewards require completing 3 activities.
+
+1. Activity reward button:
+
+* Enabled ONLY after all 3 mini-games are completed
+* Gives:
+
+activeReward = balance * bonusPercent / 365 / 3
+
+2. Base reward button:
+
+* Also enabled ONLY after all 3 mini-games are completed
+* Gives:
+
+baseReward = balance * 0.12 / 365 / 3
+
+---
+
+## PART 7 — FLOW
+
+1. Player completes 3 mini-games
+2. System calculates:
+
+   * totalSkill
+   * bonusPercent
+3. Both buttons become active
+4. Player can:
+
+   * claim activity reward
+   * claim base reward
+
+---
+
+## PART 8 — UI RULES
+
+* Before games completed → buttons disabled (gray)
+* After completion → buttons active
+* Keep existing UI style
+* Do NOT redesign
+
+---
+
+## PART 9 — SAFETY
+
+* Do NOT change how sessions unlock
+* Do NOT change existing database structure unnecessarily
+* Do NOT break existing game components
+
+---
+
+## EXPECTED RESULT
+
+* Player must complete activities to earn
+* Base income = 12%
+* Bonus depends on:
+
+  * skill
+  * capital
+  * randomness
+  * missed sessions
+* Total income ranges ~12% → ~15%
+
+Implement step by step and ensure no runtime errors.

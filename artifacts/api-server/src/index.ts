@@ -21,6 +21,14 @@ async function runMigrations() {
     ALTER TABLE game_state
     ADD COLUMN IF NOT EXISTS missed_sessions INT NOT NULL DEFAULT 0
   `);
+  await pool.query(`
+    ALTER TABLE game_state
+    ADD COLUMN IF NOT EXISTS pending_base_reward NUMERIC NOT NULL DEFAULT 0
+  `);
+  await pool.query(`
+    ALTER TABLE game_state
+    ADD COLUMN IF NOT EXISTS pending_bonus_reward NUMERIC NOT NULL DEFAULT 0
+  `);
   logger.info("DB migrations applied");
 }
 
