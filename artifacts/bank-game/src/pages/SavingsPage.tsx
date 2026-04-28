@@ -4,8 +4,6 @@ import {
   formatRub,
   calcStandardDaily,
   calcActivityBonus,
-  calculateRewards,
-  estimateBonusPercent,
   SESSIONS_PER_DAY,
 } from "@/lib/engine";
 import { TrendingUp, Zap, Lock, ChevronRight, HelpCircle, X } from "lucide-react";
@@ -17,21 +15,16 @@ interface Props {
 
 export default function SavingsPage({ state, onTabChange }: Props) {
   const { standard, active, standardEarned, activeEarned } = state.balances;
-  const { streakDays, missedSessions } = state.game;
-  const totalBalance = standard + active;
+  const { missedSessions } = state.game;
   const [showTooltip, setShowTooltip] = useState(false);
 
   const standardAnnual = standard * 0.12;
   const activeAnnual = active * 0.15;
   const stdDaily = calcStandardDaily(standard);
   const activityBonus = calcActivityBonus(missedSessions);
-  // bonusPercent = cap * 0.5 (average expected skill) — display hint only
-  const bonusEst = estimateBonusPercent(missedSessions);
-  // Double-count fix: active card uses ACTIVE balance only (standard earns separately)
-  const { dailyBase, dailyBonus, basePerSession, bonusPerSession } = calculateRewards(active, bonusEst);
-  // Max reference (15% = 12% base + 3% max bonus) — UI display only, never used in payouts
-  const MAX_PERCENT = 0.15;
-  const dailyMax = active * MAX_PERCENT / 365;
+  // Max values — UI display only, never used in payouts
+  // 15% = 12% base + 3% max bonus, applied to active balance only
+  const dailyMax = active * 0.15 / 365;
   const sessionMax = dailyMax / SESSIONS_PER_DAY;
 
   return (
@@ -115,17 +108,11 @@ export default function SavingsPage({ state, onTabChange }: Props) {
           </div>
           <div className="deposit-stat">
             <p className="deposit-stat-label">В день</p>
-            <p className="deposit-stat-value">
-              ~{formatRub(dailyBase + dailyBonus)}
-              <span className="deposit-stat-max"> (до ~{formatRub(dailyMax)})</span>
-            </p>
+            <p className="deposit-stat-value">до {formatRub(dailyMax)}</p>
           </div>
           <div className="deposit-stat">
             <p className="deposit-stat-label">За сессию</p>
-            <p className="deposit-stat-value">
-              ~{formatRub(basePerSession + bonusPerSession)}
-              <span className="deposit-stat-max"> (до ~{formatRub(sessionMax)})</span>
-            </p>
+            <p className="deposit-stat-value">до {formatRub(sessionMax)}</p>
           </div>
         </div>
 
@@ -151,7 +138,7 @@ export default function SavingsPage({ state, onTabChange }: Props) {
         )}
 
         <div className="deposit-info-box deposit-info-box-green">
-          <p>Доход зависит от активности. Максимум — 15% годовых</p>
+          <p>Доход начисляется за сессии каждые 8 часов. Результат зависит от активности.</p>
         </div>
       </div>
 
