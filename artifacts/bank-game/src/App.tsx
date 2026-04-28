@@ -53,7 +53,7 @@ function LandingPage() {
         <span className="landing-icon">🌳</span>
         <h1 className="landing-title">{APP_NAME}</h1>
         <p className="landing-subtitle">Вкладывайте и наблюдайте за ростом своего дерева</p>
-        <div className="landing-badge">{APP_VERSION} · Бета</div>
+        <div className="landing-badge">Бета {APP_VERSION}</div>
       </div>
       <div className="landing-features">
         <div className="landing-feature">
@@ -195,7 +195,7 @@ function AppShell() {
             <span className="bank-logo-text">{APP_NAME}</span>
           </div>
           <div className="bank-header-right">
-            <div className="bank-header-badge">Бета | {APP_VERSION}</div>
+            <div className="bank-header-badge">Бета {APP_VERSION}</div>
             {user && (
               <button
                 className="bank-header-signout"

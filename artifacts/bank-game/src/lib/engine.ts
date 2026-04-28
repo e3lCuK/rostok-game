@@ -3,8 +3,8 @@
 //  UI must NOT compute anything; call these functions instead
 // ============================================================
 
-export const APP_VERSION = "v0.4";
-export const APP_NAME = "Bank";
+export const APP_VERSION = "v0.1";
+export const APP_NAME = "Банк";
 
 // ---- Constants ----
 export const SESSION_COOLDOWN_MS = 8 * 60 * 60 * 1000;
