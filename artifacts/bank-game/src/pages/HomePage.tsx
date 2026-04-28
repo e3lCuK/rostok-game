@@ -94,6 +94,7 @@ export default function HomePage({ state }: Props) {
         </div>
       </div>
 
+      {state.history.length > 0 && (() => { console.log("FRONT HISTORY:", state.history); return null; })()}
       {state.history.length > 0 && (
         <div className="history-card">
           <h3 className="history-title">Последние начисления</h3>

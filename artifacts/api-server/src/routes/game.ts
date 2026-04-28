@@ -388,8 +388,8 @@ router.post("/game/session/claim", requireAuth, async (req: any, res) => {
       [userId, amount, historyType, earnedDate, efficiency, balanceAfter],
     );
 
-    req.log.info({ type, amount }, "Reward claimed");
-    return res.json({ success: true, amount });
+    req.log.info({ type, amount, efficiency, balanceAfter }, "Reward claimed");
+    return res.json({ success: true, amount, efficiency, balanceAfter });
   } catch (err) {
     req.log.error({ err }, "Error claiming reward");
     return res.status(500).json({ error: "Internal server error" });

@@ -76,7 +76,7 @@ export const api = {
     ),
 
   claim: (type: "base" | "bonus") =>
-    request<{ success: boolean; amount: number }>(
+    request<{ success: boolean; amount: number; efficiency?: number; balanceAfter?: number }>(
       "/game/session/claim",
       { method: "POST", body: JSON.stringify({ type }) },
     ),
