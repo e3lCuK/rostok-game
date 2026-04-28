@@ -9,6 +9,7 @@ export const APP_NAME = "Банк";
 // ---- Constants ----
 export const SESSION_COOLDOWN_MS = 8 * 60 * 60 * 1000;
 export const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+export const SESSIONS_PER_DAY = 3; // 1 session per 8 hours → 3 sessions/day
 
 // Starting capital options
 export const CAPITAL_OPTIONS = [20_000, 200_000, 2_000_000] as const;
@@ -82,19 +83,19 @@ export function calcSessionReward(
   missedSessions: number = 0,
 ): number {
   const total = totalBalance || _activeBalance;
-  const baseReward = total * 0.12 / 365 / 3;
+  const baseReward = total * 0.12 / 365 / SESSIONS_PER_DAY;
   const cap = getCap(missedSessions);
   const capitalPart = getCapitalPart(total);
   // Estimate at average performance: skillPart=0.375 (50% skill), capitalPart, randomPart=0.02
   const avgPerf = Math.min(0.375 + capitalPart + 0.02, 1);
   const bonusPercent = cap * avgPerf;
-  const bonusReward = total * bonusPercent / 365 / 3;
+  const bonusReward = total * bonusPercent / 365 / SESSIONS_PER_DAY;
   return baseReward + bonusReward;
 }
 
-// ---- Base reward per session (12% annual / 365 days / 3 sessions) ----
+// ---- Base reward per session (12% annual / 365 days / SESSIONS_PER_DAY) ----
 export function calcBaseSessionReward(totalBalance: number): number {
-  return totalBalance * 0.12 / 365 / 3;
+  return totalBalance * 0.12 / 365 / SESSIONS_PER_DAY;
 }
 
 // ---- Max bonus reward estimate per session ----
@@ -102,7 +103,7 @@ export function calcMaxBonusSessionReward(totalBalance: number, missedSessions: 
   const cap = getCap(missedSessions);
   const capitalPart = getCapitalPart(totalBalance);
   const maxPerf = Math.min(0.75 + capitalPart + 0.04, 1);
-  return totalBalance * cap * maxPerf / 365 / 3;
+  return totalBalance * cap * maxPerf / 365 / SESSIONS_PER_DAY;
 }
 
 // ---- Tree progression ----

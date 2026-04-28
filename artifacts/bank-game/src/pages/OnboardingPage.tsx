@@ -67,7 +67,7 @@ export default function OnboardingPage({ onComplete }: Props) {
         {CAPITAL_OPTIONS.map((cap) => {
           const half = cap / 2;
           const daily = calcStandardDaily(half);
-          const sessionR = calcSessionReward(half);
+          const sessionR = calcSessionReward(half, cap);
           const isSelected = selected === cap;
 
           return (

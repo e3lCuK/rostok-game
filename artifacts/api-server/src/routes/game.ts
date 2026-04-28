@@ -3,6 +3,7 @@ import { getAuth } from "@clerk/express";
 import { pool } from "@workspace/db";
 
 const COOLDOWN_MS = 8 * 60 * 60 * 1000;
+const SESSIONS_PER_DAY = 3; // 1 session per 8 hours
 
 // ---- New economy helpers ----
 
@@ -292,8 +293,8 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
       // New economy formula
       const missedSessions = g.missed_sessions || 0;
       const bonusPercent = calcBonusPercent(skillScore, totalBalance, missedSessions);
-      baseReward = totalBalance * 0.12 / 365 / 3;
-      bonusReward = totalBalance * bonusPercent / 365 / 3;
+      baseReward = totalBalance * 0.12 / 365 / SESSIONS_PER_DAY;
+      bonusReward = totalBalance * bonusPercent / 365 / SESSIONS_PER_DAY;
 
       req.log.info(
         { skillScore, bonusPercent, baseReward, bonusReward, totalBalance },
