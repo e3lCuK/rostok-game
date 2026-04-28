@@ -97,19 +97,29 @@ export default function HomePage({ state }: Props) {
       {state.history.length > 0 && (
         <div className="history-card">
           <h3 className="history-title">Последние начисления</h3>
+          <div className="history-header-row">
+            <span>Начисление</span>
+            <span>Эффект.</span>
+            <span>Сумма</span>
+          </div>
           <div className="history-list">
             {[...state.history].reverse().slice(0, 6).map((item, i) => (
               <div key={i} className="history-item">
-                <div className="history-dot" data-type={item.type} />
-                <div className="history-info">
+                <div className="history-cell-left">
                   <span className="history-type">
                     {item.type === "standard" ? "Стандартный вклад"
-                      : item.type === "base" ? "Активный вклад (база)"
-                      : item.type === "bonus" ? "Активный вклад (бонус)"
+                      : item.type === "base" ? "Активный (база)"
+                      : item.type === "bonus" ? "Активный (бонус)"
                       : "Активный вклад"}
                   </span>
-                  <span className="history-date">{item.date}</span>
+                  {item.balanceAfter !== undefined
+                    ? <span className="history-balance">{formatRub(item.balanceAfter)}</span>
+                    : <span className="history-date">{item.date}</span>
+                  }
                 </div>
+                <span className="history-efficiency">
+                  {item.efficiency !== undefined ? `${item.efficiency}%` : "—"}
+                </span>
                 <span className="history-amount">+{formatRub(item.amount)}</span>
               </div>
             ))}

@@ -1,0 +1,158 @@
+Improve UI: fix timer alignment and add efficiency column to reward history
+
+---
+
+## PART 1 — FIX TIMER ICON ALIGNMENT
+
+Locate session timer block (где отображается "Следующая через ...")
+
+Wrap icon + time into flex container:
+
+<div className="session-timer">
+  <IconClock />
+  <span>{time}</span>
+</div>
+
+Apply styles:
+
+.session-timer {
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.session-timer svg {
+width: 14px;
+height: 14px;
+flex-shrink: 0;
+}
+
+.session-timer span {
+line-height: 1;
+}
+
+Result:
+→ иконка и время строго по одной линии (без смещения)
+
+---
+
+## PART 2 — ADD EFFICIENCY (%) TO REWARD HISTORY
+
+GOAL:
+Добавить показатель эффективности (0–100%) и перестроить строку истории в 3 колонки:
+
+[Активный вклад + баланс] | [Эффективность] | [Заработано]
+
+---
+
+1. CALCULATION
+
+Add:
+
+const maxBonus = getCap(missedSessions)
+const efficiency = Math.min(
+100,
+Math.round((bonusPercent / maxBonus) * 100)
+)
+
+---
+
+2. SAVE IN REWARD OBJECT
+
+Each reward item must include:
+
+{
+amount: number,
+efficiency: number,
+balanceAfter: number
+}
+
+---
+
+3. UPDATE UI STRUCTURE
+
+Replace history row with:
+
+<div className="history-row">
+  <div>
+    <div className="title">Активный вклад</div>
+    <div className="balance">{balanceAfter} ₽</div>
+  </div>
+
+  <div className="efficiency">
+    {efficiency}%
+  </div>
+
+  <div className="amount">
+    +{amount} ₽
+  </div>
+</div>
+
+---
+
+4. GRID LAYOUT
+
+.history-row {
+display: grid;
+grid-template-columns: 1fr auto auto;
+align-items: center;
+gap: 12px;
+}
+
+---
+
+5. STYLES
+
+.title {
+font-size: 13px;
+color: #6b7280;
+}
+
+.balance {
+font-size: 14px;
+font-weight: 500;
+}
+
+.efficiency {
+font-size: 14px;
+font-weight: 600;
+color: #16a34a;
+}
+
+.amount {
+font-size: 14px;
+font-weight: 600;
+color: #16a34a;
+text-align: right;
+}
+
+---
+
+6. OPTIONAL HEADER (recommended)
+
+Add above list:
+
+<div className="history-header">
+  <span></span>
+  <span>Эфф.</span>
+  <span>Доход</span>
+</div>
+
+---
+
+IMPORTANT
+
+* Do NOT change reward calculations
+* Efficiency is display-only metric
+* Timer fix must not affect logic
+
+---
+
+EXPECTED RESULT
+
+✔ Иконка времени выровнена
+✔ История выглядит как таблица
+✔ Видно эффективность (например 95%)
+✔ Чистый банковский UI без "прыжков"
+
+---

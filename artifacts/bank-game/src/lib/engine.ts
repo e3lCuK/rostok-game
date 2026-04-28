@@ -36,7 +36,13 @@ export interface UserState {
     pendingBaseReward: number;
     pendingBonusReward: number;
   };
-  history: { date: string; amount: number; type: "standard" | "active" | "base" | "bonus" }[];
+  history: {
+    date: string;
+    amount: number;
+    type: "standard" | "active" | "base" | "bonus";
+    efficiency?: number;
+    balanceAfter?: number;
+  }[];
 }
 
 // ---- Income formulas ----

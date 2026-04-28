@@ -88,6 +88,10 @@ router.get("/game/state", requireAuth, async (req: any, res) => {
         amount: parseFloat(r.amount),
         type: r.type,
         date: r.earned_date,
+        efficiency: r.efficiency !== null && r.efficiency !== undefined ? r.efficiency : undefined,
+        balanceAfter: r.balance_after !== null && r.balance_after !== undefined
+          ? parseFloat(r.balance_after)
+          : undefined,
       })),
     });
   } catch (err) {
@@ -304,8 +308,12 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
       console.log("DAILY:", dailyBase + dailyBonus, "(activeBalance:", activeBalance, ")");
       console.log("SESSION:", baseReward + bonusReward);
 
+      // Efficiency: how close the player got to the cap (0–100%)
+      const maxBonus = getCap(missedSessions);
+      const efficiency = Math.min(100, Math.round((bonusPercent / maxBonus) * 100));
+
       req.log.info(
-        { skillScore, bonusPercent, baseReward, bonusReward, totalBalance, dailyBase, dailyBonus },
+        { skillScore, bonusPercent, efficiency, baseReward, bonusReward, totalBalance, dailyBase, dailyBonus },
         "Session rewards calculated",
       );
 
@@ -321,9 +329,10 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
           current_session_fertilizer = FALSE,
           pending_base_reward = COALESCE(pending_base_reward, 0) + $3,
           pending_bonus_reward = COALESCE(pending_bonus_reward, 0) + $4,
+          pending_efficiency = $6,
           updated_at = NOW()
          WHERE user_id = $5`,
-        [now, newStreak, baseReward, bonusReward, userId],
+        [now, newStreak, baseReward, bonusReward, userId, efficiency],
       );
     }
 
@@ -358,18 +367,25 @@ router.post("/game/session/claim", requireAuth, async (req: any, res) => {
     }
 
     const earnedDate = new Date().toLocaleDateString("ru-RU");
+    const efficiency: number | null = g.pending_efficiency !== null && g.pending_efficiency !== undefined
+      ? g.pending_efficiency
+      : null;
 
     await pool.query(
       `UPDATE game_state SET ${col} = 0, updated_at = NOW() WHERE user_id = $1`,
       [userId],
     );
-    await pool.query(
-      `UPDATE accounts SET active_balance = active_balance + $1, active_earned = active_earned + $1 WHERE user_id = $2`,
+    const accResult = await pool.query(
+      `UPDATE accounts SET active_balance = active_balance + $1, active_earned = active_earned + $1
+       WHERE user_id = $2 RETURNING active_balance`,
       [amount, userId],
     );
+    const balanceAfter: number = parseFloat(accResult.rows[0]?.active_balance) || 0;
+
     await pool.query(
-      "INSERT INTO income_history(user_id, amount, type, earned_date) VALUES($1, $2, $3, $4)",
-      [userId, amount, historyType, earnedDate],
+      `INSERT INTO income_history(user_id, amount, type, earned_date, efficiency, balance_after)
+       VALUES($1, $2, $3, $4, $5, $6)`,
+      [userId, amount, historyType, earnedDate, efficiency, balanceAfter],
     );
 
     req.log.info({ type, amount }, "Reward claimed");

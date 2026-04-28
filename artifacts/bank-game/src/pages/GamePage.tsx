@@ -235,9 +235,11 @@ export default function GamePage({ state, onStateChange }: Props) {
         <div className="session-counter-right">
           {locked && msLeft !== null && msLeft > 0 ? (
             <>
-              <Clock size={14} className="session-clock-icon" />
               <p className="session-timer-label">Следующая через</p>
-              <p className="session-timer">{formatTimer(msLeft)}</p>
+              <div className="session-timer">
+                <Clock size={14} />
+                <span>{formatTimer(msLeft)}</span>
+              </div>
             </>
           ) : !game.sessionInProgress ? (
             <p className="session-ready-text">Сессия готова!</p>

@@ -307,36 +307,42 @@ body {
   margin-bottom: 12px;
 }
 
+.history-header-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  padding: 0 0 6px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+  font-size: 0.62rem;
+  color: var(--text3);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.history-header-row span:last-child { text-align: right; }
+
 .history-list { display: flex; flex-direction: column; gap: 10px; }
 
 .history-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
-.history-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.history-dot[data-type="standard"] { background: var(--blue); }
-.history-dot[data-type="active"]   { background: var(--green); }
-.history-dot[data-type="base"]     { background: var(--green); }
-.history-dot[data-type="bonus"]    { background: var(--green); }
-
-.history-info {
-  flex: 1;
+.history-cell-left {
   display: flex;
   flex-direction: column;
   gap: 1px;
+  min-width: 0;
 }
 
-.history-type { font-size: 0.75rem; font-weight: 500; color: var(--text); }
+.history-type { font-size: 0.75rem; font-weight: 500; color: var(--text2); }
+.history-balance { font-size: 0.82rem; font-weight: 600; color: var(--text); }
 .history-date { font-size: 0.65rem; color: var(--text3); }
-.history-amount { font-size: 0.78rem; font-weight: 700; color: var(--green); }
+.history-efficiency { font-size: 0.82rem; font-weight: 700; color: var(--green); white-space: nowrap; }
+.history-amount { font-size: 0.82rem; font-weight: 700; color: var(--green); text-align: right; white-space: nowrap; }
 
 /* ============================
    SAVINGS PAGE
@@ -464,9 +470,19 @@ body {
 .session-counter-num { font-size: 1.1rem; font-weight: 800; color: var(--text); }
 
 .session-counter-right { text-align: right; }
-.session-clock-icon { color: var(--text3); margin-bottom: 2px; margin-left: auto; display: block; }
-.session-timer-label { font-size: 0.62rem; color: var(--text3); }
-.session-timer { font-size: 1rem; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+.session-timer-label { font-size: 0.62rem; color: var(--text3); margin-bottom: 2px; }
+.session-timer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  justify-content: flex-end;
+}
+.session-timer svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--text3); }
+.session-timer span { line-height: 1; }
 .session-ready-text { font-size: 0.78rem; font-weight: 700; color: var(--green); }
 .session-earn-hint { font-size: 0.65rem; color: var(--text3); margin-top: 6px; }
 
