@@ -3,9 +3,9 @@ import {
   UserState,
   formatRub,
   calcStandardDaily,
-  calcActiveDaily,
-  calcSessionReward,
   calcActivityBonus,
+  calculateRewards,
+  estimateBonusPercent,
 } from "@/lib/engine";
 import { TrendingUp, Zap, Lock, ChevronRight, HelpCircle, X } from "lucide-react";
 
@@ -23,9 +23,9 @@ export default function SavingsPage({ state, onTabChange }: Props) {
   const standardAnnual = standard * 0.12;
   const activeAnnual = active * 0.15;
   const stdDaily = calcStandardDaily(standard);
-  const actDaily = calcActiveDaily(active);
-  const sessionReward = calcSessionReward(active, totalBalance, streakDays, 80, missedSessions);
   const activityBonus = calcActivityBonus(missedSessions);
+  const bonusEst = estimateBonusPercent(totalBalance, missedSessions);
+  const { dailyBase, dailyBonus, basePerSession, bonusPerSession } = calculateRewards(totalBalance, bonusEst);
 
   return (
     <div className="savings-page">
@@ -108,11 +108,11 @@ export default function SavingsPage({ state, onTabChange }: Props) {
           </div>
           <div className="deposit-stat">
             <p className="deposit-stat-label">В день</p>
-            <p className="deposit-stat-value">{formatRub(actDaily)}</p>
+            <p className="deposit-stat-value">~{formatRub(dailyBase + dailyBonus)}</p>
           </div>
           <div className="deposit-stat">
             <p className="deposit-stat-label">За сессию</p>
-            <p className="deposit-stat-value">~{formatRub(sessionReward)}</p>
+            <p className="deposit-stat-value">~{formatRub(basePerSession + bonusPerSession)}</p>
           </div>
         </div>
 

@@ -4,7 +4,8 @@ import {
   getTreeProgress,
   getTreeStage,
   calcStandardDaily,
-  calcActiveDaily,
+  calculateRewards,
+  estimateBonusPercent,
   TREE_STAGE_NAMES,
 } from "@/lib/engine";
 import TreeSVG from "@/components/TreeSVG";
@@ -26,7 +27,8 @@ export default function HomePage({ state }: Props) {
   const pct = Math.round(progress * 100);
 
   const dailyStd = calcStandardDaily(standard);
-  const dailyAct = calcActiveDaily(active);
+  const { dailyBase, dailyBonus } = calculateRewards(totalBalance, estimateBonusPercent(totalBalance, state.game.missedSessions));
+  const dailyAct = dailyBase + dailyBonus;
 
   return (
     <div className="home-page">

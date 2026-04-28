@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@clerk/react";
-import { CAPITAL_OPTIONS, formatCapital, calcStandardDaily, calcSessionReward } from "@/lib/engine";
+import { CAPITAL_OPTIONS, formatCapital, calcStandardDaily, calculateRewards, estimateBonusPercent } from "@/lib/engine";
 
 interface Props {
   onComplete: (capital: number) => Promise<void>;
@@ -67,7 +67,8 @@ export default function OnboardingPage({ onComplete }: Props) {
         {CAPITAL_OPTIONS.map((cap) => {
           const half = cap / 2;
           const daily = calcStandardDaily(half);
-          const sessionR = calcSessionReward(half, cap);
+          const { basePerSession, bonusPerSession } = calculateRewards(cap, estimateBonusPercent(cap, 0));
+          const sessionR = basePerSession + bonusPerSession;
           const isSelected = selected === cap;
 
           return (

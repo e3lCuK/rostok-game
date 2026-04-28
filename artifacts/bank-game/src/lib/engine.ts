@@ -44,10 +44,6 @@ export function calcStandardDaily(standardBalance: number): number {
   return standardBalance * 0.12 / 365;
 }
 
-export function calcActiveDaily(activeBalance: number): number {
-  return activeBalance * 0.15 / 365;
-}
-
 // ---- New economy: missed-sessions cap ----
 // Returns bonus cap as a decimal (e.g. 0.03 = 3%)
 export function getCap(missedSessions: number): number {
@@ -64,7 +60,7 @@ export function getCapitalPart(totalBalance: number): number {
   return 0.16;
 }
 
-// ---- Activity bonus degradation (kept for SavingsPage display) ----
+// ---- Activity bonus degradation (for badge display) ----
 // Returns percentage points: 3 / 2 / 1 / 0.5
 export function calcActivityBonus(missedSessions: number): number {
   if (missedSessions <= 3) return 3;
@@ -73,37 +69,29 @@ export function calcActivityBonus(missedSessions: number): number {
   return 0.5;
 }
 
-// ---- Session reward estimate (hint display only — not authoritative) ----
-// Returns estimated total reward per session (base + expected bonus)
-export function calcSessionReward(
-  _activeBalance: number,
-  totalBalance: number = 0,
-  _streakDays: number = 0,
-  _skillResult: number = 80,
-  missedSessions: number = 0,
-): number {
-  const total = totalBalance || _activeBalance;
-  const baseReward = total * 0.12 / 365 / SESSIONS_PER_DAY;
-  const cap = getCap(missedSessions);
-  const capitalPart = getCapitalPart(total);
-  // Estimate at average performance: skillPart=0.375 (50% skill), capitalPart, randomPart=0.02
-  const avgPerf = Math.min(0.375 + capitalPart + 0.02, 1);
-  const bonusPercent = cap * avgPerf;
-  const bonusReward = total * bonusPercent / 365 / SESSIONS_PER_DAY;
-  return baseReward + bonusReward;
+// ---- Estimate bonus percent for UI display (no actual payout) ----
+// Returns the MAX cap for the user's current activity tier
+// so that displayed daily/session values match the 15% model at full streak
+export function estimateBonusPercent(_totalBalance: number, missedSessions: number): number {
+  return getCap(missedSessions);
 }
 
-// ---- Base reward per session (12% annual / 365 days / SESSIONS_PER_DAY) ----
-export function calcBaseSessionReward(totalBalance: number): number {
-  return totalBalance * 0.12 / 365 / SESSIONS_PER_DAY;
+// ---- SINGLE reward calculation formula — used everywhere ----
+// daily  = balance * rate / 365
+// session = daily / SESSIONS_PER_DAY
+export interface SessionRewards {
+  dailyBase: number;
+  dailyBonus: number;
+  basePerSession: number;
+  bonusPerSession: number;
 }
 
-// ---- Max bonus reward estimate per session ----
-export function calcMaxBonusSessionReward(totalBalance: number, missedSessions: number): number {
-  const cap = getCap(missedSessions);
-  const capitalPart = getCapitalPart(totalBalance);
-  const maxPerf = Math.min(0.75 + capitalPart + 0.04, 1);
-  return totalBalance * cap * maxPerf / 365 / SESSIONS_PER_DAY;
+export function calculateRewards(balance: number, bonusPercent: number): SessionRewards {
+  const dailyBase = balance * 0.12 / 365;
+  const dailyBonus = balance * bonusPercent / 365;
+  const basePerSession = dailyBase / SESSIONS_PER_DAY;
+  const bonusPerSession = dailyBonus / SESSIONS_PER_DAY;
+  return { dailyBase, dailyBonus, basePerSession, bonusPerSession };
 }
 
 // ---- Tree progression ----

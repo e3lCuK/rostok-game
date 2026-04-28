@@ -290,14 +290,20 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
         newStreak = Math.min(currentStreak + 1, 7);
       }
 
-      // New economy formula
+      // New economy formula — single source of truth
+      // daily = balance * rate / 365 | session = daily / SESSIONS_PER_DAY
       const missedSessions = g.missed_sessions || 0;
       const bonusPercent = calcBonusPercent(skillScore, totalBalance, missedSessions);
-      baseReward = totalBalance * 0.12 / 365 / SESSIONS_PER_DAY;
-      bonusReward = totalBalance * bonusPercent / 365 / SESSIONS_PER_DAY;
+      const dailyBase = totalBalance * 0.12 / 365;
+      const dailyBonus = totalBalance * bonusPercent / 365;
+      baseReward = dailyBase / SESSIONS_PER_DAY;
+      bonusReward = dailyBonus / SESSIONS_PER_DAY;
+
+      console.log("DAILY:", dailyBase + dailyBonus);
+      console.log("SESSION:", baseReward + bonusReward);
 
       req.log.info(
-        { skillScore, bonusPercent, baseReward, bonusReward, totalBalance },
+        { skillScore, bonusPercent, baseReward, bonusReward, totalBalance, dailyBase, dailyBonus },
         "Session rewards calculated",
       );
 
