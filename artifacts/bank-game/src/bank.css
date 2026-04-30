@@ -1348,6 +1348,15 @@ canvas {
   transition: width 0.1s linear;
 }
 
+/* ---- game area: fills remaining height, centers content ---- */
+.game-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
 /* ---- top-right counter ---- */
 .mini-game-counter {
   display: flex;

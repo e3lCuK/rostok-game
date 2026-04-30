@@ -183,12 +183,14 @@ export default function ClickGameSun({ onComplete }: Props) {
           <span className="mini-game-counter-val">{catchCount}</span>
         </div>
       </div>
-      <canvas
-        ref={canvasRef}
-        width={W}
-        height={H}
-        style={{ display: "block", touchAction: "none", userSelect: "none", cursor: "none" }}
-      />
+      <div className="game-content">
+        <canvas
+          ref={canvasRef}
+          width={W}
+          height={H}
+          style={{ display: "block", touchAction: "none", userSelect: "none", cursor: "none" }}
+        />
+      </div>
       {result && (
         <div
           className="mini-game-result"

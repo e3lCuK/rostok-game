@@ -231,13 +231,15 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
           <span className="mini-game-counter-val">{catchCount}</span>
         </div>
       </div>
-      <canvas
-        ref={canvasRef}
-        width={W}
-        height={H}
-        onMouseMove={onMouseMove}
-        style={{ display: "block", touchAction: "none", userSelect: "none" }}
-      />
+      <div className="game-content">
+        <canvas
+          ref={canvasRef}
+          width={W}
+          height={H}
+          onMouseMove={onMouseMove}
+          style={{ display: "block", touchAction: "none", userSelect: "none" }}
+        />
+      </div>
       {result && (
         <div
           className="mini-game-result"

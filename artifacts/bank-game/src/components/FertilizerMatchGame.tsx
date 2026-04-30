@@ -286,6 +286,7 @@ export default function FertilizerMatchGame({ onComplete }: Props) {
         </div>
       </div>
 
+      <div className="game-content">
       <div className={`m3-grid${processing ? " m3-busy" : ""}`}>
         {grid.map((row, r) =>
           row.map((cell, c) => {
@@ -308,6 +309,7 @@ export default function FertilizerMatchGame({ onComplete }: Props) {
             );
           })
         )}
+      </div>
       </div>
 
       {gameOver && result && (
