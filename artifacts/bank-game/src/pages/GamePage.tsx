@@ -9,8 +9,6 @@ import {
   getTreeProgress,
   getTreeStage,
   TREE_STAGE_NAMES,
-  calculateRewards,
-  estimateBonusPercent,
   getSessionActionsLeft,
 } from "@/lib/engine";
 import { api } from "@/lib/api";
@@ -57,9 +55,7 @@ export default function GamePage({ state, onStateChange }: Props) {
   const locked = isSessionLocked(game.lastSessionTime, now);
   const nextTime = getNextSessionTime(game.lastSessionTime);
   const msLeft = nextTime ? Math.max(0, nextTime - now) : null;
-  // Double-count fix: active balance only; estimate at 0.5 skill (average)
-  const { basePerSession, bonusPerSession } = calculateRewards(balances.active, estimateBonusPercent(game.missedSessions));
-  const sessionReward = basePerSession + bonusPerSession;
+  const sessionMax = balances.active * 0.15 / 365 / 3;
   const actionsLeft = getSessionActionsLeft(game);
 
   const progress = getTreeProgress(balances.startDate, now, totalBalance);
@@ -248,7 +244,7 @@ export default function GamePage({ state, onStateChange }: Props) {
           )}
         </div>
 
-        <p className="session-earn-hint">~{formatRub(sessionReward)} за сессию</p>
+        <p className="session-earn-hint">до {formatRub(sessionMax)} за сессию</p>
       </div>
 
       {/* Tree + game area */}

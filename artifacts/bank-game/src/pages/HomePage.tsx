@@ -4,8 +4,6 @@ import {
   getTreeProgress,
   getTreeStage,
   calcStandardDaily,
-  calculateRewards,
-  estimateBonusPercent,
   TREE_STAGE_NAMES,
 } from "@/lib/engine";
 import TreeSVG from "@/components/TreeSVG";
@@ -27,9 +25,7 @@ export default function HomePage({ state }: Props) {
   const pct = Math.round(progress * 100);
 
   const dailyStd = calcStandardDaily(standard);
-  // Double-count fix: active balance only; estimate at 0.5 skill (average)
-  const { dailyBase, dailyBonus } = calculateRewards(active, estimateBonusPercent(state.game.missedSessions));
-  const dailyAct = dailyBase + dailyBonus;
+  const dailyAct = active * 0.15 / 365;
 
   return (
     <div className="home-page">
@@ -79,7 +75,7 @@ export default function HomePage({ state }: Props) {
           <div>
             <p className="stat-label">Стандартный</p>
             <p className="stat-value">{formatRub(standard)}</p>
-            <p className="stat-sub">~{formatRub(dailyStd)}/день</p>
+            <p className="stat-sub">до {formatRub(dailyStd)}/день</p>
           </div>
         </div>
         <div className="stat-card">
@@ -89,7 +85,7 @@ export default function HomePage({ state }: Props) {
           <div>
             <p className="stat-label">Активный</p>
             <p className="stat-value">{formatRub(active)}</p>
-            <p className="stat-sub">~{formatRub(dailyAct)}/день</p>
+            <p className="stat-sub">до {formatRub(dailyAct)}/день</p>
           </div>
         </div>
       </div>

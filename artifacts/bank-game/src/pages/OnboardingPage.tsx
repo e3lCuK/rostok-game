@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@clerk/react";
-import { CAPITAL_OPTIONS, formatCapital, calcStandardDaily, calculateRewards, estimateBonusPercent } from "@/lib/engine";
+import { CAPITAL_OPTIONS, formatCapital, calcStandardDaily } from "@/lib/engine";
 
 interface Props {
   onComplete: (capital: number) => Promise<void>;
@@ -67,9 +67,7 @@ export default function OnboardingPage({ onComplete }: Props) {
         {CAPITAL_OPTIONS.map((cap) => {
           const half = cap / 2;
           const daily = calcStandardDaily(half);
-          // half = active balance; estimate at 0.5 skill (average expected)
-          const { basePerSession, bonusPerSession } = calculateRewards(half, estimateBonusPercent(0));
-          const sessionR = basePerSession + bonusPerSession;
+          const dailyActiveMax = half * 0.15 / 365;
           const isSelected = selected === cap;
 
           return (
@@ -90,11 +88,11 @@ export default function OnboardingPage({ onComplete }: Props) {
               <div className="capital-option-stats">
                 <div className="capital-stat">
                   <p className="capital-stat-label">В день (пасс.)</p>
-                  <p className="capital-stat-value">~{daily.toLocaleString("ru-RU", { maximumFractionDigits: 2 })} ₽</p>
+                  <p className="capital-stat-value">до {daily.toLocaleString("ru-RU", { maximumFractionDigits: 2 })} ₽</p>
                 </div>
                 <div className="capital-stat">
-                  <p className="capital-stat-label">За сессию</p>
-                  <p className="capital-stat-value">~{sessionR.toLocaleString("ru-RU", { maximumFractionDigits: 2 })} ₽</p>
+                  <p className="capital-stat-label">В день (акт.)</p>
+                  <p className="capital-stat-value">до {dailyActiveMax.toLocaleString("ru-RU", { maximumFractionDigits: 2 })} ₽</p>
                 </div>
               </div>
             </motion.button>
