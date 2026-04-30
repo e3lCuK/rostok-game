@@ -5,7 +5,7 @@ interface Props {
   onComplete: (skillScore: number) => void;
 }
 
-const GRID = 6;
+const GRID = 5;
 const TYPES = 5;
 const GAME_MS = 15_000;
 const MAX_MATCHES = 18;
@@ -21,6 +21,17 @@ const TILE_BG: Record<Color, string> = {
   blue:   "#3b82f6",
   purple: "#a855f7",
 };
+
+interface Result {
+  matchCount: number;
+  skillScore: number;
+}
+
+function resultLabel(m: number): string {
+  if (m < 6) return "Попробуйте ещё";
+  if (m <= 12) return "Хорошо";
+  return "Отлично 🌿";
+}
 
 const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 const rand = (): Color => COLORS[Math.floor(Math.random() * TYPES)];
@@ -119,6 +130,7 @@ export default function FertilizerMatchGame({ onComplete }: Props) {
   const [timeLeft, setTimeLeft] = useState(GAME_MS);
   const [gameOver, setGameOver] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [result, setResult] = useState<Result | null>(null);
 
   const gridRef = useRef<Grid>(grid);
   const matchRef = useRef(0);
@@ -136,7 +148,11 @@ export default function FertilizerMatchGame({ onComplete }: Props) {
     const m = matchRef.current;
     const skillFactor = Math.min(1, m / MAX_MATCHES);
     const skillScore = Math.round(skillFactor * 80);
-    setTimeout(() => onDoneRef.current(skillScore), 600);
+    setResult({ matchCount: m, skillScore });
+  }
+
+  function handleContinue(skillScore: number) {
+    onDoneRef.current(skillScore);
   }
 
   useEffect(() => {
@@ -255,20 +271,16 @@ export default function FertilizerMatchGame({ onComplete }: Props) {
   }
 
   const timerPct = (timeLeft / GAME_MS) * 100;
-  const matchPct = (matchCount / MAX_MATCHES) * 100;
 
   return (
     <div className="m3-wrap">
       <div className="m3-header">
         <div className="m3-stats-row">
           <span className="m3-stat-text">⏱ {Math.ceil(timeLeft / 1000)}с</span>
-          <span className="m3-stat-text">Матчи: {matchCount} / {MAX_MATCHES}</span>
+          <span className="m3-stat-text">Собрано: {matchCount}</span>
         </div>
         <div className="m3-bar-track">
           <div className="m3-bar-fill m3-bar-timer" style={{ width: `${timerPct}%` }} />
-        </div>
-        <div className="m3-bar-track">
-          <div className="m3-bar-fill m3-bar-match" style={{ width: `${matchPct}%` }} />
         </div>
       </div>
 
@@ -295,6 +307,22 @@ export default function FertilizerMatchGame({ onComplete }: Props) {
           })
         )}
       </div>
+
+      {gameOver && result && (
+        <div className="m3-result-overlay">
+          <div className="m3-result-icon">
+            <Leaf size={32} color="white" strokeWidth={2} />
+          </div>
+          <p className="m3-result-count">Собрано: {result.matchCount}</p>
+          <p className="m3-result-label">{resultLabel(result.matchCount)}</p>
+          <button
+            className="m3-result-btn"
+            onClick={() => handleContinue(result.skillScore)}
+          >
+            Продолжить
+          </button>
+        </div>
+      )}
     </div>
   );
 }

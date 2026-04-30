@@ -1280,6 +1280,7 @@ body {
   gap: 10px;
   padding: 10px 8px 8px;
   width: 100%;
+  position: relative;
 }
 
 .m3-header {
@@ -1317,20 +1318,19 @@ body {
 }
 
 .m3-bar-timer { background: #22c55e; }
-.m3-bar-match { background: #a855f7; }
 
 .m3-grid {
   display: grid;
-  grid-template-columns: repeat(6, 40px);
-  grid-template-rows: repeat(6, 40px);
-  gap: 3px;
+  grid-template-columns: repeat(5, 46px);
+  grid-template-rows: repeat(5, 46px);
+  gap: 4px;
 }
 
 .m3-grid.m3-busy { cursor: wait; }
 
 .m3-cell {
-  width: 40px;
-  height: 40px;
+  width: 46px;
+  height: 46px;
   padding: 2px;
   border: none;
   background: rgba(255,255,255,0.18);
@@ -1358,8 +1358,8 @@ body {
 }
 
 .m3-tile {
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1367,3 +1367,61 @@ body {
   box-shadow: 0 2px 5px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.25);
   transition: transform 0.12s ease;
 }
+
+.m3-result-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(239, 246, 255, 0.97);
+  border-radius: inherit;
+  animation: m3FadeIn 0.25s ease;
+}
+
+@keyframes m3FadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.m3-result-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #22c55e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(34,197,94,0.35);
+}
+
+.m3-result-count {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.m3-result-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #166534;
+}
+
+.m3-result-btn {
+  margin-top: 6px;
+  padding: 10px 28px;
+  background: var(--green);
+  color: white;
+  border: none;
+  border-radius: 99px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(34,197,94,0.3);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.m3-result-btn:hover { transform: scale(1.04); box-shadow: 0 4px 12px rgba(34,197,94,0.4); }
+.m3-result-btn:active { transform: scale(0.97); }
