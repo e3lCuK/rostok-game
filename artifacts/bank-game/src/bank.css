@@ -1271,28 +1271,41 @@ body {
 }
 
 /* ============================
-   SHARED MINI-GAME CARD + TIMER
+   SHARED MINI-GAME CONTAINER
 ==============================*/
 .mini-game-card {
-  width: 280px;
-  border-radius: 16px;
-  overflow: hidden;
+  width: 100%;
+  max-width: 320px;
+  height: 420px;
+  border-radius: 20px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
 }
 
-.mini-game-timer-area {
-  padding: 8px 10px 5px;
+/* ---- header: timer left + counter right ---- */
+.mini-game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
   width: 100%;
-  box-sizing: border-box;
+  margin-bottom: 8px;
+  flex-shrink: 0;
 }
 
 .game-timer {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
 }
 
 .game-timer-row {
@@ -1311,13 +1324,6 @@ body {
   font-weight: 700;
 }
 
-.game-timer-label {
-  margin-left: auto;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #6b7280;
-}
-
 .game-timer-track {
   width: 100%;
   height: 5px;
@@ -1331,23 +1337,82 @@ body {
   transition: width 0.1s linear;
 }
 
-/* ============================
-   MATCH-3 FERTILIZER GAME
-==============================*/
-.m3-wrap {
-  width: 280px;
-  border-radius: 16px;
-  overflow: hidden;
-  background: rgba(240, 253, 244, 0.97);
-  border: 2px solid #bbf7d0;
+/* ---- top-right counter ---- */
+.mini-game-counter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+}
+
+.mini-game-counter-val {
+  font-size: 0.92rem;
+  font-weight: 800;
+  min-width: 20px;
+  text-align: right;
+}
+
+/* ---- unified result overlay ---- */
+.mini-game-result {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
-  padding-bottom: 10px;
+  justify-content: center;
   gap: 8px;
+  cursor: pointer;
+  border-radius: inherit;
+  animation: mgFadeIn 0.22s ease;
 }
+
+@keyframes mgFadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.mini-game-result-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.08);
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.mini-game-result-emoji {
+  font-size: 38px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.mini-game-result-count {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.mini-game-result-label {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ============================
+   MATCH-3 FERTILIZER GRID
+==============================*/
 
 .m3-grid {
   display: grid;
@@ -1398,57 +1463,3 @@ body {
   transition: transform 0.12s ease;
 }
 
-.m3-result-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  background: rgba(240, 253, 244, 0.97);
-  cursor: pointer;
-  animation: m3FadeIn 0.22s ease;
-}
-
-@keyframes m3FadeIn {
-  from { opacity: 0; transform: scale(0.97); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-.m3-result-close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(0, 0, 0, 0.08);
-  color: #6b7280;
-  font-size: 13px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  line-height: 1;
-}
-
-.m3-result-emoji {
-  font-size: 36px;
-  line-height: 1;
-  margin-bottom: 4px;
-}
-
-.m3-result-count {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #166534;
-}
-
-.m3-result-label {
-  font-size: 0.875rem;
-  font-weight: 400;
-  color: #6b7280;
-}

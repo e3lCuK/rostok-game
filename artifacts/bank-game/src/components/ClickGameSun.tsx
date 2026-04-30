@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import GameTimer from "./GameTimer";
 
 interface Props {
@@ -6,13 +6,13 @@ interface Props {
 }
 
 const GAME_MS        = 15_000;
-const SUN_R          = 26;          // visual + click radius
-const SUN_VISIBLE_MS = 800;         // how long sun stays
+const SUN_R          = 26;
+const SUN_VISIBLE_MS = 800;
 const SPAWN_MIN      = 400;
 const SPAWN_MAX      = 900;
-const SKILL_DENOM    = 20;          // "perfect" catches for 80/80 skill
-const W              = 280;
-const H              = 310;
+const SKILL_DENOM    = 20;
+const W              = 296;
+const H              = 348;
 
 const CFG = {
   bg:          "rgba(255,251,235,0.97)",
@@ -29,22 +29,12 @@ function feedbackLabel(n: number): string {
   return "Попробуйте ещё";
 }
 
-function drawSun(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  alpha: number,
-  scale: number,
-) {
+function drawSun(ctx: CanvasRenderingContext2D, x: number, y: number, alpha: number, scale: number) {
   const r = SUN_R * scale;
   ctx.save();
   ctx.globalAlpha = alpha;
-
-  // glow
   ctx.shadowColor = "#fbbf24";
   ctx.shadowBlur  = 20;
-
-  // body gradient
   ctx.beginPath();
   ctx.arc(x, y, r, 0, Math.PI * 2);
   const grad = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.08, x, y, r);
@@ -54,8 +44,6 @@ function drawSun(
   ctx.fillStyle = grad;
   ctx.fill();
   ctx.shadowBlur = 0;
-
-  // rays
   ctx.strokeStyle = "#fbbf24";
   ctx.lineWidth   = 2.5;
   ctx.lineCap     = "round";
@@ -66,15 +54,15 @@ function drawSun(
     ctx.lineTo(x + Math.cos(angle) * (r + 13), y + Math.sin(angle) * (r + 13));
     ctx.stroke();
   }
-
   ctx.restore();
 }
 
 export default function ClickGameSun({ onComplete }: Props) {
-  const canvasRef    = useRef<HTMLCanvasElement>(null);
-  const doneRef      = useRef(false);
-  const pendingScore = useRef<number | null>(null);
-  const [timerMs, setTimerMs] = useState(GAME_MS);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const doneRef   = useRef(false);
+  const [timerMs, setTimerMs]       = useState(GAME_MS);
+  const [catchCount, setCatchCount] = useState(0);
+  const [result, setResult]         = useState<{ catches: number; skillScore: number } | null>(null);
 
   useEffect(() => {
     const id = setInterval(() => setTimerMs(t => Math.max(0, t - 100)), 100);
@@ -89,14 +77,12 @@ export default function ClickGameSun({ onComplete }: Props) {
 
     canvas.style.cursor = "none";
 
-    let catches           = 0;
-    let rafId             = 0;
-    let lastTs            = -1;
-    const start           = performance.now();
-
-    // active sun state
+    let catches            = 0;
+    let rafId              = 0;
+    let lastTs             = -1;
+    const start            = performance.now();
     let sun: { x: number; y: number; spawnedAt: number } | null = null;
-    let timeSinceLastSpawn = SPAWN_MAX; // spawn first one immediately
+    let timeSinceLastSpawn = SPAWN_MAX;
     let nextSpawnDelay     = SPAWN_MIN + Math.random() * (SPAWN_MAX - SPAWN_MIN);
 
     function finish() {
@@ -104,40 +90,9 @@ export default function ClickGameSun({ onComplete }: Props) {
       doneRef.current = true;
       cancelAnimationFrame(rafId);
       canvas.style.cursor = "default";
-
       const skillScore = Math.min(80, Math.round((catches / SKILL_DENOM) * 80));
-      pendingScore.current = skillScore;
       console.log(`[ClickGameSun] catches: ${catches}  skillScore: ${skillScore}/80`);
-
-      // result screen
-      ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = CFG.bg;
-      ctx.fillRect(0, 0, W, H);
-
-      // close button
-      ctx.beginPath();
-      ctx.arc(W - 22, 22, 14, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(0,0,0,0.08)";
-      ctx.fill();
-      ctx.textAlign = "center";
-      ctx.font      = "bold 15px sans-serif";
-      ctx.fillStyle = "#6b7280";
-      ctx.fillText("✕", W - 22, 27);
-
-      // big emoji
-      ctx.textAlign = "center";
-      ctx.font      = "bold 36px sans-serif";
-      ctx.fillText("☀️", W / 2, H / 2 - 32);
-
-      // result
-      ctx.font      = "bold 20px sans-serif";
-      ctx.fillStyle = CFG.resultColor;
-      ctx.fillText(`Поймано: ${catches}`, W / 2, H / 2 + 8);
-
-      // feedback
-      ctx.font      = "14px sans-serif";
-      ctx.fillStyle = "#6b7280";
-      ctx.fillText(feedbackLabel(catches), W / 2, H / 2 + 34);
+      setResult({ catches, skillScore });
     }
 
     function handlePointer(e: MouseEvent | TouchEvent) {
@@ -155,6 +110,7 @@ export default function ClickGameSun({ onComplete }: Props) {
       const dy = cy - sun.y;
       if (dx * dx + dy * dy <= (SUN_R + 6) * (SUN_R + 6)) {
         catches++;
+        setCatchCount(catches);
         sun = null;
         timeSinceLastSpawn = 0;
         nextSpawnDelay = SPAWN_MIN + Math.random() * (SPAWN_MAX - SPAWN_MIN);
@@ -171,7 +127,6 @@ export default function ClickGameSun({ onComplete }: Props) {
       lastTs        = ts;
       const elapsed = ts - start;
 
-      // spawn new sun
       timeSinceLastSpawn += dt;
       if (!sun && timeSinceLastSpawn >= nextSpawnDelay && elapsed < GAME_MS - 300) {
         const margin = SUN_R + 18;
@@ -184,7 +139,6 @@ export default function ClickGameSun({ onComplete }: Props) {
         nextSpawnDelay = SPAWN_MIN + Math.random() * (SPAWN_MAX - SPAWN_MIN);
       }
 
-      // expire sun
       if (sun && ts - sun.spawnedAt >= SUN_VISIBLE_MS) {
         sun = null;
         timeSinceLastSpawn = 0;
@@ -193,23 +147,15 @@ export default function ClickGameSun({ onComplete }: Props) {
 
       if (elapsed >= GAME_MS && !sun) { finish(); return; }
 
-      // ---- draw ----
       ctx.clearRect(0, 0, W, H);
       ctx.fillStyle = CFG.bg;
       ctx.fillRect(0, 0, W, H);
 
-      // catch counter
-      ctx.textAlign = "left";
-      ctx.font      = "bold 13px sans-serif";
-      ctx.fillStyle = CFG.scoreFg;
-      ctx.fillText(`☀️ ${catches}`, 10, 20);
-
-      // draw the current sun with spawn-in / fade-out animation
       if (sun) {
-        const age     = ts - sun.spawnedAt;
-        const scale   = Math.min(1, age / 140);   // scale in over 140 ms
-        const fadeMs  = 180;
-        const alpha   = age > SUN_VISIBLE_MS - fadeMs
+        const age    = ts - sun.spawnedAt;
+        const scale  = Math.min(1, age / 140);
+        const fadeMs = 180;
+        const alpha  = age > SUN_VISIBLE_MS - fadeMs
           ? Math.max(0, 1 - (age - (SUN_VISIBLE_MS - fadeMs)) / fadeMs)
           : 1;
         drawSun(ctx, sun.x, sun.y, alpha, scale);
@@ -228,35 +174,38 @@ export default function ClickGameSun({ onComplete }: Props) {
     };
   }, []);
 
-  // after game: any click on canvas → call onComplete
-  const handleCanvasClick = useCallback(() => {
-    if (doneRef.current && pendingScore.current !== null) {
-      onComplete(pendingScore.current);
-    }
-  }, [onComplete]);
-
   return (
-    <div className="mini-game-card" style={{ border: CFG.border }}>
-      <div className="mini-game-timer-area" style={{ background: CFG.bg }}>
-        <GameTimer
-          timeLeftMs={timerMs}
-          totalMs={GAME_MS}
-          color={CFG.timerColor}
-          trackColor={CFG.timerBg}
-        />
+    <div className="mini-game-card" style={{ background: CFG.bg, border: CFG.border }}>
+      <div className="mini-game-header">
+        <GameTimer timeLeftMs={timerMs} totalMs={GAME_MS} color={CFG.timerColor} trackColor={CFG.timerBg} />
+        <div className="mini-game-counter">
+          <span>☀️</span>
+          <span className="mini-game-counter-val">{catchCount}</span>
+        </div>
       </div>
       <canvas
         ref={canvasRef}
         width={W}
         height={H}
-        onClick={handleCanvasClick}
-        style={{
-          display:     "block",
-          cursor:      "default",
-          touchAction: "none",
-          userSelect:  "none",
-        }}
+        style={{ display: "block", touchAction: "none", userSelect: "none", cursor: "none" }}
       />
+      {result && (
+        <div
+          className="mini-game-result"
+          style={{ background: CFG.bg }}
+          onClick={() => onComplete(result.skillScore)}
+        >
+          <button
+            className="mini-game-result-close"
+            onClick={e => { e.stopPropagation(); onComplete(result.skillScore); }}
+          >✕</button>
+          <span className="mini-game-result-emoji">☀️</span>
+          <p className="mini-game-result-count" style={{ color: CFG.resultColor }}>
+            Поймано: {result.catches}
+          </p>
+          <p className="mini-game-result-label">{feedbackLabel(result.catches)}</p>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,0 +1,206 @@
+Unify UI for all 3 mini-games (Water, Sun, Fertilizer) to have identical layout, structure, and behavior.
+
+---
+
+## GOAL
+
+All 3 games must look and behave consistently:
+
+- Same container size
+- Same header structure
+- Same timer layout
+- Same top-right counter placement
+- Same result modal size and style
+
+---
+
+## 1. GAME CONTAINER (CRITICAL)
+
+All game areas must have identical size and styling.
+
+Apply shared class:
+
+.game-container {
+  width: 100%;
+  max-width: 320px;
+  height: 420px;
+  border-radius: 20px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+Remove any hardcoded width/height differences across games.
+
+---
+
+## 2. HEADER (TOP BAR)
+
+Unify header for ALL games:
+
+Structure:
+
+[ ⏱ time + progress bar ]    [ icon + count ]
+
+Layout:
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.timer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timer-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.progress-bar {
+  height: 4px;
+  border-radius: 2px;
+}
+
+---
+
+## 3. TOP RIGHT COUNTER (FIX ALL GAMES)
+
+### Water & Sun (FIX)
+
+Move collected counter to TOP RIGHT.
+
+Instead of left-side score:
+
+❌ REMOVE:
+"💧 12" (left side)
+
+✅ ADD:
+Right side:
+
+<div class="counter">
+  <Icon />
+  <span>{count}</span>
+</div>
+
+---
+
+### Fertilizer (FIX)
+
+Currently shows:
+"Собрано: 4"
+
+❌ REMOVE TEXT COMPLETELY
+
+✅ REPLACE WITH:
+
+Same structure as other games:
+
+<div class="counter">
+  <FertilizerIcon />
+  <span>{count}</span>
+</div>
+
+NO text like "Собрано"
+
+---
+
+## 4. TIMER CONSISTENCY
+
+All games must use SAME timer style as fertilizer:
+
+- icon + seconds (e.g. "14с")
+- progress bar below
+
+Apply to:
+- Water game
+- Sun game
+
+---
+
+## 5. RESULT MODAL (VERY IMPORTANT)
+
+Unify result popup for ALL games.
+
+### Same size:
+
+.result-modal {
+  width: 260px;
+  padding: 24px;
+  border-radius: 20px;
+  text-align: center;
+}
+
+### Same structure:
+
+[ ICON ]
+[ TEXT: "Собрано: X" ]
+[ SUBTEXT ]
+
+---
+
+### Game-specific:
+
+Water:
+💧 icon
+"Поймано: X"
+
+Sun:
+☀️ icon
+"Поймано: X"
+
+Fertilizer:
+🌱 icon
+"Собрано: X"
+
+---
+
+REMOVE any size differences between modals.
+
+---
+
+## 6. COLORS (KEEP DIFFERENT THEMES)
+
+Keep per-game colors:
+
+Water → blue
+Sun → yellow/orange
+Fertilizer → green
+
+But layout must be identical.
+
+---
+
+## 7. REMOVE INCONSISTENCIES
+
+Delete:
+
+- duplicate score labels
+- "Собрано" text in fertilizer header
+- left-aligned counters
+- different modal sizes
+- inconsistent paddings
+
+---
+
+## 8. FINAL CHECK (MUST PASS)
+
+All 3 games:
+
+✅ same container size  
+✅ same header layout  
+✅ counter top-right  
+✅ timer identical  
+✅ modal identical size  
+✅ only icons/colors differ  
+
+---
+
+DO NOT change gameplay logic.
+ONLY fix UI and layout consistency.

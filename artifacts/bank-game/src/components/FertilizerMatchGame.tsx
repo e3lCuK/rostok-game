@@ -272,15 +272,18 @@ export default function FertilizerMatchGame({ onComplete }: Props) {
   }
 
   return (
-    <div className="m3-wrap">
-      <div className="mini-game-timer-area" style={{ background: "rgba(240,253,244,0.97)" }}>
+    <div className="mini-game-card" style={{ background: "rgba(240,253,244,0.97)", border: "2px solid #bbf7d0" }}>
+      <div className="mini-game-header">
         <GameTimer
           timeLeftMs={timeLeft}
           totalMs={GAME_MS}
           color="#22c55e"
           trackColor="#dcfce7"
-          label={`Собрано: ${matchCount}`}
         />
+        <div className="mini-game-counter">
+          <span>🌱</span>
+          <span className="mini-game-counter-val">{matchCount}</span>
+        </div>
       </div>
 
       <div className={`m3-grid${processing ? " m3-busy" : ""}`}>
@@ -309,17 +312,19 @@ export default function FertilizerMatchGame({ onComplete }: Props) {
 
       {gameOver && result && (
         <div
-          className="m3-result-overlay"
+          className="mini-game-result"
+          style={{ background: "rgba(240,253,244,0.97)" }}
           onClick={() => handleContinue(result.skillScore)}
         >
           <button
-            className="m3-result-close"
+            className="mini-game-result-close"
             onClick={e => { e.stopPropagation(); handleContinue(result.skillScore); }}
-            aria-label="Закрыть"
           >✕</button>
-          <span className="m3-result-emoji">🌱</span>
-          <p className="m3-result-count">Собрано: {result.matchCount}</p>
-          <p className="m3-result-label">{resultLabel(result.matchCount)}</p>
+          <span className="mini-game-result-emoji">🌱</span>
+          <p className="mini-game-result-count" style={{ color: "#166534" }}>
+            Собрано: {result.matchCount}
+          </p>
+          <p className="mini-game-result-label">{resultLabel(result.matchCount)}</p>
         </div>
       )}
     </div>

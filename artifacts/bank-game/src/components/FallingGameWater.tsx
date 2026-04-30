@@ -8,7 +8,6 @@ interface Props {
   onComplete: (skillScore: number) => void;
 }
 
-// ---- visual config per type ----
 const CONFIGS = {
   water: {
     bg:          "rgba(239,246,255,0.97)",
@@ -48,19 +47,23 @@ const CONFIGS = {
   },
 } as const;
 
-// ---- constants ----
-const GAME_MS     = 15_000;   // 15 seconds total
-const TOTAL_DROPS = 30;       // objects to catch
+const GAME_MS     = 15_000;
+const TOTAL_DROPS = 30;
 const DROP_R      = 11;
 const BAR_W       = 88;
 const BAR_H       = 11;
-const W           = 280;
-const H           = 310;
+const W           = 296;
+const H           = 348;
 const BAR_Y       = H - 28;
-const DROP_SPEED  = 100;      // constant px/s — no acceleration
+const DROP_SPEED  = 100;
+
+function feedbackLabel(n: number): string {
+  if (n >= 20) return "Отлично!";
+  if (n >= 10) return "Хорошо";
+  return "Попробуйте ещё";
+}
 
 function makeDrop(id: number) {
-  // spread evenly across the first 13 s so last drops land before time ends
   const spawnAt = (id / TOTAL_DROPS) * (GAME_MS * 0.87) + (Math.random() * 300 - 150);
   return {
     id,
@@ -75,11 +78,12 @@ function makeDrop(id: number) {
 type Drop = ReturnType<typeof makeDrop>;
 
 export default function FallingGameWater({ type = "water", onComplete }: Props) {
-  const canvasRef    = useRef<HTMLCanvasElement>(null);
-  const barX         = useRef(W / 2);
-  const doneRef      = useRef(false);
-  const pendingScore = useRef<number | null>(null);
-  const [timerMs, setTimerMs] = useState(GAME_MS);
+  const canvasRef  = useRef<HTMLCanvasElement>(null);
+  const barX       = useRef(W / 2);
+  const doneRef    = useRef(false);
+  const [timerMs, setTimerMs]     = useState(GAME_MS);
+  const [catchCount, setCatchCount] = useState(0);
+  const [result, setResult]       = useState<{ catches: number; skillScore: number } | null>(null);
 
   useEffect(() => {
     const id = setInterval(() => setTimerMs(t => Math.max(0, t - 100)), 100);
@@ -104,16 +108,15 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
     if (!ctx) return;
 
     const cfg = CONFIGS[type];
-
     canvas.addEventListener("touchmove", onTouchMove, { passive: false });
     canvas.style.cursor = "none";
 
     const drops: Drop[] = Array.from({ length: TOTAL_DROPS }, (_, i) => makeDrop(i));
-    let catches  = 0;
-    let spawned  = 0;
-    let rafId    = 0;
-    let lastTs   = -1;
-    const start  = performance.now();
+    let catches = 0;
+    let spawned = 0;
+    let rafId   = 0;
+    let lastTs  = -1;
+    const start = performance.now();
 
     function drawRoundedRect(x: number, y: number, w: number, h: number, r: number) {
       ctx.beginPath();
@@ -129,52 +132,14 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
       ctx.closePath();
     }
 
-    function feedbackLabel(n: number): string {
-      if (n >= 20) return "Отлично!";
-      if (n >= 10) return "Хорошо";
-      return "Попробуйте ещё";
-    }
-
     function finish() {
       if (doneRef.current) return;
       doneRef.current = true;
       cancelAnimationFrame(rafId);
       canvas.style.cursor = "default";
-
-      // map catches (0–30) → skillScore (0–80)
       const skillScore = Math.min(80, Math.round((catches / TOTAL_DROPS) * 80));
-      pendingScore.current = skillScore;
       console.log(`[FallingGame:${type}] catches: ${catches}/${TOTAL_DROPS}  skillScore: ${skillScore}/80`);
-
-      // ---- result screen ----
-      ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = cfg.bg;
-      ctx.fillRect(0, 0, W, H);
-
-      // close button
-      ctx.beginPath();
-      ctx.arc(W - 22, 22, 14, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(0,0,0,0.08)";
-      ctx.fill();
-      ctx.textAlign = "center";
-      ctx.font      = "bold 15px sans-serif";
-      ctx.fillStyle = "#6b7280";
-      ctx.fillText("✕", W - 22, 27);
-
-      // emoji
-      ctx.textAlign = "center";
-      ctx.font      = "bold 36px sans-serif";
-      ctx.fillText(cfg.scoreEmoji, W / 2, H / 2 - 32);
-
-      // main result
-      ctx.font      = "bold 20px sans-serif";
-      ctx.fillStyle = cfg.resultColor;
-      ctx.fillText(`Поймано: ${catches}`, W / 2, H / 2 + 8);
-
-      // feedback
-      ctx.font      = "14px sans-serif";
-      ctx.fillStyle = "#6b7280";
-      ctx.fillText(feedbackLabel(catches), W / 2, H / 2 + 34);
+      setResult({ catches, skillScore });
     }
 
     function frame(ts: number) {
@@ -184,24 +149,22 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
       lastTs        = ts;
       const elapsed = ts - start;
 
-      // spawn
       while (spawned < TOTAL_DROPS && drops[spawned].spawnAt <= elapsed) {
         drops[spawned].active = true;
         spawned++;
       }
 
-      // update
       let activeCnt = 0;
       for (const d of drops) {
         if (!d.active) continue;
         d.y += DROP_SPEED * dt;
-
         if (!d.caught && d.y + DROP_R >= BAR_Y - BAR_H && d.y - DROP_R <= BAR_Y + BAR_H) {
           const bx = barX.current;
           if (d.x >= bx - BAR_W / 2 - DROP_R && d.x <= bx + BAR_W / 2 + DROP_R) {
             d.caught = true;
             d.active = false;
             catches++;
+            setCatchCount(catches);
             continue;
           }
         }
@@ -211,38 +174,26 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
 
       if (elapsed >= GAME_MS && activeCnt === 0) { finish(); return; }
 
-      // ---- draw ----
       ctx.clearRect(0, 0, W, H);
       ctx.fillStyle = cfg.bg;
       ctx.fillRect(0, 0, W, H);
 
-      // catch counter
-      ctx.textAlign = "left";
-      ctx.font      = "bold 13px sans-serif";
-      ctx.fillStyle = cfg.scoreFg;
-      ctx.fillText(`${cfg.scoreEmoji} ${catches}`, 10, 20);
-
-      // drops
       for (const d of drops) {
         if (!d.active) continue;
-        // shadow
         ctx.beginPath();
         ctx.arc(d.x + 2, d.y + 2, DROP_R, 0, Math.PI * 2);
         ctx.fillStyle = cfg.dropShadow;
         ctx.fill();
-        // body
         ctx.beginPath();
         ctx.arc(d.x, d.y, DROP_R, 0, Math.PI * 2);
         ctx.fillStyle = cfg.dropColor;
         ctx.fill();
-        // shine
         ctx.beginPath();
         ctx.arc(d.x - 3, d.y - 3, 4, 0, Math.PI * 2);
         ctx.fillStyle = "rgba(255,255,255,0.45)";
         ctx.fill();
       }
 
-      // catch bar
       const bx = barX.current;
       ctx.shadowColor   = "rgba(0,0,0,0.18)";
       ctx.shadowBlur    = 4;
@@ -253,7 +204,6 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
       ctx.shadowColor   = "transparent";
       ctx.shadowBlur    = 0;
       ctx.shadowOffsetY = 0;
-      // shine
       drawRoundedRect(bx - BAR_W / 2 + 6, BAR_Y - BAR_H / 2 + 2, BAR_W - 12, 3, 2);
       ctx.fillStyle = "rgba(255,255,255,0.35)";
       ctx.fill();
@@ -272,35 +222,39 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
 
   const cfg = CONFIGS[type];
 
-  const handleClick = useCallback(() => {
-    if (doneRef.current && pendingScore.current !== null) {
-      onComplete(pendingScore.current);
-    }
-  }, [onComplete]);
-
   return (
-    <div className="mini-game-card" style={{ border: cfg.border }}>
-      <div className="mini-game-timer-area" style={{ background: cfg.bg }}>
-        <GameTimer
-          timeLeftMs={timerMs}
-          totalMs={GAME_MS}
-          color={cfg.timerColor}
-          trackColor={cfg.timerBg}
-        />
+    <div className="mini-game-card" style={{ background: cfg.bg, border: cfg.border }}>
+      <div className="mini-game-header">
+        <GameTimer timeLeftMs={timerMs} totalMs={GAME_MS} color={cfg.timerColor} trackColor={cfg.timerBg} />
+        <div className="mini-game-counter">
+          <span>{cfg.scoreEmoji}</span>
+          <span className="mini-game-counter-val">{catchCount}</span>
+        </div>
       </div>
       <canvas
         ref={canvasRef}
         width={W}
         height={H}
         onMouseMove={onMouseMove}
-        onClick={handleClick}
-        style={{
-          display:     "block",
-          cursor:      "default",
-          touchAction: "none",
-          userSelect:  "none",
-        }}
+        style={{ display: "block", touchAction: "none", userSelect: "none" }}
       />
+      {result && (
+        <div
+          className="mini-game-result"
+          style={{ background: cfg.bg }}
+          onClick={() => onComplete(result.skillScore)}
+        >
+          <button
+            className="mini-game-result-close"
+            onClick={e => { e.stopPropagation(); onComplete(result.skillScore); }}
+          >✕</button>
+          <span className="mini-game-result-emoji">{cfg.scoreEmoji}</span>
+          <p className="mini-game-result-count" style={{ color: cfg.resultColor }}>
+            Поймано: {result.catches}
+          </p>
+          <p className="mini-game-result-label">{feedbackLabel(result.catches)}</p>
+        </div>
+      )}
     </div>
   );
 }
