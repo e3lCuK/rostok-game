@@ -255,26 +255,6 @@ export default function GamePage({ state, onStateChange }: Props) {
           </div>
         ))}
 
-        {/* Mini-game overlay */}
-        {activeMinigame && (
-          <div className="water-game-overlay">
-            {activeMinigame === "sun" ? (
-              <ClickGameSun
-                onComplete={(score) => handleMinigameComplete("sun", score)}
-              />
-            ) : activeMinigame === "fertilizer" ? (
-              <FertilizerMatchGame
-                onComplete={(score) => handleMinigameComplete("fertilizer", score)}
-              />
-            ) : (
-              <FallingGameWater
-                type={activeMinigame}
-                onComplete={(score) => handleMinigameComplete(activeMinigame, score)}
-              />
-            )}
-          </div>
-        )}
-
         <div className="game-tree-wrap">
           <AnimatePresence mode="wait">
             <motion.div
@@ -372,6 +352,25 @@ export default function GamePage({ state, onStateChange }: Props) {
         </div>
       </div>
 
+      {/* Full-screen mini-game modal — outside game-area to avoid clipping */}
+      {activeMinigame && (
+        <div className="water-game-overlay">
+          {activeMinigame === "sun" ? (
+            <ClickGameSun
+              onComplete={(score) => handleMinigameComplete("sun", score)}
+            />
+          ) : activeMinigame === "fertilizer" ? (
+            <FertilizerMatchGame
+              onComplete={(score) => handleMinigameComplete("fertilizer", score)}
+            />
+          ) : (
+            <FallingGameWater
+              type={activeMinigame}
+              onComplete={(score) => handleMinigameComplete(activeMinigame, score)}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }

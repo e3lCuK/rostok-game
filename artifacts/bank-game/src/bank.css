@@ -47,6 +47,7 @@ body {
   flex-direction: column;
   background: var(--bg);
   position: relative;
+  overflow-x: hidden;
 }
 
 .status-bar {
@@ -1101,18 +1102,28 @@ body {
 }
 
 /* ============================
-   WATER MINI-GAME OVERLAY
+   MINI-GAME FULL-SCREEN MODAL
 ==============================*/
 .water-game-overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  z-index: 10;
+  z-index: 200;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(239, 246, 255, 0.92);
-  border-radius: inherit;
-  backdrop-filter: blur(2px);
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.50);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-sizing: border-box;
+}
+
+/* Canvas must not overflow its card container */
+canvas {
+  display: block;
+  max-width: 100%;
+  touch-action: none;
+  user-select: none;
 }
 
 /* ============================
