@@ -1375,53 +1375,52 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  background: rgba(239, 246, 255, 0.97);
+  gap: 6px;
+  background: rgba(240, 253, 244, 0.97);
+  border: 2px solid #bbf7d0;
   border-radius: inherit;
-  animation: m3FadeIn 0.25s ease;
+  cursor: pointer;
+  animation: m3FadeIn 0.22s ease;
 }
 
 @keyframes m3FadeIn {
-  from { opacity: 0; transform: scale(0.95); }
+  from { opacity: 0; transform: scale(0.97); }
   to   { opacity: 1; transform: scale(1); }
 }
 
-.m3-result-icon {
-  width: 60px;
-  height: 60px;
+.m3-result-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: #22c55e;
+  border: none;
+  background: rgba(0, 0, 0, 0.08);
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(34,197,94,0.35);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.m3-result-emoji {
+  font-size: 36px;
+  line-height: 1;
+  margin-bottom: 4px;
 }
 
 .m3-result-count {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: var(--text);
-}
-
-.m3-result-label {
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
   color: #166534;
 }
 
-.m3-result-btn {
-  margin-top: 6px;
-  padding: 10px 28px;
-  background: var(--green);
-  color: white;
-  border: none;
-  border-radius: 99px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(34,197,94,0.3);
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+.m3-result-label {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #6b7280;
 }
-
-.m3-result-btn:hover { transform: scale(1.04); box-shadow: 0 4px 12px rgba(34,197,94,0.4); }
-.m3-result-btn:active { transform: scale(0.97); }

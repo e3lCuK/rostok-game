@@ -309,18 +309,18 @@ export default function FertilizerMatchGame({ onComplete }: Props) {
       </div>
 
       {gameOver && result && (
-        <div className="m3-result-overlay">
-          <div className="m3-result-icon">
-            <Leaf size={32} color="white" strokeWidth={2} />
-          </div>
+        <div
+          className="m3-result-overlay"
+          onClick={() => handleContinue(result.skillScore)}
+        >
+          <button
+            className="m3-result-close"
+            onClick={e => { e.stopPropagation(); handleContinue(result.skillScore); }}
+            aria-label="Закрыть"
+          >✕</button>
+          <span className="m3-result-emoji">🌱</span>
           <p className="m3-result-count">Собрано: {result.matchCount}</p>
           <p className="m3-result-label">{resultLabel(result.matchCount)}</p>
-          <button
-            className="m3-result-btn"
-            onClick={() => handleContinue(result.skillScore)}
-          >
-            Продолжить
-          </button>
         </div>
       )}
     </div>
