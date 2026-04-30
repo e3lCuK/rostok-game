@@ -1271,53 +1271,83 @@ body {
 }
 
 /* ============================
-   MATCH-3 FERTILIZER GAME
+   SHARED MINI-GAME CARD + TIMER
 ==============================*/
-.m3-wrap {
+.mini-game-card {
+  width: 280px;
+  border-radius: 16px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 8px 8px;
-  width: 100%;
-  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
 }
 
-.m3-header {
+.mini-game-timer-area {
+  padding: 8px 10px 5px;
   width: 100%;
-  max-width: 264px;
+  box-sizing: border-box;
+}
+
+.game-timer {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
+  width: 100%;
 }
 
-.m3-stats-row {
+.game-timer-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 6px;
 }
 
-.m3-stat-text {
-  font-size: 0.72rem;
+.game-timer-icon {
+  font-size: 0.78rem;
+  line-height: 1;
+}
+
+.game-timer-secs {
+  font-size: 0.78rem;
   font-weight: 700;
-  color: #166534;
 }
 
-.m3-bar-track {
+.game-timer-label {
+  margin-left: auto;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.game-timer-track {
   width: 100%;
   height: 5px;
-  background: rgba(0,0,0,0.12);
   border-radius: 3px;
   overflow: hidden;
 }
 
-.m3-bar-fill {
+.game-timer-fill {
   height: 100%;
   border-radius: 3px;
-  transition: width 0.15s linear;
+  transition: width 0.1s linear;
 }
 
-.m3-bar-timer { background: #22c55e; }
+/* ============================
+   MATCH-3 FERTILIZER GAME
+==============================*/
+.m3-wrap {
+  width: 280px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(240, 253, 244, 0.97);
+  border: 2px solid #bbf7d0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
+  padding-bottom: 10px;
+  gap: 8px;
+}
 
 .m3-grid {
   display: grid;
@@ -1377,8 +1407,6 @@ body {
   justify-content: center;
   gap: 6px;
   background: rgba(240, 253, 244, 0.97);
-  border: 2px solid #bbf7d0;
-  border-radius: inherit;
   cursor: pointer;
   animation: m3FadeIn 0.22s ease;
 }

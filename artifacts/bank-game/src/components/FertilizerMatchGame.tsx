@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Leaf } from "lucide-react";
+import GameTimer from "./GameTimer";
 
 interface Props {
   onComplete: (skillScore: number) => void;
@@ -270,18 +271,16 @@ export default function FertilizerMatchGame({ onComplete }: Props) {
     setTimeout(() => resolveChains(swapped, matchRef.current), 50);
   }
 
-  const timerPct = (timeLeft / GAME_MS) * 100;
-
   return (
     <div className="m3-wrap">
-      <div className="m3-header">
-        <div className="m3-stats-row">
-          <span className="m3-stat-text">⏱ {Math.ceil(timeLeft / 1000)}с</span>
-          <span className="m3-stat-text">Собрано: {matchCount}</span>
-        </div>
-        <div className="m3-bar-track">
-          <div className="m3-bar-fill m3-bar-timer" style={{ width: `${timerPct}%` }} />
-        </div>
+      <div className="mini-game-timer-area" style={{ background: "rgba(240,253,244,0.97)" }}>
+        <GameTimer
+          timeLeftMs={timeLeft}
+          totalMs={GAME_MS}
+          color="#22c55e"
+          trackColor="#dcfce7"
+          label={`Собрано: ${matchCount}`}
+        />
       </div>
 
       <div className={`m3-grid${processing ? " m3-busy" : ""}`}>

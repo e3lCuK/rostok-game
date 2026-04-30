@@ -1,4 +1,5 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
+import GameTimer from "./GameTimer";
 
 interface Props {
   onComplete: (skillScore: number) => void;
@@ -73,6 +74,12 @@ export default function ClickGameSun({ onComplete }: Props) {
   const canvasRef    = useRef<HTMLCanvasElement>(null);
   const doneRef      = useRef(false);
   const pendingScore = useRef<number | null>(null);
+  const [timerMs, setTimerMs] = useState(GAME_MS);
+
+  useEffect(() => {
+    const id = setInterval(() => setTimerMs(t => Math.max(0, t - 100)), 100);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -191,13 +198,6 @@ export default function ClickGameSun({ onComplete }: Props) {
       ctx.fillStyle = CFG.bg;
       ctx.fillRect(0, 0, W, H);
 
-      // timer bar
-      const pct = Math.max(0, 1 - elapsed / GAME_MS);
-      ctx.fillStyle = CFG.timerBg;
-      ctx.fillRect(0, 0, W, 5);
-      ctx.fillStyle = CFG.timerColor;
-      ctx.fillRect(0, 0, W * pct, 5);
-
       // catch counter
       ctx.textAlign = "left";
       ctx.font      = "bold 13px sans-serif";
@@ -236,19 +236,27 @@ export default function ClickGameSun({ onComplete }: Props) {
   }, [onComplete]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={W}
-      height={H}
-      onClick={handleCanvasClick}
-      style={{
-        display:      "block",
-        borderRadius: 16,
-        cursor:       "default",
-        touchAction:  "none",
-        border:       CFG.border,
-        userSelect:   "none",
-      }}
-    />
+    <div className="mini-game-card" style={{ border: CFG.border }}>
+      <div className="mini-game-timer-area" style={{ background: CFG.bg }}>
+        <GameTimer
+          timeLeftMs={timerMs}
+          totalMs={GAME_MS}
+          color={CFG.timerColor}
+          trackColor={CFG.timerBg}
+        />
+      </div>
+      <canvas
+        ref={canvasRef}
+        width={W}
+        height={H}
+        onClick={handleCanvasClick}
+        style={{
+          display:     "block",
+          cursor:      "default",
+          touchAction: "none",
+          userSelect:  "none",
+        }}
+      />
+    </div>
   );
 }
