@@ -1,0 +1,300 @@
+import { useState, useEffect, useRef } from "react";
+import { Leaf } from "lucide-react";
+
+interface Props {
+  onComplete: (skillScore: number) => void;
+}
+
+const GRID = 6;
+const TYPES = 5;
+const GAME_MS = 15_000;
+const MAX_MATCHES = 18;
+
+const COLORS = ["green", "brown", "yellow", "blue", "purple"] as const;
+type Color = (typeof COLORS)[number];
+type Grid = (Color | null)[][];
+
+const TILE_BG: Record<Color, string> = {
+  green:  "#22c55e",
+  brown:  "#a16207",
+  yellow: "#eab308",
+  blue:   "#3b82f6",
+  purple: "#a855f7",
+};
+
+const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
+const rand = (): Color => COLORS[Math.floor(Math.random() * TYPES)];
+
+function clone(g: Grid): Grid { return g.map(r => [...r]); }
+
+function swapCells(g: Grid, r1: number, c1: number, r2: number, c2: number): Grid {
+  const n = clone(g);
+  [n[r1][c1], n[r2][c2]] = [n[r2][c2], n[r1][c1]];
+  return n;
+}
+
+function findMatches(g: Grid): { cells: Set<string>; events: number } {
+  const cells = new Set<string>();
+  let events = 0;
+
+  for (let r = 0; r < GRID; r++) {
+    for (let c = 0; c < GRID - 2; c++) {
+      const v = g[r][c];
+      if (!v || g[r][c + 1] !== v || g[r][c + 2] !== v) continue;
+      let len = 3;
+      while (c + len < GRID && g[r][c + len] === v) len++;
+      for (let i = 0; i < len; i++) cells.add(`${r},${c + i}`);
+      events++;
+      c += len - 1;
+    }
+  }
+
+  for (let c = 0; c < GRID; c++) {
+    for (let r = 0; r < GRID - 2; r++) {
+      const v = g[r][c];
+      if (!v || g[r + 1][c] !== v || g[r + 2][c] !== v) continue;
+      let len = 3;
+      while (r + len < GRID && g[r + len][c] === v) len++;
+      for (let i = 0; i < len; i++) cells.add(`${r + i},${c}`);
+      events++;
+      r += len - 1;
+    }
+  }
+
+  return { cells, events };
+}
+
+function hasMove(g: Grid): boolean {
+  for (let r = 0; r < GRID; r++) {
+    for (let c = 0; c < GRID; c++) {
+      if (c + 1 < GRID && findMatches(swapCells(g, r, c, r, c + 1)).cells.size > 0) return true;
+      if (r + 1 < GRID && findMatches(swapCells(g, r, c, r + 1, c)).cells.size > 0) return true;
+    }
+  }
+  return false;
+}
+
+function applyGravity(g: Grid): Grid {
+  const n = clone(g);
+  for (let c = 0; c < GRID; c++) {
+    const tiles: Color[] = [];
+    for (let r = GRID - 1; r >= 0; r--) if (n[r][c]) tiles.push(n[r][c]!);
+    for (let r = GRID - 1; r >= 0; r--) n[r][c] = tiles.length > 0 ? tiles.shift()! : rand();
+  }
+  return n;
+}
+
+function makeGrid(): Grid {
+  let g: Grid = [];
+  let tries = 0;
+  do {
+    g = Array.from({ length: GRID }, () => Array.from({ length: GRID }, rand));
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (let r = 0; r < GRID; r++) {
+        for (let c = 0; c < GRID; c++) {
+          const hBad = c >= 2 && g[r][c] === g[r][c - 1] && g[r][c] === g[r][c - 2];
+          const vBad = r >= 2 && g[r][c] === g[r - 1][c] && g[r][c] === g[r - 2][c];
+          if (!hBad && !vBad) continue;
+          const forbid = new Set<Color>();
+          if (hBad) forbid.add(g[r][c - 1]!);
+          if (vBad) forbid.add(g[r - 1][c]!);
+          const opts = COLORS.filter(x => !forbid.has(x));
+          g[r][c] = opts[Math.floor(Math.random() * opts.length)];
+          changed = true;
+        }
+      }
+    }
+    tries++;
+  } while (!hasMove(g) && tries < 200);
+  return g;
+}
+
+export default function FertilizerMatchGame({ onComplete }: Props) {
+  const [grid, setGrid] = useState<Grid>(() => makeGrid());
+  const [selected, setSelected] = useState<[number, number] | null>(null);
+  const [highlighted, setHighlighted] = useState<Set<string>>(new Set());
+  const [matchCount, setMatchCount] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(GAME_MS);
+  const [gameOver, setGameOver] = useState(false);
+  const [processing, setProcessing] = useState(false);
+
+  const gridRef = useRef<Grid>(grid);
+  const matchRef = useRef(0);
+  const doneRef = useRef(false);
+  const procRef = useRef(false);
+  const onDoneRef = useRef(onComplete);
+  useEffect(() => { onDoneRef.current = onComplete; }, [onComplete]);
+
+  function endGame() {
+    if (doneRef.current) return;
+    doneRef.current = true;
+    procRef.current = false;
+    setGameOver(true);
+    setProcessing(false);
+    const m = matchRef.current;
+    const skillFactor = Math.min(1, m / MAX_MATCHES);
+    const skillScore = Math.round(skillFactor * 80);
+    setTimeout(() => onDoneRef.current(skillScore), 600);
+  }
+
+  useEffect(() => {
+    if (gameOver) return;
+    const id = setInterval(() => {
+      setTimeLeft(t => {
+        if (t <= 100) { clearInterval(id); return 0; }
+        return t - 100;
+      });
+    }, 100);
+    return () => clearInterval(id);
+  }, [gameOver]);
+
+  useEffect(() => {
+    if (timeLeft === 0 && !doneRef.current) endGame();
+  }, [timeLeft]);
+
+  async function resolveChains(g: Grid, m: number) {
+    let cur = g;
+    let count = m;
+
+    while (true) {
+      const { cells, events } = findMatches(cur);
+      if (cells.size === 0) break;
+
+      const newCount = count + events;
+      const display = Math.min(newCount, MAX_MATCHES);
+      matchRef.current = display;
+      count = newCount;
+      setMatchCount(display);
+
+      setHighlighted(cells);
+      await sleep(220);
+
+      const ng = clone(cur);
+      cells.forEach(k => {
+        const [r, c] = k.split(",").map(Number);
+        ng[r][c] = null;
+      });
+      setHighlighted(new Set());
+      cur = ng;
+      setGrid(clone(cur));
+      await sleep(80);
+
+      cur = applyGravity(cur);
+      gridRef.current = cur;
+      setGrid(clone(cur));
+      await sleep(150);
+
+      if (newCount >= MAX_MATCHES) {
+        endGame();
+        return;
+      }
+
+      if (!hasMove(cur)) {
+        cur = makeGrid();
+        gridRef.current = cur;
+        setGrid(clone(cur));
+        await sleep(200);
+      }
+    }
+
+    if (!hasMove(cur)) {
+      cur = makeGrid();
+      gridRef.current = cur;
+      setGrid(clone(cur));
+    }
+
+    procRef.current = false;
+    setProcessing(false);
+  }
+
+  function handleClick(r: number, c: number) {
+    if (doneRef.current || procRef.current) return;
+
+    if (!selected) {
+      setSelected([r, c]);
+      return;
+    }
+
+    const [sr, sc] = selected;
+
+    if (sr === r && sc === c) {
+      setSelected(null);
+      return;
+    }
+
+    if (Math.abs(sr - r) + Math.abs(sc - c) !== 1) {
+      setSelected([r, c]);
+      return;
+    }
+
+    setSelected(null);
+
+    const orig = gridRef.current;
+    const swapped = swapCells(orig, sr, sc, r, c);
+    const { cells } = findMatches(swapped);
+
+    if (cells.size === 0) {
+      procRef.current = true;
+      setProcessing(true);
+      setGrid(swapped);
+      setTimeout(() => {
+        setGrid(clone(orig));
+        procRef.current = false;
+        setProcessing(false);
+      }, 280);
+      return;
+    }
+
+    procRef.current = true;
+    setProcessing(true);
+    gridRef.current = swapped;
+    setGrid(clone(swapped));
+    setTimeout(() => resolveChains(swapped, matchRef.current), 50);
+  }
+
+  const timerPct = (timeLeft / GAME_MS) * 100;
+  const matchPct = (matchCount / MAX_MATCHES) * 100;
+
+  return (
+    <div className="m3-wrap">
+      <div className="m3-header">
+        <div className="m3-stats-row">
+          <span className="m3-stat-text">⏱ {Math.ceil(timeLeft / 1000)}с</span>
+          <span className="m3-stat-text">Матчи: {matchCount} / {MAX_MATCHES}</span>
+        </div>
+        <div className="m3-bar-track">
+          <div className="m3-bar-fill m3-bar-timer" style={{ width: `${timerPct}%` }} />
+        </div>
+        <div className="m3-bar-track">
+          <div className="m3-bar-fill m3-bar-match" style={{ width: `${matchPct}%` }} />
+        </div>
+      </div>
+
+      <div className={`m3-grid${processing ? " m3-busy" : ""}`}>
+        {grid.map((row, r) =>
+          row.map((cell, c) => {
+            const key = `${r},${c}`;
+            const isSel = selected?.[0] === r && selected?.[1] === c;
+            const isHi = highlighted.has(key);
+            return (
+              <button
+                key={key}
+                className={`m3-cell${isSel ? " m3-sel" : ""}${isHi ? " m3-hi" : ""}`}
+                onClick={() => handleClick(r, c)}
+                disabled={gameOver}
+              >
+                {cell && (
+                  <div className="m3-tile" style={{ background: TILE_BG[cell] }}>
+                    <Leaf size={15} color="rgba(255,255,255,0.88)" strokeWidth={2.5} />
+                  </div>
+                )}
+              </button>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}

@@ -15,7 +15,7 @@ import { api } from "@/lib/api";
 import TreeSVG from "@/components/TreeSVG";
 import FallingGameWater, { GameType } from "@/components/FallingGameWater";
 import ClickGameSun from "@/components/ClickGameSun";
-import ClickGameFertilizer from "@/components/ClickGameFertilizer";
+import FertilizerMatchGame from "@/components/FertilizerMatchGame";
 import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2 } from "lucide-react";
 
 interface Props {
@@ -263,7 +263,7 @@ export default function GamePage({ state, onStateChange }: Props) {
                 onComplete={(score) => handleMinigameComplete("sun", score)}
               />
             ) : activeMinigame === "fertilizer" ? (
-              <ClickGameFertilizer
+              <FertilizerMatchGame
                 onComplete={(score) => handleMinigameComplete("fertilizer", score)}
               />
             ) : (
