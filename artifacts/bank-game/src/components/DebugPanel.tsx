@@ -112,7 +112,7 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
             </div>
 
             <button className="debug-btn" onClick={resetTreeGrowth} disabled={busy}>
-              Обнулить дерево
+              Сброс роста
             </button>
 
             <button className="debug-btn" onClick={resetSession} disabled={busy}>
