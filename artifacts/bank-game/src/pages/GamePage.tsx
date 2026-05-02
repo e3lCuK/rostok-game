@@ -153,7 +153,7 @@ export default function GamePage({ state, onStateChange }: Props) {
           newGrowthMM += extraMM;
           newRemainder -= extraMM;
         }
-        if (newGrowthMM > 1000) newGrowthMM = 1000;
+        if (newGrowthMM > 10000) newGrowthMM = 10000;
         nextGame = {
           ...nextGame,
           water: true, sun: true, fertilizer: true,

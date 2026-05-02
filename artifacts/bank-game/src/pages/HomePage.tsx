@@ -24,7 +24,7 @@ export default function HomePage({ state }: Props) {
   const progress = getTreeProgress(startDate, now, totalBalance);
   const stage = getTreeStage(progress);
   const treeGrowthMM = state.game.treeGrowthMM ?? 0;
-  const treeGrowthPct = treeGrowthMM / 10; // 1000mm = 100%
+  const treeGrowthPct = treeGrowthMM / 100; // 10000mm = 100%
 
   const dailyStd = calcStandardDaily(standard);
   const dailyAct = active * 0.15 / 365;

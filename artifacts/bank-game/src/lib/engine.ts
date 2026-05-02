@@ -149,7 +149,7 @@ export function getSessionActionsLeft(game: UserState["game"]): number {
 export function formatTreeGrowth(mm: number): string {
   if (mm < 10) return `${mm} мм`;
   if (mm < 1000) return `${(mm / 10).toFixed(1)} см`;
-  return "1.00 м";
+  return `${(mm / 1000).toFixed(2)} м`;
 }
 
 // ---- Formatters ----

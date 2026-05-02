@@ -322,7 +322,7 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
         newGrowthMM += extraMM;
         newRemainder -= extraMM;
       }
-      if (newGrowthMM > 1000) newGrowthMM = 1000;
+      if (newGrowthMM > 10000) newGrowthMM = 10000;
 
       // Store pending rewards (accumulate in case previous unclaimed)
       // Close session, do NOT auto-credit
