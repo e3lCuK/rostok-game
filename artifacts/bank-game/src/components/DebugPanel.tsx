@@ -27,6 +27,13 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
     setMmInput("");
   }
 
+  function resetTreeGrowth() {
+    onStateChange({
+      ...state,
+      game: { ...game, treeGrowthMM: 0, treeGrowthRemainder: 0 },
+    });
+  }
+
   async function resetSession() {
     if (busy) return;
     setBusy(true);
@@ -103,6 +110,10 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
                 + мм дереву
               </button>
             </div>
+
+            <button className="debug-btn" onClick={resetTreeGrowth} disabled={busy}>
+              Обнулить дерево
+            </button>
 
             <button className="debug-btn" onClick={resetSession} disabled={busy}>
               Сброс сессии
