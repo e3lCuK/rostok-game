@@ -13,8 +13,19 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [mmInput, setMmInput] = useState("");
 
   const { game } = state;
+
+  function addTreeGrowthMm() {
+    const value = Number(mmInput);
+    if (isNaN(value) || value <= 0) return;
+    onStateChange({
+      ...state,
+      game: { ...game, treeGrowthMM: (game.treeGrowthMM ?? 0) + value },
+    });
+    setMmInput("");
+  }
 
   async function resetSession() {
     if (busy) return;
@@ -79,6 +90,20 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
         <div className="debug-body">
           <p className="debug-title">Отладка</p>
           <div className="debug-buttons">
+            <div className="debug-mm-row">
+              <input
+                className="debug-mm-input"
+                type="number"
+                value={mmInput}
+                placeholder="мм роста"
+                onChange={e => setMmInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && addTreeGrowthMm()}
+              />
+              <button className="debug-btn" onClick={addTreeGrowthMm} disabled={busy}>
+                + мм дереву
+              </button>
+            </div>
+
             <button className="debug-btn" onClick={resetSession} disabled={busy}>
               Сброс сессии
             </button>

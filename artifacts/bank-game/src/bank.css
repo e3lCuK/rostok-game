@@ -628,31 +628,10 @@ body.modal-open {
 }
 
 /* ── Debug panel ─────────────────────────────────── */
-.debug-mm-panel {
+.debug-mm-row {
   display: flex;
+  gap: 6px;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: rgba(239,68,68,0.08);
-  border: 1px dashed rgba(239,68,68,0.35);
-  border-radius: 10px;
-  margin-top: 4px;
-}
-
-.debug-mm-btn {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #ef4444;
-  background: none;
-  border: 1px solid rgba(239,68,68,0.4);
-  border-radius: 6px;
-  padding: 4px 10px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.debug-mm-btn:hover {
-  background: rgba(239,68,68,0.08);
 }
 
 .debug-mm-input {
@@ -663,10 +642,12 @@ body.modal-open {
   border-radius: 6px;
   outline: none;
   min-width: 0;
+  background: #fff;
+  color: #111827;
 }
 
 .debug-mm-input:focus {
-  border-color: #ef4444;
+  border-color: #6b7280;
 }
 
 /* ── Help icon ───────────────────────────────────── */

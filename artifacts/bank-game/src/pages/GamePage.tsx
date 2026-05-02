@@ -72,8 +72,6 @@ export default function GamePage({ state, onStateChange }: Props) {
   const [displayGrowthMM, setDisplayGrowthMM] = useState(state.game.treeGrowthMM ?? 0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [currentStage, setCurrentStage] = useState<0|1|2|3|4>(() => getTreeStage(state.game.treeGrowthMM ?? 0) as 0|1|2|3|4);
-  const [showDebugInput, setShowDebugInput] = useState(false);
-  const [debugMmInput, setDebugMmInput] = useState("");
   const currentStageRef = useRef<0|1|2|3|4>(getTreeStage(state.game.treeGrowthMM ?? 0) as 0|1|2|3|4);
   const stageTransTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -656,34 +654,6 @@ export default function GamePage({ state, onStateChange }: Props) {
                 );
               })}
             </div>
-          )}
-        </div>
-      )}
-
-      {import.meta.env.DEV && (
-        <div className="debug-mm-panel">
-          <button
-            className="debug-mm-btn"
-            onClick={() => setShowDebugInput(v => !v)}
-          >
-            Проверка этапов
-          </button>
-          {showDebugInput && (
-            <input
-              className="debug-mm-input"
-              type="number"
-              value={debugMmInput}
-              placeholder="Введите мм (например 500)"
-              autoFocus
-              onChange={e => setDebugMmInput(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === "Enter") {
-                  const value = Number(debugMmInput);
-                  if (!isNaN(value) && value > 0) addTreeGrowthMm(value);
-                  setDebugMmInput("");
-                }
-              }}
-            />
           )}
         </div>
       )}
