@@ -3,12 +3,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ClerkProvider, SignIn, SignUp, Show, useClerk, useUser, useAuth } from "@clerk/react";
 import { Switch, Route, Redirect, useLocation, Router as WouterRouter } from "wouter";
 import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
-import { Home, PiggyBank, Gamepad2, LogOut } from "lucide-react";
+import { Home, PiggyBank, TrendingUp, Zap, LogOut } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { api, setTokenGetter } from "@/lib/api";
 import { APP_NAME, APP_VERSION, UserState, applyOfflineAccrual } from "@/lib/engine";
 import HomePage from "@/pages/HomePage";
 import SavingsPage from "@/pages/SavingsPage";
+import StandardPage from "@/pages/StandardPage";
 import GamePage from "@/pages/GamePage";
 import OnboardingPage from "@/pages/OnboardingPage";
 import DebugPanel from "@/components/DebugPanel";
@@ -97,11 +98,12 @@ function HomeRedirect() {
 }
 
 // ---- Main app shell ----
-type Tab = "home" | "savings" | "game";
+type Tab = "home" | "savings" | "standard" | "active";
 const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
-  { id: "home", label: "Главная", icon: Home },
-  { id: "savings", label: "Вклады", icon: PiggyBank },
-  { id: "game", label: "Игра", icon: Gamepad2 },
+  { id: "home",     label: "Главная",    icon: Home },
+  { id: "savings",  label: "Вклады",     icon: PiggyBank },
+  { id: "standard", label: "Стандартный", icon: TrendingUp },
+  { id: "active",   label: "Активный",   icon: Zap },
 ];
 
 function AppShell() {
@@ -220,9 +222,10 @@ function AppShell() {
             transition={{ duration: 0.18 }}
             className="bank-page"
           >
-            {tab === "home" && <HomePage state={state} />}
-            {tab === "savings" && <SavingsPage state={state} onTabChange={handleTabChange} />}
-            {tab === "game" && (
+            {tab === "home"     && <HomePage state={state} />}
+            {tab === "savings"  && <SavingsPage state={state} onTabChange={handleTabChange} />}
+            {tab === "standard" && <StandardPage state={state} />}
+            {tab === "active"   && (
               <GamePage
                 state={state}
                 onStateChange={handleStateChange}

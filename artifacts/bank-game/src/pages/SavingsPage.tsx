@@ -10,7 +10,7 @@ import { TrendingUp, Zap, Lock, ChevronRight, HelpCircle, X } from "lucide-react
 
 interface Props {
   state: UserState;
-  onTabChange: (tab: "game") => void;
+  onTabChange: (tab: "active") => void;
 }
 
 export default function SavingsPage({ state, onTabChange }: Props) {
@@ -76,7 +76,7 @@ export default function SavingsPage({ state, onTabChange }: Props) {
         </div>
       </div>
 
-      <div className="deposit-card deposit-card-green" onClick={() => onTabChange("game")}>
+      <div className="deposit-card deposit-card-green" onClick={() => onTabChange("active")}>
         <div className="deposit-header">
           <div className="deposit-icon-wrap deposit-icon-green">
             <Zap size={20} />

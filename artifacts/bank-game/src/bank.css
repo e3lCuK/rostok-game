@@ -139,11 +139,18 @@ body {
   border: none;
   cursor: pointer;
   color: var(--text3);
-  font-size: 0.68rem;
+  font-size: 0.6rem;
   font-weight: 500;
-  padding: 4px 0;
+  padding: 4px 2px;
   position: relative;
   transition: color 0.15s;
+}
+
+.std-history-empty {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.85rem;
+  padding: 16px 0;
 }
 
 .bank-nav-btn-active {
