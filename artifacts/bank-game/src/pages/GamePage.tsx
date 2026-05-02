@@ -39,6 +39,9 @@ export default function GamePage({ state, onStateChange }: Props) {
   const [activeMinigame, setActiveMinigame] = useState<GameType | null>(null);
   const [claimingBase, setClaimingBase] = useState(false);
   const [claimingBonus, setClaimingBonus] = useState(false);
+  const [waterResultPct, setWaterResultPct] = useState<number | null>(null);
+  const [lightResultPct, setLightResultPct] = useState<number | null>(null);
+  const [fertilizerResultPct, setFertilizerResultPct] = useState<number | null>(null);
   const floaterRef = useRef(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const skillScoreRef = useRef<number>(40);
@@ -121,11 +124,14 @@ export default function GamePage({ state, onStateChange }: Props) {
     try {
       await api.startSession();
       console.log("[Session] Started successfully");
-      // reset per-session scores
+      // reset per-session scores and result display
       waterScoreRef.current = 40;
       sunScoreRef.current = 40;
       fertilizerScoreRef.current = 40;
       skillScoreRef.current = 40;
+      setWaterResultPct(null);
+      setLightResultPct(null);
+      setFertilizerResultPct(null);
       onStateChange({
         ...state,
         game: { ...game, sessionInProgress: true, water: false, sun: false, fertilizer: false },
@@ -148,6 +154,10 @@ export default function GamePage({ state, onStateChange }: Props) {
     if (type === "water")      waterScoreRef.current = safe;
     if (type === "sun")        sunScoreRef.current = safe;
     if (type === "fertilizer") fertilizerScoreRef.current = safe;
+    const pct = Math.min(100, Math.max(0, Math.round((safe / 80) * 100)));
+    if (type === "water")      setWaterResultPct(pct);
+    if (type === "sun")        setLightResultPct(pct);
+    if (type === "fertilizer") setFertilizerResultPct(pct);
 
     const waterScore      = waterScoreRef.current || 0;
     const sunScore        = sunScoreRef.current || 0;
@@ -338,9 +348,9 @@ export default function GamePage({ state, onStateChange }: Props) {
             </p>
             <div className="action-buttons-row">
               {[
-                { key: "water" as const, icon: <Droplets size={22} />, label: "Вода", color: "#3b82f6", done: game.water },
-                { key: "sun" as const, icon: <Sun size={22} />, label: "Свет", color: "#f59e0b", done: game.sun },
-                { key: "fertilizer" as const, icon: <Leaf size={22} />, label: "Удобрение", color: "#22c55e", done: game.fertilizer },
+                { key: "water" as const, icon: <Droplets size={22} />, label: "Вода", color: "#3b82f6", done: game.water, pct: waterResultPct },
+                { key: "sun" as const, icon: <Sun size={22} />, label: "Свет", color: "#f59e0b", done: game.sun, pct: lightResultPct },
+                { key: "fertilizer" as const, icon: <Leaf size={22} />, label: "Удобрение", color: "#22c55e", done: game.fertilizer, pct: fertilizerResultPct },
               ].map(btn => (
                 <motion.button
                   key={btn.key}
@@ -352,6 +362,9 @@ export default function GamePage({ state, onStateChange }: Props) {
                 >
                   {btn.done ? <CheckCircle2 size={22} /> : btn.icon}
                   <span>{btn.label}</span>
+                  {btn.done && btn.pct !== null && (
+                    <span className="action-btn-pct" style={{ color: btn.color }}>{btn.pct}%</span>
+                  )}
                 </motion.button>
               ))}
             </div>
