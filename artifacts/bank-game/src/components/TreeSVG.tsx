@@ -80,13 +80,6 @@ export default function TreeSVG({ stage, size = 160 }: TreeSVGProps) {
       <ellipse cx="76" cy="32" rx="28" ry="26" fill="#3d8c38" />
       <ellipse cx="126" cy="26" rx="26" ry="24" fill="#4d9c47" />
       <ellipse cx="100" cy="6" rx="30" ry="24" fill="#5aac54" />
-      <circle cx="66" cy="60" r="5" fill="#ff6b6b" />
-      <circle cx="134" cy="54" r="5" fill="#ff6b6b" />
-      <circle cx="100" cy="28" r="4" fill="#ffb347" />
-      <circle cx="80" cy="44" r="3.5" fill="#ff6b6b" />
-      <circle cx="122" cy="38" r="3.5" fill="#ffb347" />
-      <circle cx="56" cy="76" r="3" fill="#ffb347" />
-      <circle cx="146" cy="68" r="3" fill="#ff6b6b" />
     </svg>
   ];
   return (
