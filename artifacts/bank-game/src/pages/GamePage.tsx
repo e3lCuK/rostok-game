@@ -453,8 +453,10 @@ export default function GamePage({ state, onStateChange }: Props) {
                       className="action-btn-bank"
                       style={{ "--ac": "#9ca3af" } as React.CSSProperties}
                     >
-                      {btn.icon}
-                      <span>{btn.label}</span>
+                      <div className="action-btn-content">
+                        {btn.icon}
+                        <span>{btn.label}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -496,10 +498,21 @@ export default function GamePage({ state, onStateChange }: Props) {
                     disabled={!!btn.done || actionLoading}
                     whileTap={!btn.done ? { scale: 0.91 } : {}}
                   >
-                    {btn.done ? <CheckCircle2 size={22} /> : btn.icon}
-                    <span>{btn.label}</span>
-                    {btn.done && btn.pct !== null && (
-                      <span className="action-btn-pct" style={{ color: btn.color }}>{btn.pct}%</span>
+                    {btn.done ? (
+                      <>
+                        <div className="action-btn-top">
+                          <CheckCircle2 size={20} />
+                          <span>{btn.label}</span>
+                        </div>
+                        {btn.pct !== null && (
+                          <div className="action-btn-percent">{btn.pct}%</div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="action-btn-content">
+                        {btn.icon}
+                        <span>{btn.label}</span>
+                      </div>
                     )}
                   </motion.button>
                 ))}
