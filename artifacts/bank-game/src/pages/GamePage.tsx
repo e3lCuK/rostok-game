@@ -405,7 +405,7 @@ export default function GamePage({ state, onStateChange }: Props) {
 
       {showCompletionStage && !showRewards && (
         <button className="transition-btn" onClick={handleGoToRewards}>
-          ↓ Перейти к начислениям
+          Перейти к начислениям
         </button>
       )}
 

@@ -614,8 +614,9 @@ body {
 .transition-btn {
   display: block;
   width: 100%;
-  margin-top: 16px;
-  padding: 8px 0;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding: 0;
   background: none;
   border: none;
   color: #9ca3af;
