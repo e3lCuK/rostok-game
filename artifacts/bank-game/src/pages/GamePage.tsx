@@ -42,6 +42,8 @@ export default function GamePage({ state, onStateChange }: Props) {
   const [waterResultPct, setWaterResultPct] = useState<number | null>(null);
   const [lightResultPct, setLightResultPct] = useState<number | null>(null);
   const [fertilizerResultPct, setFertilizerResultPct] = useState<number | null>(null);
+  const [sessionJustCompleted, setSessionJustCompleted] = useState(false);
+  const completionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const floaterRef = useRef(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const skillScoreRef = useRef<number>(40);
@@ -60,6 +62,10 @@ export default function GamePage({ state, onStateChange }: Props) {
 
   useEffect(() => {
     return () => { if (animFrameRef.current !== null) cancelAnimationFrame(animFrameRef.current); };
+  }, []);
+
+  useEffect(() => {
+    return () => { if (completionTimerRef.current !== null) clearTimeout(completionTimerRef.current); };
   }, []);
 
   const { balances, game } = state;
@@ -203,6 +209,12 @@ export default function GamePage({ state, onStateChange }: Props) {
           pendingBonusReward: (game.pendingBonusReward ?? 0) + (result.bonusReward ?? 0),
         };
         console.log(`[Session complete] base=${result.baseReward} bonus=${result.bonusReward}`);
+        setSessionJustCompleted(true);
+        if (completionTimerRef.current !== null) clearTimeout(completionTimerRef.current);
+        completionTimerRef.current = setTimeout(() => {
+          setSessionJustCompleted(false);
+          completionTimerRef.current = null;
+        }, 1200);
         onStateChange({ ...state, game: nextGame });
       } else {
         onStateChange({ ...state, game: nextGame });
@@ -282,13 +294,15 @@ export default function GamePage({ state, onStateChange }: Props) {
       <div className="session-counter-card">
         <div className="session-counter-left">
           <p className="session-counter-label">Статус сессии</p>
-          <div className={`session-status-badge ${locked ? "session-status-locked" : "session-status-ready"}`}>
-            {game.sessionInProgress ? "В процессе" : locked ? "Перезарядка" : "Готова"}
+          <div className={`session-status-badge ${sessionJustCompleted ? "session-status-ready" : locked ? "session-status-locked" : "session-status-ready"}`}>
+            {game.sessionInProgress || sessionJustCompleted ? "В процессе" : locked ? "Перезарядка" : "Готова"}
           </div>
         </div>
 
         <div className="session-counter-right">
-          {locked && msLeft !== null && msLeft > 0 ? (
+          {sessionJustCompleted ? (
+            <p className="session-ready-text">Осталось: 0 действия</p>
+          ) : locked && msLeft !== null && msLeft > 0 ? (
             <>
               <p className="session-timer-label">Следующая через</p>
               <div className="session-timer">
@@ -331,7 +345,7 @@ export default function GamePage({ state, onStateChange }: Props) {
           <p className="game-tree-stage">{TREE_STAGE_NAMES[stage]} · Рост дерева: {formatTreeGrowth(displayGrowthMM)}</p>
         </div>
 
-        {!game.sessionInProgress ? (
+        {!game.sessionInProgress && !sessionJustCompleted ? (
           <motion.button
             className={`start-session-btn ${locked ? "start-session-btn-disabled" : ""}`}
             onClick={handleStartSession}
