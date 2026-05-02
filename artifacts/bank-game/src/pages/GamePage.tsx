@@ -102,7 +102,18 @@ export default function GamePage({ state, onStateChange }: Props) {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    const newStage = getTreeStage(game.treeGrowthMM ?? 0) as 0|1|2|3|4;
+    const mm = game.treeGrowthMM ?? 0;
+
+    // Sync display counter (animates if different from current display)
+    if (mm !== displayGrowthMMRef.current) {
+      const from = displayGrowthMMRef.current;
+      displayGrowthMMRef.current = mm;
+      setDisplayGrowthMM(mm);
+      if (mm > from) animateGrowth(from, mm);
+    }
+
+    // Stage transition
+    const newStage = getTreeStage(mm) as 0|1|2|3|4;
     if (newStage !== currentStageRef.current) {
       currentStageRef.current = newStage;
       stageTransTimers.current.forEach(clearTimeout);
