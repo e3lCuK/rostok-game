@@ -398,15 +398,51 @@ export default function GamePage({ state, onStateChange }: Props) {
         </div>
 
         {!game.sessionInProgress && !showCompletionStage ? (
-          <motion.button
-            className={`start-session-btn ${locked ? "start-session-btn-disabled" : ""}`}
-            onClick={handleStartSession}
-            disabled={locked || actionLoading}
-            whileTap={!locked ? { scale: 0.96 } : {}}
-          >
-            <Play size={16} />
-            {locked ? "Сессия недоступна" : "Начать сессию"}
-          </motion.button>
+          <AnimatePresence mode="wait">
+            {locked ? (
+              <motion.div
+                key="cooldown"
+                className="session-actions activities-disabled"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.35 }}
+              >
+                <p className="session-actions-title">Ухаживайте за деревом</p>
+                <div className="action-buttons-row">
+                  {[
+                    { key: "water", icon: <Droplets size={22} />, label: "Вода" },
+                    { key: "sun",   icon: <Sun size={22} />,      label: "Свет" },
+                    { key: "fertilizer", icon: <Leaf size={22} />, label: "Удобрение" },
+                  ].map(btn => (
+                    <div
+                      key={btn.key}
+                      className="action-btn-bank"
+                      style={{ "--ac": "#9ca3af" } as React.CSSProperties}
+                    >
+                      {btn.icon}
+                      <span>{btn.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            ) : (
+              <motion.button
+                key="start"
+                className="start-session-btn"
+                onClick={handleStartSession}
+                disabled={actionLoading}
+                whileTap={{ scale: 0.96 }}
+                initial={{ opacity: 0, scale: 0.92 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.92 }}
+                transition={{ duration: 0.35 }}
+              >
+                <Play size={16} />
+                Начать сессию
+              </motion.button>
+            )}
+          </AnimatePresence>
         ) : (
           !showRewards && (
             <div className={`session-actions ${fadeActivities ? "activities-fade" : ""}`}>

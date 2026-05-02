@@ -538,10 +538,9 @@ body {
   background: #15803d;
 }
 
-.start-session-btn-disabled {
-  background: #9ca3af;
-  box-shadow: none;
-  cursor: not-allowed;
+.activities-disabled {
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 /* Action buttons */
