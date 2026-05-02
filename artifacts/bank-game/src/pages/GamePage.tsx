@@ -47,6 +47,7 @@ export default function GamePage({ state, onStateChange }: Props) {
   const [showCompletionStage, setShowCompletionStage] = useState(hasPendingInit && notInSessionInit);
   const [showRewards, setShowRewards] = useState(hasPendingInit && notInSessionInit);
   const [fadeActivities, setFadeActivities] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const floaterRef = useRef(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const skillScoreRef = useRef<number>(40);
@@ -303,6 +304,42 @@ export default function GamePage({ state, onStateChange }: Props) {
     }
   }
 
+  function formatPercent(value: number) {
+    return value.toFixed(2) + " %";
+  }
+
+  const sessionHistory = (() => {
+    const activeItems = [...state.history].reverse().filter(h => h.type === "base" || h.type === "bonus");
+    const sessions: { date: string; base: number; bonus: number; total: number }[] = [];
+    let i = 0;
+    while (i < activeItems.length) {
+      const item = activeItems[i];
+      const next = activeItems[i + 1];
+      if (next && next.type !== item.type) {
+        sessions.push({
+          date: item.date,
+          base: item.type === "base" ? item.amount : next.amount,
+          bonus: item.type === "bonus" ? item.amount : next.amount,
+          total: item.amount + next.amount,
+        });
+        i += 2;
+      } else {
+        sessions.push({
+          date: item.date,
+          base: item.type === "base" ? item.amount : 0,
+          bonus: item.type === "bonus" ? item.amount : 0,
+          total: item.amount,
+        });
+        i += 1;
+      }
+    }
+    return sessions;
+  })();
+
+  const avgPercent = sessionHistory.length > 0
+    ? sessionHistory.reduce((sum, s) => sum + (s.base > 0 ? (s.total / s.base) * 12 : 12), 0) / sessionHistory.length
+    : 12;
+
   return (
     <div className="game-page">
       {/* Session status card */}
@@ -449,64 +486,47 @@ export default function GamePage({ state, onStateChange }: Props) {
         </div>
         <div className="text-right">
           <p className="game-balance-label">Заработано</p>
-          <p className="game-balance-earned">+{formatRub(balances.activeEarned)}</p>
+          <p className="game-balance-earned">+{formatRub(balances.activeEarned)} · {formatPercent(avgPercent)}</p>
         </div>
       </div>
 
       {/* Session history */}
-      {(() => {
-        const activeItems = [...state.history].reverse().filter(h => h.type === "base" || h.type === "bonus");
-        if (activeItems.length === 0) return null;
-        const sessions: { date: string; base: number; bonus: number; total: number }[] = [];
-        let i = 0;
-        while (i < activeItems.length) {
-          const item = activeItems[i];
-          const next = activeItems[i + 1];
-          if (next && next.type !== item.type) {
-            sessions.push({
-              date: item.date,
-              base: item.type === "base" ? item.amount : next.amount,
-              bonus: item.type === "bonus" ? item.amount : next.amount,
-              total: item.amount + next.amount,
-            });
-            i += 2;
-          } else {
-            sessions.push({
-              date: item.date,
-              base: item.type === "base" ? item.amount : 0,
-              bonus: item.type === "bonus" ? item.amount : 0,
-              total: item.amount,
-            });
-            i += 1;
-          }
-        }
-        return (
-          <div className="session-history">
-            <h3 className="session-history-title">История сессий</h3>
-            {sessions.map((s, idx) => (
-              <div key={idx} className="session-item">
-                <p className="session-title">{s.date}</p>
-                {s.base > 0 && (
-                  <div className="session-row">
-                    <span>База</span>
-                    <span>+{formatRub(s.base)}</span>
-                  </div>
-                )}
-                {s.bonus > 0 && (
-                  <div className="session-row session-row-bonus">
-                    <span>Бонус</span>
-                    <span>+{formatRub(s.bonus)}</span>
-                  </div>
-                )}
-                <div className="session-total">
-                  <span>Итого</span>
-                  <span>+{formatRub(s.total)}</span>
-                </div>
-              </div>
-            ))}
+      {sessionHistory.length > 0 && (
+        <div className="session-history">
+          <div className="history-header" onClick={() => setHistoryOpen(!historyOpen)}>
+            <span>ИСТОРИЯ СЕССИЙ</span>
+            <span className="history-chevron">{historyOpen ? "▼" : "▶"}</span>
           </div>
-        );
-      })()}
+          {historyOpen && (
+            <div>
+              {sessionHistory.map((s, idx) => {
+                const pct = s.base > 0 ? (s.total / s.base) * 12 : 12;
+                return (
+                  <div key={idx} className="session-item">
+                    <p className="session-title">{s.date}</p>
+                    {s.base > 0 && (
+                      <div className="session-row">
+                        <span>База</span>
+                        <span>+{formatRub(s.base)}</span>
+                      </div>
+                    )}
+                    {s.bonus > 0 && (
+                      <div className="session-row session-row-bonus">
+                        <span>Бонус</span>
+                        <span>+{formatRub(s.bonus)}</span>
+                      </div>
+                    )}
+                    <div className="session-total">
+                      <span>Итого</span>
+                      <span>+{formatRub(s.total)} · {formatPercent(pct)}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Full-screen mini-game modal — outside game-area to avoid clipping */}
       {activeMinigame && (

@@ -635,13 +635,27 @@ body {
   margin-top: 16px;
 }
 
-.session-history-title {
-  font-size: 13px;
+.history-header {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
   font-weight: 600;
   color: #6b7280;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 10px;
+  padding: 6px 0;
+  user-select: none;
+}
+
+.history-header:hover {
+  color: #374151;
+}
+
+.history-chevron {
+  font-size: 10px;
+  color: #9ca3af;
 }
 
 .session-item {
