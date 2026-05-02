@@ -90,15 +90,18 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
     return () => clearInterval(id);
   }, []);
 
+  const clampBar = (x: number) =>
+    Math.max(BAR_W / 2, Math.min(W - BAR_W / 2, x));
+
   const onMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current?.getBoundingClientRect();
-    if (rect) barX.current = e.clientX - rect.left;
+    if (rect) barX.current = clampBar(e.clientX - rect.left);
   }, []);
 
   const onTouchMove = useCallback((e: TouchEvent) => {
     e.preventDefault();
     const rect = canvasRef.current?.getBoundingClientRect();
-    if (rect) barX.current = e.touches[0].clientX - rect.left;
+    if (rect) barX.current = clampBar(e.touches[0].clientX - rect.left);
   }, []);
 
   useEffect(() => {
