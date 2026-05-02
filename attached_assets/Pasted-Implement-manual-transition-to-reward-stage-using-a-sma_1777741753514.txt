@@ -1,0 +1,138 @@
+Implement manual transition to reward stage using a small text button placed below activity buttons.
+
+---
+
+## GOAL
+
+User must manually switch from activity results to reward collection using a button placed BELOW activities.
+
+---
+
+## 1. REMOVE AUTO TRANSITIONS
+
+Delete all setTimeout or automatic switching logic.
+
+Transition must happen ONLY on user click.
+
+---
+
+## 2. STATE
+
+Use:
+
+const [showCompletionStage, setShowCompletionStage] = useState(false)
+const [showRewards, setShowRewards] = useState(false)
+
+---
+
+## 3. COMPLETION DETECTION
+
+When all activities completed:
+
+if (allCompleted) {
+setShowCompletionStage(true)
+}
+
+---
+
+## 4. UI STRUCTURE
+
+Layout MUST be:
+
+<GameField />
+
+<ActivityButtons />
+
+{showCompletionStage && !showRewards && ( <button className="transition-btn">
+↓ Перейти к начислениям </button>
+)}
+
+---
+
+## 5. IMPORTANT POSITIONING
+
+* Button MUST be rendered BELOW activity buttons
+* NOT inside game field
+* NOT overlayed
+* Separate block element
+
+---
+
+## 6. BUTTON STYLE
+
+.transition-btn {
+margin-top: 16px;
+text-align: center;
+width: 100%;
+background: none;
+border: none;
+color: #9ca3af;
+font-size: 14px;
+cursor: pointer;
+}
+
+.transition-btn:hover {
+color: #6b7280;
+}
+
+---
+
+## 7. CLICK HANDLER
+
+function handleGoToRewards() {
+
+setFadeActivities(true)
+
+setTimeout(() => {
+setShowRewards(true)
+}, 300)
+
+}
+
+---
+
+## 8. FADE ANIMATION
+
+.activities.fade {
+opacity: 0;
+transform: scale(0.95);
+transition: 300ms ease;
+}
+
+---
+
+## 9. RENDER LOGIC
+
+IF showRewards = false:
+
+* show activities (disabled + % visible)
+
+IF showRewards = true:
+
+* hide activities
+* show:
+
+  * "Базовый доход"
+  * "Бонус за активность"
+
+---
+
+## 10. IMPORTANT
+
+* DO NOT auto-switch
+* DO NOT hide results before click
+* DO NOT place button inside game field
+* DO NOT remove activity results prematurely
+
+---
+
+## RESULT
+
+User flow:
+
+Complete all activities →
+See results clearly →
+See small button below →
+Click →
+Smooth transition →
+Reward buttons appear

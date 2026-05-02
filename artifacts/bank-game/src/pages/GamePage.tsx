@@ -42,8 +42,11 @@ export default function GamePage({ state, onStateChange }: Props) {
   const [waterResultPct, setWaterResultPct] = useState<number | null>(null);
   const [lightResultPct, setLightResultPct] = useState<number | null>(null);
   const [fertilizerResultPct, setFertilizerResultPct] = useState<number | null>(null);
-  const [sessionJustCompleted, setSessionJustCompleted] = useState(false);
-  const completionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasPendingInit = (state.game.pendingBaseReward ?? 0) > 0 || (state.game.pendingBonusReward ?? 0) > 0;
+  const notInSessionInit = !state.game.sessionInProgress;
+  const [showCompletionStage, setShowCompletionStage] = useState(hasPendingInit && notInSessionInit);
+  const [showRewards, setShowRewards] = useState(hasPendingInit && notInSessionInit);
+  const [fadeActivities, setFadeActivities] = useState(false);
   const floaterRef = useRef(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const skillScoreRef = useRef<number>(40);
@@ -65,8 +68,14 @@ export default function GamePage({ state, onStateChange }: Props) {
   }, []);
 
   useEffect(() => {
-    return () => { if (completionTimerRef.current !== null) clearTimeout(completionTimerRef.current); };
-  }, []);
+    const pb = state.game.pendingBaseReward ?? 0;
+    const pbo = state.game.pendingBonusReward ?? 0;
+    if (pb === 0 && pbo === 0 && showCompletionStage) {
+      setShowCompletionStage(false);
+      setShowRewards(false);
+      setFadeActivities(false);
+    }
+  }, [state.game.pendingBaseReward, state.game.pendingBonusReward, showCompletionStage]);
 
   const { balances, game } = state;
   const totalBalance = balances.standard + balances.active;
@@ -138,6 +147,9 @@ export default function GamePage({ state, onStateChange }: Props) {
       setWaterResultPct(null);
       setLightResultPct(null);
       setFertilizerResultPct(null);
+      setShowCompletionStage(false);
+      setShowRewards(false);
+      setFadeActivities(false);
       onStateChange({
         ...state,
         game: { ...game, sessionInProgress: true, water: false, sun: false, fertilizer: false },
@@ -152,6 +164,14 @@ export default function GamePage({ state, onStateChange }: Props) {
     } finally {
       setActionLoading(false);
     }
+  }
+
+  function handleGoToRewards() {
+    setFadeActivities(true);
+    setTimeout(() => {
+      setShowRewards(true);
+      setFadeActivities(false);
+    }, 300);
   }
 
   function handleMinigameComplete(type: GameType, skillScore: number) {
@@ -209,12 +229,7 @@ export default function GamePage({ state, onStateChange }: Props) {
           pendingBonusReward: (game.pendingBonusReward ?? 0) + (result.bonusReward ?? 0),
         };
         console.log(`[Session complete] base=${result.baseReward} bonus=${result.bonusReward}`);
-        setSessionJustCompleted(true);
-        if (completionTimerRef.current !== null) clearTimeout(completionTimerRef.current);
-        completionTimerRef.current = setTimeout(() => {
-          setSessionJustCompleted(false);
-          completionTimerRef.current = null;
-        }, 1200);
+        setShowCompletionStage(true);
         onStateChange({ ...state, game: nextGame });
       } else {
         onStateChange({ ...state, game: nextGame });
@@ -294,13 +309,13 @@ export default function GamePage({ state, onStateChange }: Props) {
       <div className="session-counter-card">
         <div className="session-counter-left">
           <p className="session-counter-label">Статус сессии</p>
-          <div className={`session-status-badge ${sessionJustCompleted ? "session-status-ready" : locked ? "session-status-locked" : "session-status-ready"}`}>
-            {game.sessionInProgress || sessionJustCompleted ? "В процессе" : locked ? "Перезарядка" : "Готова"}
+          <div className={`session-status-badge ${showCompletionStage && !showRewards ? "session-status-ready" : locked ? "session-status-locked" : "session-status-ready"}`}>
+            {game.sessionInProgress || (showCompletionStage && !showRewards) ? "В процессе" : locked ? "Перезарядка" : "Готова"}
           </div>
         </div>
 
         <div className="session-counter-right">
-          {sessionJustCompleted ? (
+          {showCompletionStage && !showRewards ? (
             <p className="session-ready-text">Осталось: 0 действия</p>
           ) : locked && msLeft !== null && msLeft > 0 ? (
             <>
@@ -345,7 +360,7 @@ export default function GamePage({ state, onStateChange }: Props) {
           <p className="game-tree-stage">{TREE_STAGE_NAMES[stage]} · Рост дерева: {formatTreeGrowth(displayGrowthMM)}</p>
         </div>
 
-        {!game.sessionInProgress && !sessionJustCompleted ? (
+        {!game.sessionInProgress && !showCompletionStage ? (
           <motion.button
             className={`start-session-btn ${locked ? "start-session-btn-disabled" : ""}`}
             onClick={handleStartSession}
@@ -356,38 +371,46 @@ export default function GamePage({ state, onStateChange }: Props) {
             {locked ? "Сессия недоступна" : "Начать сессию"}
           </motion.button>
         ) : (
-          <div className="session-actions">
-            <p className="session-actions-title">
-              Ухаживайте за деревом
-            </p>
-            <div className="action-buttons-row">
-              {[
-                { key: "water" as const, icon: <Droplets size={22} />, label: "Вода", color: "#3b82f6", done: game.water, pct: waterResultPct },
-                { key: "sun" as const, icon: <Sun size={22} />, label: "Свет", color: "#f59e0b", done: game.sun, pct: lightResultPct },
-                { key: "fertilizer" as const, icon: <Leaf size={22} />, label: "Удобрение", color: "#22c55e", done: game.fertilizer, pct: fertilizerResultPct },
-              ].map(btn => (
-                <motion.button
-                  key={btn.key}
-                  className={`action-btn-bank ${btn.done ? "action-btn-done" : ""}`}
-                  style={{ "--ac": btn.color } as React.CSSProperties}
-                  onClick={!btn.done ? () => setActiveMinigame(btn.key) : undefined}
-                  disabled={!!btn.done || actionLoading}
-                  whileTap={!btn.done ? { scale: 0.91 } : {}}
-                >
-                  {btn.done ? <CheckCircle2 size={22} /> : btn.icon}
-                  <span>{btn.label}</span>
-                  {btn.done && btn.pct !== null && (
-                    <span className="action-btn-pct" style={{ color: btn.color }}>{btn.pct}%</span>
-                  )}
-                </motion.button>
-              ))}
+          !showRewards && (
+            <div className={`session-actions ${fadeActivities ? "activities-fade" : ""}`}>
+              <p className="session-actions-title">
+                Ухаживайте за деревом
+              </p>
+              <div className="action-buttons-row">
+                {[
+                  { key: "water" as const, icon: <Droplets size={22} />, label: "Вода", color: "#3b82f6", done: game.water, pct: waterResultPct },
+                  { key: "sun" as const, icon: <Sun size={22} />, label: "Свет", color: "#f59e0b", done: game.sun, pct: lightResultPct },
+                  { key: "fertilizer" as const, icon: <Leaf size={22} />, label: "Удобрение", color: "#22c55e", done: game.fertilizer, pct: fertilizerResultPct },
+                ].map(btn => (
+                  <motion.button
+                    key={btn.key}
+                    className={`action-btn-bank ${btn.done ? "action-btn-done" : ""}`}
+                    style={{ "--ac": btn.color } as React.CSSProperties}
+                    onClick={!btn.done ? () => setActiveMinigame(btn.key) : undefined}
+                    disabled={!!btn.done || actionLoading}
+                    whileTap={!btn.done ? { scale: 0.91 } : {}}
+                  >
+                    {btn.done ? <CheckCircle2 size={22} /> : btn.icon}
+                    <span>{btn.label}</span>
+                    {btn.done && btn.pct !== null && (
+                      <span className="action-btn-pct" style={{ color: btn.color }}>{btn.pct}%</span>
+                    )}
+                  </motion.button>
+                ))}
+              </div>
             </div>
-          </div>
+          )
         )}
       </div>
 
+      {showCompletionStage && !showRewards && (
+        <button className="transition-btn" onClick={handleGoToRewards}>
+          ↓ Перейти к начислениям
+        </button>
+      )}
+
       {/* Reward claim area — shown after session complete */}
-      {(pendingBase > 0 || pendingBonus > 0) && (
+      {showRewards && (pendingBase > 0 || pendingBonus > 0) && (
         <div className="collect-area">
           {pendingBase > 0 && (
             <motion.button
