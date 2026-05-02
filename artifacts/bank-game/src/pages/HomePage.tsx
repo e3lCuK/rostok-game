@@ -52,13 +52,6 @@ export default function HomePage({ state }: Props) {
             </span>
             <span className="tree-growth-pct">Рост дерева: {formatTreeGrowth(treeGrowthMM)}</span>
           </div>
-          <div className="tree-progress-bar">
-            <motion.div
-              className="tree-progress-fill"
-              animate={{ width: `${treeGrowthPct}%` }}
-              transition={{ type: "spring", stiffness: 80, damping: 20 }}
-            />
-          </div>
           <p className="tree-growth-caption">Дерево растёт вместе с активным доходом</p>
         </div>
       </div>
