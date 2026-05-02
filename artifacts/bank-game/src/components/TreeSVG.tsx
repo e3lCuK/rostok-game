@@ -58,8 +58,8 @@ export default function TreeSVG({ stage, size = 160 }: TreeSVGProps) {
       <ellipse cx="116" cy="52" rx="18" ry="16" fill="#6dbf67" />
       <ellipse cx="100" cy="34" rx="20" ry="18" fill="#7acc74" />
     </svg>,
-    // Stage 4 — mighty tree with fruits
-    <svg key={4} viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+    // Stage 4 — mighty tree
+    <svg key={4} viewBox="0 -22 200 262" fill="none" xmlns="http://www.w3.org/2000/svg">
       <ellipse cx="100" cy="238" rx="88" ry="13" fill="#8B6340" opacity="0.38" />
       <path d="M90 226 Q76 234 56 238" stroke="#5a3a1a" strokeWidth="4.5" strokeLinecap="round" fill="none"/>
       <path d="M110 226 Q124 234 144 238" stroke="#5a3a1a" strokeWidth="4.5" strokeLinecap="round" fill="none"/>
