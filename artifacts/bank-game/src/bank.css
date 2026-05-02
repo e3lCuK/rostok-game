@@ -896,6 +896,7 @@ body.modal-open {
   align-items: center;
   gap: 12px;
   width: 100%;
+  margin-top: 10px;
 }
 
 .session-actions-title {
