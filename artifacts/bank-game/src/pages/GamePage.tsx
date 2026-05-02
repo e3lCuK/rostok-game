@@ -4,6 +4,7 @@ import {
   UserState,
   formatRub,
   formatTimer,
+  formatTreeGrowth,
   isSessionLocked,
   getNextSessionTime,
   getTreeProgress,
@@ -141,6 +142,18 @@ export default function GamePage({ state, onStateChange }: Props) {
 
       if (result.sessionComplete) {
         const finishedTime = Date.now();
+        // Optimistic tree growth update (mirrors server logic)
+        const totalReward = (result.baseReward ?? 0) + (result.bonusReward ?? 0);
+        const wholeMM = Math.floor(totalReward);
+        const rewardRemainder = totalReward - wholeMM;
+        let newGrowthMM = (game.treeGrowthMM ?? 0) + wholeMM;
+        let newRemainder = (game.treeGrowthRemainder ?? 0) + rewardRemainder;
+        if (newRemainder >= 1) {
+          const extraMM = Math.floor(newRemainder);
+          newGrowthMM += extraMM;
+          newRemainder -= extraMM;
+        }
+        if (newGrowthMM > 1000) newGrowthMM = 1000;
         nextGame = {
           ...nextGame,
           water: true, sun: true, fertilizer: true,
@@ -148,6 +161,8 @@ export default function GamePage({ state, onStateChange }: Props) {
           lastSessionTime: finishedTime,
           pendingBaseReward: (game.pendingBaseReward ?? 0) + (result.baseReward ?? 0),
           pendingBonusReward: (game.pendingBonusReward ?? 0) + (result.bonusReward ?? 0),
+          treeGrowthMM: newGrowthMM,
+          treeGrowthRemainder: newRemainder,
         };
         console.log(`[Session complete] base=${result.baseReward} bonus=${result.bonusReward}`);
         onStateChange({ ...state, game: nextGame });
@@ -267,7 +282,7 @@ export default function GamePage({ state, onStateChange }: Props) {
               <TreeSVG stage={stage} size={180} />
             </motion.div>
           </AnimatePresence>
-          <p className="game-tree-stage">{TREE_STAGE_NAMES[stage]} · {treeGrowthPct}% роста</p>
+          <p className="game-tree-stage">{TREE_STAGE_NAMES[stage]} · Рост дерева: {formatTreeGrowth(game.treeGrowthMM ?? 0)}</p>
         </div>
 
         {!game.sessionInProgress ? (

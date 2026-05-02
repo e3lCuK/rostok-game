@@ -50,6 +50,8 @@ export interface GameStateResponse {
     missedSessions: number;
     pendingBaseReward: number;
     pendingBonusReward: number;
+    treeGrowthMM: number;
+    treeGrowthRemainder: number;
   };
   history?: { amount: number; type: "standard" | "active" | "base" | "bonus"; date: string }[];
 }

@@ -35,6 +35,8 @@ export interface UserState {
     missedSessions: number;
     pendingBaseReward: number;
     pendingBonusReward: number;
+    treeGrowthMM: number;
+    treeGrowthRemainder: number;
   };
   history: {
     date: string;
@@ -141,6 +143,13 @@ export function getSessionActionsLeft(game: UserState["game"]): number {
   if (!game.sun) n++;
   if (!game.fertilizer) n++;
   return n;
+}
+
+// ---- Tree growth formatter ----
+export function formatTreeGrowth(mm: number): string {
+  if (mm < 10) return `${mm} мм`;
+  if (mm < 1000) return `${(mm / 10).toFixed(1)} см`;
+  return "1.00 м";
 }
 
 // ---- Formatters ----

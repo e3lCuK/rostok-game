@@ -83,6 +83,8 @@ router.get("/game/state", requireAuth, async (req: any, res) => {
         missedSessions: game.missed_sessions || 0,
         pendingBaseReward: parseFloat(game.pending_base_reward) || 0,
         pendingBonusReward: parseFloat(game.pending_bonus_reward) || 0,
+        treeGrowthMM: parseInt(game.tree_growth_mm) || 0,
+        treeGrowthRemainder: parseFloat(game.tree_growth_remainder) || 0,
       },
       history: historyRows.rows.map((r: any) => ({
         amount: parseFloat(r.amount),
@@ -309,6 +311,19 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
         "Session rewards calculated",
       );
 
+      // Tree growth: 1 RUB = 1 mm, max 1000 mm
+      const totalReward = baseReward + bonusReward;
+      const wholeMM = Math.floor(totalReward);
+      const rewardRemainder = totalReward - wholeMM;
+      let newGrowthMM = (parseInt(g.tree_growth_mm) || 0) + wholeMM;
+      let newRemainder = (parseFloat(g.tree_growth_remainder) || 0) + rewardRemainder;
+      if (newRemainder >= 1) {
+        const extraMM = Math.floor(newRemainder);
+        newGrowthMM += extraMM;
+        newRemainder -= extraMM;
+      }
+      if (newGrowthMM > 1000) newGrowthMM = 1000;
+
       // Store pending rewards (accumulate in case previous unclaimed)
       // Close session, do NOT auto-credit
       await pool.query(
@@ -321,9 +336,11 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
           current_session_fertilizer = FALSE,
           pending_base_reward = COALESCE(pending_base_reward, 0) + $3,
           pending_bonus_reward = COALESCE(pending_bonus_reward, 0) + $4,
+          tree_growth_mm = $6,
+          tree_growth_remainder = $7,
           updated_at = NOW()
          WHERE user_id = $5`,
-        [now, newStreak, baseReward, bonusReward, userId],
+        [now, newStreak, baseReward, bonusReward, userId, newGrowthMM, newRemainder],
       );
     }
 

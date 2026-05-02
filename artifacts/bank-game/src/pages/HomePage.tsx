@@ -1,6 +1,7 @@
 import {
   UserState,
   formatRub,
+  formatTreeGrowth,
   getTreeProgress,
   getTreeStage,
   calcStandardDaily,
@@ -22,7 +23,8 @@ export default function HomePage({ state }: Props) {
 
   const progress = getTreeProgress(startDate, now, totalBalance);
   const stage = getTreeStage(progress);
-  const pct = Math.round(progress * 100);
+  const treeGrowthMM = state.game.treeGrowthMM ?? 0;
+  const treeGrowthPct = treeGrowthMM / 10; // 1000mm = 100%
 
   const dailyStd = calcStandardDaily(standard);
   const dailyAct = active * 0.15 / 365;
@@ -50,12 +52,12 @@ export default function HomePage({ state }: Props) {
               <Sprout size={13} />
               {TREE_STAGE_NAMES[stage]}
             </span>
-            <span className="tree-growth-pct">{pct}% роста</span>
+            <span className="tree-growth-pct">Рост дерева: {formatTreeGrowth(treeGrowthMM)}</span>
           </div>
           <div className="tree-progress-bar">
             <motion.div
               className="tree-progress-fill"
-              animate={{ width: `${pct}%` }}
+              animate={{ width: `${treeGrowthPct}%` }}
               transition={{ type: "spring", stiffness: 80, damping: 20 }}
             />
           </div>
