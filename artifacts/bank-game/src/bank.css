@@ -541,6 +541,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-top: 16px;
   background: #16a34a;
   color: white;
   border: none;
