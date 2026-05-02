@@ -187,9 +187,9 @@ body {
 
 .hero-card-inner {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .hero-left { flex: 1; }

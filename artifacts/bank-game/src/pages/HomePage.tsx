@@ -40,7 +40,7 @@ export default function HomePage({ state }: Props) {
             </div>
           </div>
           <div className="hero-tree">
-            <TreeSVG stage={stage} size={120} />
+            <TreeSVG stage={stage} size={90} />
           </div>
         </div>
 
