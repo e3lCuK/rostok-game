@@ -630,6 +630,56 @@ body {
   color: #6b7280;
 }
 
+/* Session history (Game page) */
+.session-history {
+  margin-top: 16px;
+}
+
+.session-history-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.session-item {
+  padding: 12px;
+  border-radius: 12px;
+  background: #f9fafb;
+  margin-bottom: 8px;
+}
+
+.session-item .session-title {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-bottom: 6px;
+}
+
+.session-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #374151;
+  padding: 2px 0;
+}
+
+.session-row-bonus {
+  color: #16a34a;
+}
+
+.session-total {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #e5e7eb;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  color: #16a34a;
+}
+
 /* Balance bar */
 .game-balance-bar {
   background: var(--surface);

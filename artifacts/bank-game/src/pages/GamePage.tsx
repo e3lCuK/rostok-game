@@ -453,6 +453,61 @@ export default function GamePage({ state, onStateChange }: Props) {
         </div>
       </div>
 
+      {/* Session history */}
+      {(() => {
+        const activeItems = [...state.history].reverse().filter(h => h.type === "base" || h.type === "bonus");
+        if (activeItems.length === 0) return null;
+        const sessions: { date: string; base: number; bonus: number; total: number }[] = [];
+        let i = 0;
+        while (i < activeItems.length) {
+          const item = activeItems[i];
+          const next = activeItems[i + 1];
+          if (next && next.type !== item.type) {
+            sessions.push({
+              date: item.date,
+              base: item.type === "base" ? item.amount : next.amount,
+              bonus: item.type === "bonus" ? item.amount : next.amount,
+              total: item.amount + next.amount,
+            });
+            i += 2;
+          } else {
+            sessions.push({
+              date: item.date,
+              base: item.type === "base" ? item.amount : 0,
+              bonus: item.type === "bonus" ? item.amount : 0,
+              total: item.amount,
+            });
+            i += 1;
+          }
+        }
+        return (
+          <div className="session-history">
+            <h3 className="session-history-title">История сессий</h3>
+            {sessions.map((s, idx) => (
+              <div key={idx} className="session-item">
+                <p className="session-title">{s.date}</p>
+                {s.base > 0 && (
+                  <div className="session-row">
+                    <span>База</span>
+                    <span>+{formatRub(s.base)}</span>
+                  </div>
+                )}
+                {s.bonus > 0 && (
+                  <div className="session-row session-row-bonus">
+                    <span>Бонус</span>
+                    <span>+{formatRub(s.bonus)}</span>
+                  </div>
+                )}
+                <div className="session-total">
+                  <span>Итого</span>
+                  <span>+{formatRub(s.total)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+
       {/* Full-screen mini-game modal — outside game-area to avoid clipping */}
       {activeMinigame && (
         <div className="water-game-overlay">

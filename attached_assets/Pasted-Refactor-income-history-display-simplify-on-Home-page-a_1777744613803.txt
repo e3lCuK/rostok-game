@@ -1,0 +1,194 @@
+Refactor income history display: simplify on Home page and add detailed session history on Game page.
+
+---
+
+## GOAL
+
+Split history logic into two layers:
+
+1. **Home page → simplified (merged entries)**
+2. **Game page → detailed per-session breakdown**
+
+---
+
+## PART 1 — HOME PAGE (SIMPLIFY)
+
+### PROBLEM
+
+Currently showing:
+
+* "Активный (база)"
+* "Активный (бонус)"
+
+This creates duplicate entries for one session.
+
+---
+
+### REQUIRED
+
+Merge base + bonus into ONE entry per session.
+
+---
+
+### IMPLEMENTATION
+
+When rendering history:
+
+Group entries by session (same sessionId or timestamp window)
+
+Then:
+
+const total = baseAmount + bonusAmount
+
+Render:
+
+"Активный вклад"
++{total} ₽
+
+---
+
+### RESULT
+
+Instead of:
+
+Активный (база)  +109 ₽
+Активный (бонус) +17 ₽
+
+Show:
+
+Активный вклад +126 ₽
+
+---
+
+### IMPORTANT
+
+* Do NOT change backend logic
+* Only merge at UI level
+* Keep sorting (latest first)
+
+---
+
+## PART 2 — GAME PAGE (DETAIL VIEW)
+
+### GOAL
+
+Replace simple "заработано" block with detailed session history.
+
+---
+
+## STRUCTURE
+
+Below game field, add new block:
+
+"История сессий"
+
+---
+
+## SESSION ITEM
+
+Each session renders as:
+
+<div class="session-item">
+
+  <div class="session-title">
+    Сессия #{n} (или дата/время)
+  </div>
+
+  <div class="session-row">
+    База <span>+10.96 ₽</span>
+  </div>
+
+  <div class="session-row">
+    Бонус <span>+2.74 ₽</span>
+  </div>
+
+  <div class="session-total">
+    Итого +13.70 ₽
+  </div>
+
+</div>
+
+---
+
+## GROUPING
+
+Group history by sessionId:
+
+Each session contains:
+
+* base entry
+* bonus entry
+
+---
+
+## ORDER
+
+* newest session FIRST
+* scrollable list
+
+---
+
+## STYLE
+
+.session-history {
+margin-top: 16px;
+}
+
+.session-item {
+padding: 12px;
+border-radius: 12px;
+background: #f9fafb;
+margin-bottom: 8px;
+}
+
+.session-title {
+font-size: 13px;
+color: #6b7280;
+margin-bottom: 6px;
+}
+
+.session-row {
+display: flex;
+justify-content: space-between;
+font-size: 14px;
+}
+
+.session-total {
+margin-top: 6px;
+font-weight: 600;
+display: flex;
+justify-content: space-between;
+}
+
+---
+
+## OPTIONAL (RECOMMENDED)
+
+Color coding:
+
+* База → обычный текст
+* Бонус → зелёный
+* Итого → жирный + зелёный
+
+---
+
+## IMPORTANT
+
+* DO NOT remove top summary (balance / earned)
+* DO NOT change reward logic
+* DO NOT break existing history API
+* ONLY change rendering
+
+---
+
+## FINAL RESULT
+
+Home page:
+→ clean, simple income view
+
+Game page:
+→ detailed breakdown per session
+
+---
+
+This improves clarity without changing core logic.

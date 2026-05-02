@@ -92,27 +92,46 @@ export default function HomePage({ state }: Props) {
         </div>
       </div>
 
-      {state.history.length > 0 && (
-        <div className="history-card">
-          <h3 className="history-title">Последние начисления</h3>
-          <div className="history-list">
-            {[...state.history].reverse().slice(0, 6).map((item, i) => (
-              <div key={i} className="history-item">
-                <div className="history-cell-left">
-                  <span className="history-type">
-                    {item.type === "standard" ? "Стандартный вклад"
-                      : item.type === "base" ? "Активный (база)"
-                      : item.type === "bonus" ? "Активный (бонус)"
-                      : "Активный вклад"}
-                  </span>
-                  <span className="history-date">{item.date}</span>
+      {state.history.length > 0 && (() => {
+        const merged: { date: string; amount: number; label: string }[] = [];
+        const reversed = [...state.history].reverse();
+        let i = 0;
+        while (i < reversed.length) {
+          const item = reversed[i];
+          const next = reversed[i + 1];
+          if (
+            (item.type === "base" || item.type === "bonus") &&
+            next && (next.type === "base" || next.type === "bonus") &&
+            next.type !== item.type
+          ) {
+            merged.push({ date: item.date, amount: item.amount + next.amount, label: "Активный вклад" });
+            i += 2;
+          } else {
+            merged.push({
+              date: item.date,
+              amount: item.amount,
+              label: item.type === "standard" ? "Стандартный вклад" : "Активный вклад",
+            });
+            i += 1;
+          }
+        }
+        return (
+          <div className="history-card">
+            <h3 className="history-title">Последние начисления</h3>
+            <div className="history-list">
+              {merged.slice(0, 6).map((item, idx) => (
+                <div key={idx} className="history-item">
+                  <div className="history-cell-left">
+                    <span className="history-type">{item.label}</span>
+                    <span className="history-date">{item.date}</span>
+                  </div>
+                  <span className="history-amount">+{formatRub(item.amount)}</span>
                 </div>
-                <span className="history-amount">+{formatRub(item.amount)}</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
