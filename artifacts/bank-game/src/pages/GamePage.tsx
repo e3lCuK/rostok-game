@@ -48,6 +48,9 @@ export default function GamePage({ state, onStateChange }: Props) {
   const [showRewards, setShowRewards] = useState(hasPendingInit && notInSessionInit);
   const [fadeActivities, setFadeActivities] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [activeAnim, setActiveAnim] = useState<GameType | null>(null);
+  const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const animParticlesRef = useRef<number[]>([]);
   const floaterRef = useRef(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const skillScoreRef = useRef<number>(40);
@@ -65,7 +68,10 @@ export default function GamePage({ state, onStateChange }: Props) {
   }, []);
 
   useEffect(() => {
-    return () => { if (animFrameRef.current !== null) cancelAnimationFrame(animFrameRef.current); };
+    return () => {
+      if (animFrameRef.current !== null) cancelAnimationFrame(animFrameRef.current);
+      if (animTimerRef.current !== null) clearTimeout(animTimerRef.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -185,6 +191,11 @@ export default function GamePage({ state, onStateChange }: Props) {
     if (type === "water")      setWaterResultPct(pct);
     if (type === "sun")        setLightResultPct(pct);
     if (type === "fertilizer") setFertilizerResultPct(pct);
+
+    animParticlesRef.current = [14, 22, 31, 40, 50, 60, 69, 78];
+    setActiveAnim(type);
+    if (animTimerRef.current) clearTimeout(animTimerRef.current);
+    animTimerRef.current = setTimeout(() => setActiveAnim(null), 1800);
 
     const waterScore      = waterScoreRef.current || 0;
     const sunScore        = sunScoreRef.current || 0;
@@ -395,6 +406,27 @@ export default function GamePage({ state, onStateChange }: Props) {
             </AnimatePresence>
           </motion.div>
           <p className="game-tree-stage">{TREE_STAGE_NAMES[stage]} · Рост дерева: {formatTreeGrowth(displayGrowthMM)}</p>
+          {activeAnim && (
+            <div className="tree-anim-layer">
+              {activeAnim === "water" && (
+                <>
+                  {animParticlesRef.current.map((left, i) => (
+                    <div key={i} className="water-drop" style={{ left: `${left}%`, animationDelay: `${i * 0.09}s` }} />
+                  ))}
+                  <div className="water-ripple" />
+                </>
+              )}
+              {activeAnim === "sun" && (
+                <>
+                  <div className="light-glow" />
+                  <div className="light-rays" />
+                </>
+              )}
+              {activeAnim === "fertilizer" && animParticlesRef.current.map((left, i) => (
+                <div key={i} className="fertilizer-particle" style={{ left: `${left}%`, animationDelay: `${i * 0.09}s` }} />
+              ))}
+            </div>
+          )}
         </div>
 
         {!game.sessionInProgress && !showCompletionStage ? (
