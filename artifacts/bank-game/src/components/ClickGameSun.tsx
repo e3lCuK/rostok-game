@@ -58,8 +58,9 @@ function drawSun(ctx: CanvasRenderingContext2D, x: number, y: number, alpha: num
 }
 
 export default function ClickGameSun({ onComplete }: Props) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const doneRef   = useRef(false);
+  const canvasRef  = useRef<HTMLCanvasElement>(null);
+  const doneRef    = useRef(false);
+  const cursorRef  = useRef<{ x: number; y: number } | null>(null);
   const [timerMs, setTimerMs]       = useState(GAME_MS);
   const [catchCount, setCatchCount] = useState(0);
   const [result, setResult]         = useState<{ catches: number; skillScore: number } | null>(null);
@@ -117,8 +118,16 @@ export default function ClickGameSun({ onComplete }: Props) {
       }
     }
 
+    function handleMouseMove(e: MouseEvent) {
+      const rect = canvas.getBoundingClientRect();
+      cursorRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    }
+    function handleMouseLeave() { cursorRef.current = null; }
+
     canvas.addEventListener("click",      handlePointer);
     canvas.addEventListener("touchstart", handlePointer, { passive: true });
+    canvas.addEventListener("mousemove",  handleMouseMove);
+    canvas.addEventListener("mouseleave", handleMouseLeave);
 
     function frame(ts: number) {
       if (doneRef.current) return;
@@ -161,6 +170,27 @@ export default function ClickGameSun({ onComplete }: Props) {
         drawSun(ctx, sun.x, sun.y, alpha, scale);
       }
 
+      // draw crosshair cursor
+      const cur = cursorRef.current;
+      if (cur) {
+        const cr = 10;
+        const cg = 4;
+        ctx.save();
+        ctx.strokeStyle = "rgba(180,80,0,0.85)";
+        ctx.lineWidth   = 2;
+        ctx.lineCap     = "round";
+        // horizontal line
+        ctx.beginPath(); ctx.moveTo(cur.x - cr, cur.y); ctx.lineTo(cur.x - cg, cur.y); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cur.x + cg, cur.y); ctx.lineTo(cur.x + cr, cur.y); ctx.stroke();
+        // vertical line
+        ctx.beginPath(); ctx.moveTo(cur.x, cur.y - cr); ctx.lineTo(cur.x, cur.y - cg); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cur.x, cur.y + cg); ctx.lineTo(cur.x, cur.y + cr); ctx.stroke();
+        // center dot
+        ctx.beginPath(); ctx.arc(cur.x, cur.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(180,80,0,0.85)"; ctx.fill();
+        ctx.restore();
+      }
+
       rafId = requestAnimationFrame(frame);
     }
 
@@ -170,6 +200,8 @@ export default function ClickGameSun({ onComplete }: Props) {
       cancelAnimationFrame(rafId);
       canvas.removeEventListener("click",      handlePointer);
       canvas.removeEventListener("touchstart", handlePointer);
+      canvas.removeEventListener("mousemove",  handleMouseMove);
+      canvas.removeEventListener("mouseleave", handleMouseLeave);
       canvas.style.cursor = "default";
     };
   }, []);
