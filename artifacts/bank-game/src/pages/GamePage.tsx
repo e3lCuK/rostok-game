@@ -677,8 +677,8 @@ export default function GamePage({ state, onStateChange }: Props) {
                     <p className="help-section-heading">Рост дерева</p>
                     <ul className="help-section-list">
                       <li>1 ₽ дохода = 1 мм роста</li>
-                      <li>Рост только от активного дохода</li>
-                      <li>Максимум — 10 метров</li>
+                      <li>Рост идёт только от активного дохода</li>
+                      <li>Копейки накапливаются и добавляются позже</li>
                     </ul>
                   </div>
                 </div>
