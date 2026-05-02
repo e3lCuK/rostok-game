@@ -513,7 +513,6 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  transform: translateY(-12px);
 }
 
 .tree-growth-label {
