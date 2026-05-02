@@ -391,6 +391,8 @@ export default function GamePage({ state, onStateChange }: Props) {
           </div>
         ))}
 
+        <p className="tree-growth-label">Рост дерева: {formatTreeGrowth(displayGrowthMM)}</p>
+
         <div className="game-tree-wrap">
           <motion.div animate={treeControls} style={{ display: "inline-block" }}>
             <AnimatePresence mode="wait">
@@ -405,7 +407,6 @@ export default function GamePage({ state, onStateChange }: Props) {
               </motion.div>
             </AnimatePresence>
           </motion.div>
-          <p className="game-tree-stage">{TREE_STAGE_NAMES[stage]} · Рост дерева: {formatTreeGrowth(displayGrowthMM)}</p>
           {activeAnim && (
             <div className="tree-anim-layer">
               {activeAnim === "water" && (

@@ -508,6 +508,21 @@ body {
   gap: 8px;
 }
 
+.tree-growth-label {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #166534;
+  z-index: 10;
+}
+
 .game-tree-stage {
   font-size: 0.72rem;
   font-weight: 600;
