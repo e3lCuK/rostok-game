@@ -95,7 +95,7 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
                 className="debug-mm-input"
                 type="number"
                 value={mmInput}
-                placeholder="мм роста"
+                placeholder="мм"
                 onChange={e => setMmInput(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && addTreeGrowthMm()}
               />
