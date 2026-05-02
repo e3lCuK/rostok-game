@@ -53,6 +53,15 @@ export default function GamePage({ state, onStateChange }: Props) {
   const animParticlesRef = useRef<number[]>([]);
   const [showHelp, setShowHelp] = useState(false);
   const [helpPulsing, setHelpPulsing] = useState(() => !localStorage.getItem("active_help_seen"));
+
+  useEffect(() => {
+    if (showHelp) {
+      document.body.classList.add("modal-open");
+    } else {
+      document.body.classList.remove("modal-open");
+    }
+    return () => document.body.classList.remove("modal-open");
+  }, [showHelp]);
   const floaterRef = useRef(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const skillScoreRef = useRef<number>(40);

@@ -590,11 +590,16 @@ body {
   overflow: visible;
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
 /* ── Help icon ───────────────────────────────────── */
 .help-icon {
   position: absolute;
-  top: 10px;
-  left: 12px;
+  top: 12px;
+  right: 12px;
+  left: auto;
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -629,18 +634,18 @@ body {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
-  z-index: 200;
+  z-index: 1000;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
 }
 
 .help-modal {
   background: #fff;
-  border-radius: 20px 20px 0 0;
-  width: 100%;
-  max-width: 430px;
-  padding: 20px 20px 32px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 420px;
+  padding: 20px 20px 28px;
   max-height: 85vh;
   overflow-y: auto;
 }
