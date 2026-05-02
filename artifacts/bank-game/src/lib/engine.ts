@@ -8,7 +8,6 @@ export const APP_NAME = "Банк";
 
 // ---- Constants ----
 export const SESSION_COOLDOWN_MS = 8 * 60 * 60 * 1000;
-export const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 export const SESSIONS_PER_DAY = 3; // 1 session per 8 hours → 3 sessions/day
 
 // Starting capital options
@@ -103,23 +102,18 @@ export function calculateRewards(balance: number, bonusPercent: number): Session
 }
 
 // ---- Tree progression ----
-function balanceMultiplier(total: number): number {
-  if (total >= 1_000_000) return 3;
-  if (total >= 100_000) return 2;
-  return 1;
+// Visual progress: clamped 0–1, used only for rendering
+export function getTreeProgressFromMM(mm: number): number {
+  return Math.min(mm / 10000, 1);
 }
 
-export function getTreeProgress(startDate: number, now: number, totalBalance: number): number {
-  const elapsed = now - startDate;
-  const effectiveTime = elapsed * balanceMultiplier(totalBalance);
-  return Math.min(effectiveTime / ONE_YEAR_MS, 1);
-}
-
-export function getTreeStage(progress: number): 0 | 1 | 2 | 3 | 4 {
-  if (progress < 0.05) return 0;
-  if (progress < 0.2)  return 1;
-  if (progress < 0.5)  return 2;
-  if (progress < 0.85) return 3;
+// Stage based on accumulated mm — same thresholds as before but in mm units
+// (0%, 5%, 20%, 50%, 85%) × 10 000 mm
+export function getTreeStage(mm: number): 0 | 1 | 2 | 3 | 4 {
+  if (mm < 500)  return 0;
+  if (mm < 2000) return 1;
+  if (mm < 5000) return 2;
+  if (mm < 8500) return 3;
   return 4;
 }
 
@@ -160,7 +154,6 @@ export function applyTreeGrowth(
     newMM += extraMM;
     newRemainder -= extraMM;
   }
-  if (newMM > 10000) newMM = 10000;
   return { newMM, newRemainder };
 }
 

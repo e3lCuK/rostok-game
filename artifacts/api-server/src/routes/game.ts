@@ -372,7 +372,6 @@ router.post("/game/session/claim", requireAuth, async (req: any, res) => {
       newGrowthMM += extraMM;
       newGrowthRemainder -= extraMM;
     }
-    if (newGrowthMM > 10000) newGrowthMM = 10000;
 
     await pool.query(
       `UPDATE game_state SET ${col} = 0, tree_growth_mm = $2, tree_growth_remainder = $3, updated_at = NOW() WHERE user_id = $1`,

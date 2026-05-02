@@ -2,8 +2,8 @@ import {
   UserState,
   formatRub,
   formatTreeGrowth,
-  getTreeProgress,
   getTreeStage,
+  getTreeProgressFromMM,
   calcStandardDaily,
   TREE_STAGE_NAMES,
 } from "@/lib/engine";
@@ -16,15 +16,13 @@ interface Props {
 }
 
 export default function HomePage({ state }: Props) {
-  const now = Date.now();
-  const { standard, active, standardEarned, activeEarned, startDate } = state.balances;
+  const { standard, active, standardEarned, activeEarned } = state.balances;
   const totalBalance = standard + active;
   const totalEarned = standardEarned + activeEarned;
 
-  const progress = getTreeProgress(startDate, now, totalBalance);
-  const stage = getTreeStage(progress);
   const treeGrowthMM = state.game.treeGrowthMM ?? 0;
-  const treeGrowthPct = treeGrowthMM / 100; // 10000mm = 100%
+  const stage = getTreeStage(treeGrowthMM);
+  const treeGrowthPct = getTreeProgressFromMM(treeGrowthMM) * 100;
 
   const dailyStd = calcStandardDaily(standard);
   const dailyAct = active * 0.15 / 365;
@@ -61,11 +59,7 @@ export default function HomePage({ state }: Props) {
               transition={{ type: "spring", stiffness: 80, damping: 20 }}
             />
           </div>
-          <p className="tree-growth-caption">
-            {progress < 1
-              ? "Дерево растёт быстрее с большим балансом"
-              : "Дерево достигло максимума!"}
-          </p>
+          <p className="tree-growth-caption">Дерево растёт вместе с активным доходом</p>
         </div>
       </div>
 
