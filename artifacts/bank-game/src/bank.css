@@ -590,6 +590,144 @@ body {
   overflow: visible;
 }
 
+/* ── Help icon ───────────────────────────────────── */
+.help-icon {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.70);
+  color: #15803d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 15;
+  padding: 0;
+  transition: background 0.15s;
+}
+
+.help-icon:hover {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+@keyframes helpPulse {
+  0%   { transform: scale(1);    opacity: 1; }
+  50%  { transform: scale(1.22); opacity: 0.7; }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+.help-icon-pulse {
+  animation: helpPulse 1.6s ease-in-out infinite;
+}
+
+/* ── Help modal ──────────────────────────────────── */
+.help-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.help-modal {
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 430px;
+  padding: 20px 20px 32px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.help-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.help-modal-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.help-modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #f3f4f6;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.help-modal-close:hover {
+  background: #e5e7eb;
+}
+
+.help-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.help-section {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px;
+  background: #f9fafb;
+  border-radius: 14px;
+}
+
+.help-section-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.help-section-heading {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.help-section-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.help-section-list li {
+  font-size: 0.8rem;
+  color: #4b5563;
+  padding-left: 10px;
+  position: relative;
+}
+
+.help-section-list li::before {
+  content: "·";
+  position: absolute;
+  left: 0;
+  color: #9ca3af;
+}
+
 /* Water */
 .water-drop {
   position: absolute;

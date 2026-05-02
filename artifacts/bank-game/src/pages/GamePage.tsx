@@ -18,7 +18,7 @@ import TreeSVG from "@/components/TreeSVG";
 import FallingGameWater, { GameType } from "@/components/FallingGameWater";
 import ClickGameSun from "@/components/ClickGameSun";
 import FertilizerMatchGame from "@/components/FertilizerMatchGame";
-import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2 } from "lucide-react";
+import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2, HelpCircle, X } from "lucide-react";
 
 interface Props {
   state: UserState;
@@ -51,6 +51,8 @@ export default function GamePage({ state, onStateChange }: Props) {
   const [activeAnim, setActiveAnim] = useState<GameType | null>(null);
   const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animParticlesRef = useRef<number[]>([]);
+  const [showHelp, setShowHelp] = useState(false);
+  const [helpPulsing, setHelpPulsing] = useState(() => !localStorage.getItem("active_help_seen"));
   const floaterRef = useRef(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const skillScoreRef = useRef<number>(40);
@@ -391,6 +393,20 @@ export default function GamePage({ state, onStateChange }: Props) {
           </div>
         ))}
 
+        <button
+          className={`help-icon${helpPulsing ? " help-icon-pulse" : ""}`}
+          onClick={() => {
+            setShowHelp(true);
+            if (helpPulsing) {
+              setHelpPulsing(false);
+              localStorage.setItem("active_help_seen", "true");
+            }
+          }}
+          aria-label="Справка"
+        >
+          <HelpCircle size={20} />
+        </button>
+
         <p className="tree-growth-label">Рост дерева: {formatTreeGrowth(displayGrowthMM)}</p>
 
         <div className="game-tree-wrap">
@@ -629,6 +645,81 @@ export default function GamePage({ state, onStateChange }: Props) {
           )}
         </div>
       )}
+      <AnimatePresence>
+        {showHelp && (
+          <motion.div
+            className="help-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setShowHelp(false)}
+          >
+            <motion.div
+              className="help-modal"
+              initial={{ y: 32, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 32, opacity: 0 }}
+              transition={{ duration: 0.22 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="help-modal-header">
+                <h3 className="help-modal-title">Активный вклад</h3>
+                <button className="help-modal-close" onClick={() => setShowHelp(false)}>
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="help-sections">
+                <div className="help-section">
+                  <span className="help-section-icon">🌱</span>
+                  <div>
+                    <p className="help-section-heading">Рост дерева</p>
+                    <ul className="help-section-list">
+                      <li>1 ₽ дохода = 1 мм роста</li>
+                      <li>Рост только от активного дохода</li>
+                      <li>Максимум — 10 метров</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="help-section">
+                  <span className="help-section-icon">⚡</span>
+                  <div>
+                    <p className="help-section-heading">Сессии</p>
+                    <ul className="help-section-list">
+                      <li>Доступны каждые 8 часов</li>
+                      <li>3 активности за сессию: Вода, Свет, Удобрение</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="help-section">
+                  <span className="help-section-icon">🎮</span>
+                  <div>
+                    <p className="help-section-heading">Мини-игры</p>
+                    <ul className="help-section-list">
+                      <li>Каждая активность — своя игра</li>
+                      <li>Результат в % влияет на бонус</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="help-section">
+                  <span className="help-section-icon">💰</span>
+                  <div>
+                    <p className="help-section-heading">Доход</p>
+                    <ul className="help-section-list">
+                      <li>Базовый: 12% годовых</li>
+                      <li>Бонус: до +3% за результат игр</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
