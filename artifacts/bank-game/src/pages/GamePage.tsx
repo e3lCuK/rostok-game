@@ -461,7 +461,7 @@ export default function GamePage({ state, onStateChange }: Props) {
                   exit={{ scale: 1.08, opacity: 0 }}
                   transition={{ type: "spring", stiffness: 180, damping: 18 }}
                 >
-                  <TreeSVG stage={currentStage} size={160} />
+                  <TreeSVG stage={currentStage} size={120} />
                 </motion.div>
               </AnimatePresence>
             </div>

@@ -481,14 +481,14 @@ body {
 .game-area {
   background: linear-gradient(160deg, #d4edaa 0%, #b8de74 40%, #f5e87c 100%);
   border-radius: var(--radius);
-  padding: 24px 20px 20px;
+  padding: 16px 20px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
-  min-height: 340px;
+  gap: 10px;
+  min-height: 300px;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: var(--shadow-md);
 }
 
