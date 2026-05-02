@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import {
   UserState,
   formatRub,
   formatTimer,
   formatTreeGrowth,
+  applyTreeGrowth,
   isSessionLocked,
   getNextSessionTime,
   getTreeProgress,
@@ -44,10 +45,18 @@ export default function GamePage({ state, onStateChange }: Props) {
   const waterScoreRef = useRef<number>(40);
   const sunScoreRef = useRef<number>(40);
   const fertilizerScoreRef = useRef<number>(40);
+  const treeControls = useAnimation();
+  const animFrameRef = useRef<number | null>(null);
+  const displayGrowthMMRef = useRef(state.game.treeGrowthMM ?? 0);
+  const [displayGrowthMM, setDisplayGrowthMM] = useState(state.game.treeGrowthMM ?? 0);
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    return () => { if (animFrameRef.current !== null) cancelAnimationFrame(animFrameRef.current); };
   }, []);
 
   const { balances, game } = state;
@@ -70,6 +79,39 @@ export default function GamePage({ state, onStateChange }: Props) {
     const id = ++floaterRef.current;
     setFloaters(f => [...f, { id, x, y, label }]);
     setTimeout(() => setFloaters(f => f.filter(fl => fl.id !== id)), 1200);
+  }
+
+  function animateGrowth(fromMM: number, toMM: number) {
+    if (animFrameRef.current !== null) cancelAnimationFrame(animFrameRef.current);
+    if (fromMM === toMM) return;
+    const start = performance.now();
+    const duration = 750;
+    function tick(now: number) {
+      const t = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const current = Math.round(fromMM + (toMM - fromMM) * eased);
+      displayGrowthMMRef.current = current;
+      setDisplayGrowthMM(current);
+      if (t < 1) {
+        animFrameRef.current = requestAnimationFrame(tick);
+      } else {
+        animFrameRef.current = null;
+      }
+    }
+    animFrameRef.current = requestAnimationFrame(tick);
+  }
+
+  function triggerTreeAnim() {
+    void treeControls.start({
+      scale: [1, 1.13, 1],
+      y: [0, -12, 0],
+      filter: [
+        "drop-shadow(0 0 0px rgba(34,197,94,0))",
+        "drop-shadow(0 0 14px rgba(34,197,94,0.85))",
+        "drop-shadow(0 0 0px rgba(34,197,94,0))",
+      ],
+      transition: { duration: 0.75, times: [0, 0.38, 1], ease: "easeOut" },
+    });
   }
 
   async function handleStartSession() {
@@ -142,18 +184,6 @@ export default function GamePage({ state, onStateChange }: Props) {
 
       if (result.sessionComplete) {
         const finishedTime = Date.now();
-        // Optimistic tree growth update (mirrors server logic)
-        const totalReward = (result.baseReward ?? 0) + (result.bonusReward ?? 0);
-        const wholeMM = Math.floor(totalReward);
-        const rewardRemainder = totalReward - wholeMM;
-        let newGrowthMM = (game.treeGrowthMM ?? 0) + wholeMM;
-        let newRemainder = (game.treeGrowthRemainder ?? 0) + rewardRemainder;
-        if (newRemainder >= 1) {
-          const extraMM = Math.floor(newRemainder);
-          newGrowthMM += extraMM;
-          newRemainder -= extraMM;
-        }
-        if (newGrowthMM > 10000) newGrowthMM = 10000;
         nextGame = {
           ...nextGame,
           water: true, sun: true, fertilizer: true,
@@ -161,8 +191,6 @@ export default function GamePage({ state, onStateChange }: Props) {
           lastSessionTime: finishedTime,
           pendingBaseReward: (game.pendingBaseReward ?? 0) + (result.baseReward ?? 0),
           pendingBonusReward: (game.pendingBonusReward ?? 0) + (result.bonusReward ?? 0),
-          treeGrowthMM: newGrowthMM,
-          treeGrowthRemainder: newRemainder,
         };
         console.log(`[Session complete] base=${result.baseReward} bonus=${result.bonusReward}`);
         onStateChange({ ...state, game: nextGame });
@@ -184,6 +212,7 @@ export default function GamePage({ state, onStateChange }: Props) {
       const amount = result.amount ?? 0;
       const rect = gameAreaRef.current?.getBoundingClientRect();
       addFloater(`+${formatRub(amount)}`, (rect?.width ?? 200) / 2, 40);
+      const { newMM, newRemainder } = applyTreeGrowth(amount, game.treeGrowthMM ?? 0, game.treeGrowthRemainder ?? 0);
       onStateChange({
         ...state,
         balances: {
@@ -191,12 +220,14 @@ export default function GamePage({ state, onStateChange }: Props) {
           active: balances.active + amount,
           activeEarned: balances.activeEarned + amount,
         },
-        game: { ...game, pendingBaseReward: 0 },
+        game: { ...game, pendingBaseReward: 0, treeGrowthMM: newMM, treeGrowthRemainder: newRemainder },
         history: [
           ...state.history,
           { date: new Date().toLocaleDateString("ru-RU"), amount, type: "base" as const },
         ].slice(-30),
       });
+      animateGrowth(displayGrowthMMRef.current, newMM);
+      triggerTreeAnim();
     } catch (err) {
       console.error("[Claim base] failed:", err);
     } finally {
@@ -212,6 +243,7 @@ export default function GamePage({ state, onStateChange }: Props) {
       const amount = result.amount ?? 0;
       const rect = gameAreaRef.current?.getBoundingClientRect();
       addFloater(`+${formatRub(amount)}`, (rect?.width ?? 200) / 2 + 60, 40);
+      const { newMM, newRemainder } = applyTreeGrowth(amount, game.treeGrowthMM ?? 0, game.treeGrowthRemainder ?? 0);
       onStateChange({
         ...state,
         balances: {
@@ -219,12 +251,14 @@ export default function GamePage({ state, onStateChange }: Props) {
           active: balances.active + amount,
           activeEarned: balances.activeEarned + amount,
         },
-        game: { ...game, pendingBonusReward: 0 },
+        game: { ...game, pendingBonusReward: 0, treeGrowthMM: newMM, treeGrowthRemainder: newRemainder },
         history: [
           ...state.history,
           { date: new Date().toLocaleDateString("ru-RU"), amount, type: "bonus" as const },
         ].slice(-30),
       });
+      animateGrowth(displayGrowthMMRef.current, newMM);
+      triggerTreeAnim();
     } catch (err) {
       console.error("[Claim bonus] failed:", err);
     } finally {
@@ -271,18 +305,20 @@ export default function GamePage({ state, onStateChange }: Props) {
         ))}
 
         <div className="game-tree-wrap">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={stage}
-              initial={{ scale: 0.85, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 1.08, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 180, damping: 18 }}
-            >
-              <TreeSVG stage={stage} size={180} />
-            </motion.div>
-          </AnimatePresence>
-          <p className="game-tree-stage">{TREE_STAGE_NAMES[stage]} · Рост дерева: {formatTreeGrowth(game.treeGrowthMM ?? 0)}</p>
+          <motion.div animate={treeControls} style={{ display: "inline-block" }}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={stage}
+                initial={{ scale: 0.85, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 1.08, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 180, damping: 18 }}
+              >
+                <TreeSVG stage={stage} size={180} />
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
+          <p className="game-tree-stage">{TREE_STAGE_NAMES[stage]} · Рост дерева: {formatTreeGrowth(displayGrowthMM)}</p>
         </div>
 
         {!game.sessionInProgress ? (

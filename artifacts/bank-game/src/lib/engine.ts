@@ -145,6 +145,25 @@ export function getSessionActionsLeft(game: UserState["game"]): number {
   return n;
 }
 
+// ---- Tree growth: apply reward amount to current growth state ----
+export function applyTreeGrowth(
+  rewardRub: number,
+  currentMM: number,
+  currentRemainder: number,
+): { newMM: number; newRemainder: number } {
+  const wholeMM = Math.floor(rewardRub);
+  const remainder = rewardRub - wholeMM;
+  let newMM = currentMM + wholeMM;
+  let newRemainder = currentRemainder + remainder;
+  if (newRemainder >= 1) {
+    const extraMM = Math.floor(newRemainder);
+    newMM += extraMM;
+    newRemainder -= extraMM;
+  }
+  if (newMM > 10000) newMM = 10000;
+  return { newMM, newRemainder };
+}
+
 // ---- Tree growth formatter ----
 export function formatTreeGrowth(mm: number): string {
   if (mm < 10) return `${mm} мм`;
