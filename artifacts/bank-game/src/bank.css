@@ -894,15 +894,16 @@ body.modal-open {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
   width: 100%;
-  margin-top: 18px;
+  margin-top: 16px;
 }
 
 .session-actions-title {
   font-size: 0.8rem;
   color: #2d5a1a;
   font-weight: 500;
+  margin-bottom: 6px;
 }
 
 .action-buttons-row {
