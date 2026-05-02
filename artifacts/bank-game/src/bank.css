@@ -594,6 +594,81 @@ body.modal-open {
   overflow: hidden;
 }
 
+/* ── Tree stage wrapper + transition ─────────────── */
+.tree-wrapper {
+  position: relative;
+  display: inline-block;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.tree-wrapper.transitioning {
+  transform: scale(0.82);
+  opacity: 0;
+}
+
+.tree-cloud {
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(circle, rgba(255,255,255,0.85), transparent 70%);
+  animation: cloudFade 0.6s ease forwards;
+  pointer-events: none;
+  z-index: 10;
+}
+
+@keyframes cloudFade {
+  0%   { opacity: 0; transform: scale(0.8); }
+  50%  { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(1.2); }
+}
+
+@keyframes growBounce {
+  0%   { transform: scale(0.9); }
+  50%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* ── Debug panel ─────────────────────────────────── */
+.debug-mm-panel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(239,68,68,0.08);
+  border: 1px dashed rgba(239,68,68,0.35);
+  border-radius: 10px;
+  margin-top: 4px;
+}
+
+.debug-mm-btn {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #ef4444;
+  background: none;
+  border: 1px solid rgba(239,68,68,0.4);
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.debug-mm-btn:hover {
+  background: rgba(239,68,68,0.08);
+}
+
+.debug-mm-input {
+  flex: 1;
+  font-size: 0.78rem;
+  padding: 4px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  outline: none;
+  min-width: 0;
+}
+
+.debug-mm-input:focus {
+  border-color: #ef4444;
+}
+
 /* ── Help icon ───────────────────────────────────── */
 .help-icon {
   position: absolute;

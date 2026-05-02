@@ -70,6 +70,12 @@ export default function GamePage({ state, onStateChange }: Props) {
   const animFrameRef = useRef<number | null>(null);
   const displayGrowthMMRef = useRef(state.game.treeGrowthMM ?? 0);
   const [displayGrowthMM, setDisplayGrowthMM] = useState(state.game.treeGrowthMM ?? 0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [currentStage, setCurrentStage] = useState<0|1|2|3|4>(() => getTreeStage(state.game.treeGrowthMM ?? 0) as 0|1|2|3|4);
+  const [showDebugInput, setShowDebugInput] = useState(false);
+  const [debugMmInput, setDebugMmInput] = useState("");
+  const currentStageRef = useRef<0|1|2|3|4>(getTreeStage(state.game.treeGrowthMM ?? 0) as 0|1|2|3|4);
+  const stageTransTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
@@ -95,6 +101,19 @@ export default function GamePage({ state, onStateChange }: Props) {
 
   const { balances, game } = state;
   const totalBalance = balances.standard + balances.active;
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const newStage = getTreeStage(game.treeGrowthMM ?? 0) as 0|1|2|3|4;
+    if (newStage !== currentStageRef.current) {
+      currentStageRef.current = newStage;
+      stageTransTimers.current.forEach(clearTimeout);
+      setIsTransitioning(true);
+      const t1 = setTimeout(() => setCurrentStage(newStage), 300);
+      const t2 = setTimeout(() => setIsTransitioning(false), 900);
+      stageTransTimers.current = [t1, t2];
+    }
+  }, [game.treeGrowthMM]);
 
   const locked = isSessionLocked(game.lastSessionTime, now);
   const nextTime = getNextSessionTime(game.lastSessionTime);
@@ -144,6 +163,13 @@ export default function GamePage({ state, onStateChange }: Props) {
       ],
       transition: { duration: 0.75, times: [0, 0.38, 1], ease: "easeOut" },
     });
+  }
+
+  function addTreeGrowthMm(mm: number) {
+    const currentMM = game.treeGrowthMM ?? 0;
+    const newMM = currentMM + mm;
+    onStateChange({ ...state, game: { ...game, treeGrowthMM: newMM } });
+    animateGrowth(displayGrowthMMRef.current, newMM);
   }
 
   async function handleStartSession() {
@@ -416,17 +442,20 @@ export default function GamePage({ state, onStateChange }: Props) {
 
         <div className="game-tree-wrap">
           <motion.div animate={treeControls} style={{ display: "inline-block" }}>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={stage}
-                initial={{ scale: 0.85, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 1.08, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 180, damping: 18 }}
-              >
-                <TreeSVG stage={stage} size={180} />
-              </motion.div>
-            </AnimatePresence>
+            <div className={`tree-wrapper${isTransitioning ? " transitioning" : ""}`}>
+              {isTransitioning && <div className="tree-cloud" />}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentStage}
+                  initial={{ scale: 0.85, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 1.08, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 180, damping: 18 }}
+                >
+                  <TreeSVG stage={currentStage} size={180} />
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </motion.div>
           {activeAnim && (
             <div className="tree-anim-layer">
@@ -627,6 +656,34 @@ export default function GamePage({ state, onStateChange }: Props) {
                 );
               })}
             </div>
+          )}
+        </div>
+      )}
+
+      {import.meta.env.DEV && (
+        <div className="debug-mm-panel">
+          <button
+            className="debug-mm-btn"
+            onClick={() => setShowDebugInput(v => !v)}
+          >
+            Проверка этапов
+          </button>
+          {showDebugInput && (
+            <input
+              className="debug-mm-input"
+              type="number"
+              value={debugMmInput}
+              placeholder="Введите мм (например 500)"
+              autoFocus
+              onChange={e => setDebugMmInput(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === "Enter") {
+                  const value = Number(debugMmInput);
+                  if (!isNaN(value) && value > 0) addTreeGrowthMm(value);
+                  setDebugMmInput("");
+                }
+              }}
+            />
           )}
         </div>
       )}
