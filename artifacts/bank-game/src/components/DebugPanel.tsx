@@ -40,13 +40,13 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
     if (isNaN(value) || value <= 0) return;
     setBusy(true);
     try {
-      await api.debugAddSessions(value);
+      await api.debugAddSessions(value - 1);
       onStateChange({
         ...state,
         game: {
           ...game,
-          missedSessions: value,
-          pendingStoredSessions: value + 1,
+          missedSessions: value - 1,
+          pendingStoredSessions: value,
           lastSessionTime: null,
           sessionInProgress: false,
         },
@@ -55,31 +55,6 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
     } catch (e) {
       console.warn("[Debug] add-sessions failed", e);
     }
-    setBusy(false);
-  }
-
-  async function resetSession() {
-    if (busy) return;
-    setBusy(true);
-    try {
-      await api.debugResetSession();
-    } catch (e) {
-      console.warn("[Debug] reset-session failed", e);
-    }
-    onStateChange({
-      ...state,
-      game: {
-        ...game,
-        lastSessionTime: null,
-        sessionInProgress: false,
-        water: false,
-        sun: false,
-        fertilizer: false,
-        streakDays: 0,
-        pendingBaseReward: 0,
-        pendingBonusReward: 0,
-      },
-    });
     setBusy(false);
   }
 
@@ -151,10 +126,6 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
 
             <button className="debug-btn" onClick={resetTreeGrowth} disabled={busy}>
               Сброс роста
-            </button>
-
-            <button className="debug-btn" onClick={resetSession} disabled={busy}>
-              Сброс сессии
             </button>
 
             <button className="debug-btn" onClick={resetAccount} disabled={busy}>

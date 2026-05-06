@@ -84,9 +84,6 @@ export const api = {
       { method: "POST", body: JSON.stringify({ type }) },
     ),
 
-  debugResetSession: () =>
-    request<{ success: boolean }>("/game/debug/reset-session", { method: "POST" }),
-
   debugAddSessions: (sessions: number) =>
     request<{ success: boolean }>("/game/debug/add-sessions", {
       method: "POST",

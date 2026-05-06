@@ -394,33 +394,6 @@ router.post("/game/session/claim", requireAuth, async (req: any, res) => {
   }
 });
 
-// POST /api/game/debug/reset-session — clear cooldown only (debug)
-router.post("/game/debug/reset-session", requireAuth, async (req: any, res) => {
-  const userId = req.userId;
-  try {
-    await pool.query(
-      `UPDATE game_state SET
-        last_session_time = NULL,
-        session_in_progress = FALSE,
-        current_session_water = FALSE,
-        current_session_sun = FALSE,
-        current_session_fertilizer = FALSE,
-        streak_days = 0,
-        missed_sessions = 0,
-        pending_stored_sessions = 1,
-        pending_base_reward = 0,
-        pending_bonus_reward = 0,
-        updated_at = NOW()
-       WHERE user_id = $1`,
-      [userId],
-    );
-    return res.json({ success: true });
-  } catch (err) {
-    req.log.error({ err }, "Error resetting session (debug)");
-    return res.status(500).json({ error: "Internal server error" });
-  }
-});
-
 // POST /api/game/debug/add-sessions — add missed sessions and unlock cooldown (debug)
 router.post("/game/debug/add-sessions", requireAuth, async (req: any, res) => {
   const userId = req.userId;
