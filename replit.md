@@ -43,13 +43,12 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 
 ### Economy Formulas (v2 — two-button reward system)
 - Standard daily: `balance × 0.12 / 365` (auto-accrued)
-- Base session reward: `totalBalance × 0.12 / 365 / 3` (12% annual ÷ 3 sessions/day)
-- Activity bonus: `totalBalance × bonusPercent / 365 / 3`
-  - `bonusPercent = getCap(missedSessions) × min(skillPart + capitalPart + randomPart, 1)`
+- Base session reward: `activeBalance × 0.12 / 365 / 3` (12% annual ÷ 3 sessions/day)
+- Activity bonus: `activeBalance × bonusPercent / 365 / 3`
+  - `bonusPercent = 0.03 × min(skillPart + capitalPart + randomPart, 1)` (fixed cap 3%)
   - `skillPart = (avgSkillScore/80) × 0.75` (from 3 mini-games, 0–0.75)
   - `capitalPart`: 0.16 / 0.18 / 0.20 based on total balance thresholds
   - `randomPart`: 0–0.04 random
-  - `getCap`: 0.03 / 0.02 / 0.01 / 0.005 based on missed sessions
 
 ### Two-Button Reward Flow
 1. Player completes all 3 mini-games (water, sun, fertilizer)

@@ -1,12 +1,10 @@
-import { useState } from "react";
 import {
   UserState,
   formatRub,
   calcStandardDaily,
-  calcActivityBonus,
   SESSIONS_PER_DAY,
 } from "@/lib/engine";
-import { TrendingUp, Zap, Lock, ChevronRight, HelpCircle, X } from "lucide-react";
+import { TrendingUp, Zap, Lock, ChevronRight } from "lucide-react";
 
 interface Props {
   state: UserState;
@@ -15,15 +13,10 @@ interface Props {
 
 export default function SavingsPage({ state, onTabChange }: Props) {
   const { standard, active, standardEarned, activeEarned } = state.balances;
-  const { missedSessions } = state.game;
-  const [showTooltip, setShowTooltip] = useState(false);
 
   const standardAnnual = standard * 0.12;
   const activeAnnual = active * 0.15;
   const stdDaily = calcStandardDaily(standard);
-  const activityBonus = calcActivityBonus(missedSessions);
-  // Max values — UI display only, never used in payouts
-  // 15% = 12% base + 3% max bonus, applied to active balance only
   const dailyMax = active * 0.15 / 365;
   const sessionMax = dailyMax / SESSIONS_PER_DAY;
 
@@ -83,7 +76,7 @@ export default function SavingsPage({ state, onTabChange }: Props) {
           </div>
           <div>
             <p className="deposit-name">Активный вклад</p>
-            <span className="deposit-badge deposit-badge-green">до {(12 + activityBonus).toFixed(1)}% годовых</span>
+            <span className="deposit-badge deposit-badge-green">до 15,0% годовых</span>
           </div>
           <ChevronRight size={18} className="deposit-trend" />
         </div>
@@ -116,60 +109,10 @@ export default function SavingsPage({ state, onTabChange }: Props) {
           </div>
         </div>
 
-        {missedSessions > 1 && (
-          <div
-            className="missed-sessions-row"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <span className="missed-sessions-label">
-              Пропущенные сессии: <strong>{missedSessions}</strong>
-            </span>
-            <button className="super-session-btn" disabled>
-              Супер-сессия
-            </button>
-            <button
-              className="missed-sessions-help"
-              onClick={(e) => { e.stopPropagation(); setShowTooltip(true); }}
-              title="Подробнее"
-            >
-              <HelpCircle size={18} />
-            </button>
-          </div>
-        )}
-
         <div className="deposit-info-box deposit-info-box-green">
           <p>Доход начисляется за сессии каждые 8 часов. Результат зависит от активности.</p>
         </div>
       </div>
-
-      {showTooltip && (
-        <div className="tooltip-overlay" onClick={() => setShowTooltip(false)}>
-          <div className="tooltip-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="tooltip-close" onClick={() => setShowTooltip(false)}>
-              <X size={18} />
-            </button>
-            <h3 className="tooltip-title">Бонус активности</h3>
-            <p className="tooltip-body">
-              Бонус к доходу уменьшается, если вы пропускаете сессии:
-            </p>
-            <div className="tooltip-table">
-              <div className={`tooltip-row ${missedSessions <= 3 ? "tooltip-row-active" : ""}`}>
-                <span>1–3 сессии</span><span>+3%</span>
-              </div>
-              <div className={`tooltip-row ${missedSessions > 3 && missedSessions <= 9 ? "tooltip-row-active" : ""}`}>
-                <span>4–9 сессий</span><span>+2%</span>
-              </div>
-              <div className={`tooltip-row ${missedSessions > 9 && missedSessions <= 21 ? "tooltip-row-active" : ""}`}>
-                <span>10–21 сессия</span><span>+1%</span>
-              </div>
-              <div className={`tooltip-row ${missedSessions > 21 ? "tooltip-row-active" : ""}`}>
-                <span>Более 21</span><span>+0.5%</span>
-              </div>
-            </div>
-            <p className="tooltip-hint">Вы можете восстановить бонус, играя регулярно.</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

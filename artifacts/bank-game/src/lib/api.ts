@@ -47,7 +47,6 @@ export interface GameStateResponse {
     sun: boolean;
     fertilizer: boolean;
     streakDays: number;
-    missedSessions: number;
     pendingBaseReward: number;
     pendingBonusReward: number;
     treeGrowthMM: number;

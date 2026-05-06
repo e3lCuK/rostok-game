@@ -19,10 +19,6 @@ if (Number.isNaN(port) || port <= 0) {
 async function runMigrations() {
   await pool.query(`
     ALTER TABLE game_state
-    ADD COLUMN IF NOT EXISTS missed_sessions INT NOT NULL DEFAULT 0
-  `);
-  await pool.query(`
-    ALTER TABLE game_state
     ADD COLUMN IF NOT EXISTS pending_base_reward NUMERIC NOT NULL DEFAULT 0
   `);
   await pool.query(`

@@ -7,13 +7,6 @@ const SESSIONS_PER_DAY = 3; // 1 session per 8 hours
 
 // ---- New economy helpers ----
 
-function getCap(missedSessions: number): number {
-  if (missedSessions <= 3) return 0.03;
-  if (missedSessions <= 9) return 0.02;
-  if (missedSessions <= 21) return 0.01;
-  return 0.005;
-}
-
 function getCapitalPart(totalBalance: number): number {
   if (totalBalance >= 2_000_000) return 0.20;
   if (totalBalance >= 200_000) return 0.18;
@@ -21,14 +14,14 @@ function getCapitalPart(totalBalance: number): number {
 }
 
 // skillScore: 0–80 average from mini-games
-function calcBonusPercent(skillScore: number, totalBalance: number, missedSessions: number): number {
+function calcBonusPercent(skillScore: number, totalBalance: number): number {
   const skillFactor = Math.min(Math.max(skillScore, 0), 80) / 80; // 0–1
   const skillPart = skillFactor * 0.75;                            // 0–0.75
   const capitalPart = getCapitalPart(totalBalance);                // 0.16–0.20
   const randomPart = Math.random() * 0.04;                         // 0–0.04
   const performance = skillPart + capitalPart + randomPart;
   const normalized = Math.min(performance, 1);
-  return getCap(missedSessions) * normalized;
+  return 0.03 * normalized;
 }
 
 const router = Router();
@@ -80,7 +73,6 @@ router.get("/game/state", requireAuth, async (req: any, res) => {
         sun: game.current_session_sun || false,
         fertilizer: game.current_session_fertilizer || false,
         streakDays: game.streak_days || 0,
-        missedSessions: game.missed_sessions || 0,
         pendingBaseReward: parseFloat(game.pending_base_reward) || 0,
         pendingBonusReward: parseFloat(game.pending_bonus_reward) || 0,
         treeGrowthMM: parseInt(game.tree_growth_mm) || 0,
@@ -202,24 +194,15 @@ router.post("/game/session/start", requireAuth, async (req: any, res) => {
       return res.status(429).json({ error: "Session locked", nextAvailable });
     }
 
-    // Calculate how many sessions were missed since the last one
-    let additionalMissed = 0;
-    if (g.last_session_time) {
-      const elapsed = now - parseInt(g.last_session_time);
-      additionalMissed = Math.max(0, Math.floor(elapsed / COOLDOWN_MS) - 1);
-    }
-    const newMissedSessions = (g.missed_sessions || 0) + additionalMissed;
-
     await pool.query(
       `UPDATE game_state
        SET session_in_progress = TRUE,
            current_session_water = FALSE,
            current_session_sun = FALSE,
            current_session_fertilizer = FALSE,
-           missed_sessions = $2,
            updated_at = NOW()
        WHERE user_id = $1`,
-      [userId, newMissedSessions],
+      [userId],
     );
 
     return res.json({ success: true });
@@ -296,8 +279,7 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
       // daily = activeBalance * rate / 365 | session = daily / SESSIONS_PER_DAY
       // IMPORTANT: use activeBalance only — standard earns separately via /accrue
       // totalBalance is only used for capital tier in calcBonusPercent
-      const missedSessions = g.missed_sessions || 0;
-      const bonusPercent = calcBonusPercent(skillScore, totalBalance, missedSessions);
+      const bonusPercent = calcBonusPercent(skillScore, totalBalance);
       const dailyBase = activeBalance * 0.12 / 365;
       const dailyBonus = activeBalance * bonusPercent / 365;
       baseReward = dailyBase / SESSIONS_PER_DAY;
@@ -408,7 +390,6 @@ router.post("/game/debug/reset-session", requireAuth, async (req: any, res) => {
         current_session_sun = FALSE,
         current_session_fertilizer = FALSE,
         streak_days = 0,
-        missed_sessions = 0,
         pending_base_reward = 0,
         pending_bonus_reward = 0,
         updated_at = NOW()

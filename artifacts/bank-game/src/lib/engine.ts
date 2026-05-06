@@ -31,7 +31,6 @@ export interface UserState {
     sun: boolean;
     fertilizer: boolean;
     streakDays: number;
-    missedSessions: number;
     pendingBaseReward: number;
     pendingBonusReward: number;
     treeGrowthMM: number;
@@ -49,38 +48,11 @@ export function calcStandardDaily(standardBalance: number): number {
   return standardBalance * 0.12 / 365;
 }
 
-// ---- New economy: missed-sessions cap ----
-// Returns bonus cap as a decimal (e.g. 0.03 = 3%)
-export function getCap(missedSessions: number): number {
-  if (missedSessions <= 3) return 0.03;
-  if (missedSessions <= 9) return 0.02;
-  if (missedSessions <= 21) return 0.01;
-  return 0.005;
-}
-
 // ---- Capital part based on total balance ----
 export function getCapitalPart(totalBalance: number): number {
   if (totalBalance >= 2_000_000) return 0.20;
   if (totalBalance >= 200_000) return 0.18;
   return 0.16;
-}
-
-// ---- Activity bonus degradation (for badge display) ----
-// Returns percentage points: 3 / 2 / 1 / 0.5
-export function calcActivityBonus(missedSessions: number): number {
-  if (missedSessions <= 3) return 3;
-  if (missedSessions <= 9) return 2;
-  if (missedSessions <= 21) return 1;
-  return 0.5;
-}
-
-// ---- Estimate bonus percent for UI display (no actual payout) ----
-// bonusPercent = cap * skillFactor
-// cap = max possible for this activity tier
-// skillFactor = 0..1, defaults to 0.5 (average expected performance)
-// Pass the real skillFactor after a session for post-session display
-export function estimateBonusPercent(missedSessions: number, skillFactor = 0.5): number {
-  return getCap(missedSessions) * Math.min(Math.max(skillFactor, 0), 1);
 }
 
 // ---- SINGLE reward calculation formula — used everywhere ----
