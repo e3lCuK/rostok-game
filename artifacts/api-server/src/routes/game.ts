@@ -268,6 +268,7 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
 
     let baseReward = 0;
     let bonusReward = 0;
+    let storedSessionsResult = 1;
 
     if (allDone) {
       const activeBalance = parseFloat(acc.active_balance);
@@ -291,18 +292,18 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
       // IMPORTANT: use activeBalance only — standard earns separately via /accrue
       // totalBalance is only used for capital tier in calcBonusPercent
       const missedSessions = g.missed_sessions || 0;
-      const storedSessions = 1 + missedSessions;
+      storedSessionsResult = 1 + missedSessions;
       const bonusMultiplier = Math.max(1 - missedSessions * 0.1, 0.1);
       const bonusPercent = calcBonusPercent(skillScore, totalBalance);
       const dailyBase = activeBalance * 0.12 / 365;
       const dailyBonus = activeBalance * bonusPercent / 365;
       const basePerSession = dailyBase / SESSIONS_PER_DAY;
       const bonusPerSession = dailyBonus / SESSIONS_PER_DAY;
-      baseReward = basePerSession * storedSessions;
-      bonusReward = bonusPerSession * bonusMultiplier * storedSessions;
+      baseReward = basePerSession * storedSessionsResult;
+      bonusReward = bonusPerSession * bonusMultiplier * storedSessionsResult;
 
       req.log.info(
-        { skillScore, bonusPercent, bonusMultiplier, storedSessions, baseReward, bonusReward, totalBalance },
+        { skillScore, bonusPercent, bonusMultiplier, storedSessions: storedSessionsResult, baseReward, bonusReward, totalBalance },
         "Session rewards calculated",
       );
 
@@ -323,11 +324,11 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
           pending_bonus_reward = COALESCE(pending_bonus_reward, 0) + $5,
           updated_at = NOW()
          WHERE user_id = $6`,
-        [now, newStreak, storedSessions, baseReward, bonusReward, userId],
+        [now, newStreak, storedSessionsResult, baseReward, bonusReward, userId],
       );
     }
 
-    return res.json({ success: true, sessionComplete: allDone, baseReward, bonusReward });
+    return res.json({ success: true, sessionComplete: allDone, baseReward, bonusReward, storedSessions: storedSessionsResult });
   } catch (err) {
     req.log.error({ err }, "Error processing action");
     return res.status(500).json({ error: "Internal server error" });
@@ -430,7 +431,7 @@ router.post("/game/debug/add-sessions", requireAuth, async (req: any, res) => {
   try {
     await pool.query(
       `UPDATE game_state SET
-        missed_sessions = COALESCE(missed_sessions, 0) + $2,
+        missed_sessions = $2,
         last_session_time = NULL,
         session_in_progress = FALSE,
         updated_at = NOW()

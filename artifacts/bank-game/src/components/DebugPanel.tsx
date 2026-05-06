@@ -45,7 +45,7 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
         ...state,
         game: {
           ...game,
-          missedSessions: (game.missedSessions ?? 0) + value,
+          missedSessions: value,
           lastSessionTime: null,
           sessionInProgress: false,
         },
@@ -125,7 +125,7 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
                 className="debug-mm-input"
                 type="number"
                 value={sessionInput}
-                placeholder="Количество сессий"
+                placeholder="Кол-во"
                 onChange={e => setSessionInput(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && addSessions()}
               />

@@ -290,8 +290,10 @@ export default function GamePage({ state, onStateChange }: Props) {
           water: true, sun: true, fertilizer: true,
           sessionInProgress: false,
           lastSessionTime: finishedTime,
+          missedSessions: 0,
           pendingBaseReward: (game.pendingBaseReward ?? 0) + (result.baseReward ?? 0),
           pendingBonusReward: (game.pendingBonusReward ?? 0) + (result.bonusReward ?? 0),
+          pendingStoredSessions: result.storedSessions ?? 1,
         };
         console.log(`[Session complete] base=${result.baseReward} bonus=${result.bonusReward}`);
         setShowCompletionStage(true);

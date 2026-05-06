@@ -73,7 +73,7 @@ export const api = {
     request<{ success: boolean }>("/game/session/start", { method: "POST" }),
 
   doAction: (action: "water" | "sun" | "fertilizer", skillScore?: number) =>
-    request<{ success: boolean; sessionComplete: boolean; baseReward: number; bonusReward: number }>(
+    request<{ success: boolean; sessionComplete: boolean; baseReward: number; bonusReward: number; storedSessions: number }>(
       "/game/session/action",
       { method: "POST", body: JSON.stringify({ action, skillScore }) },
     ),
