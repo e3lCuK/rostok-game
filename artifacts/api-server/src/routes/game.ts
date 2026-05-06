@@ -398,7 +398,7 @@ router.post("/game/session/claim", requireAuth, async (req: any, res) => {
 router.post("/game/debug/add-sessions", requireAuth, async (req: any, res) => {
   const userId = req.userId;
   const value = Math.floor(Number(req.body.sessions));
-  if (isNaN(value) || value < 0) {
+  if (isNaN(value) || value < 1) {
     return res.status(400).json({ error: "Invalid sessions value" });
   }
   try {
@@ -409,7 +409,7 @@ router.post("/game/debug/add-sessions", requireAuth, async (req: any, res) => {
         session_in_progress = FALSE,
         updated_at = NOW()
        WHERE user_id = $1`,
-      [userId, value],
+      [userId, value - 1],
     );
     return res.json({ success: true });
   } catch (err) {

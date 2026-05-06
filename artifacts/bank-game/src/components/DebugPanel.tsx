@@ -40,7 +40,7 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
     if (isNaN(value) || value <= 0) return;
     setBusy(true);
     try {
-      await api.debugAddSessions(value - 1);
+      await api.debugAddSessions(value);
       onStateChange({
         ...state,
         game: {
