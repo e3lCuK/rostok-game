@@ -87,6 +87,12 @@ export const api = {
   debugResetSession: () =>
     request<{ success: boolean }>("/game/debug/reset-session", { method: "POST" }),
 
+  debugAddSessions: (sessions: number) =>
+    request<{ success: boolean }>("/game/debug/add-sessions", {
+      method: "POST",
+      body: JSON.stringify({ sessions }),
+    }),
+
   debugResetAll: () =>
     request<{ success: boolean }>("/game/debug/reset-all", { method: "DELETE" }),
 };

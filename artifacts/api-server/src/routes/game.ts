@@ -420,6 +420,30 @@ router.post("/game/debug/reset-session", requireAuth, async (req: any, res) => {
   }
 });
 
+// POST /api/game/debug/add-sessions — add missed sessions and unlock cooldown (debug)
+router.post("/game/debug/add-sessions", requireAuth, async (req: any, res) => {
+  const userId = req.userId;
+  const value = Math.floor(Number(req.body.sessions));
+  if (isNaN(value) || value <= 0) {
+    return res.status(400).json({ error: "Invalid sessions value" });
+  }
+  try {
+    await pool.query(
+      `UPDATE game_state SET
+        missed_sessions = COALESCE(missed_sessions, 0) + $2,
+        last_session_time = NULL,
+        session_in_progress = FALSE,
+        updated_at = NOW()
+       WHERE user_id = $1`,
+      [userId, value],
+    );
+    return res.json({ success: true });
+  } catch (err) {
+    req.log.error({ err }, "Error adding sessions (debug)");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // DELETE /api/game/debug/reset-all — wipe all user data (debug)
 router.delete("/game/debug/reset-all", requireAuth, async (req: any, res) => {
   const userId = req.userId;

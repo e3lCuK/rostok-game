@@ -14,6 +14,7 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [mmInput, setMmInput] = useState("");
+  const [sessionInput, setSessionInput] = useState("");
 
   const { game } = state;
 
@@ -32,6 +33,28 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
       ...state,
       game: { ...game, treeGrowthMM: 0, treeGrowthRemainder: 0 },
     });
+  }
+
+  async function addSessions() {
+    const value = Math.floor(Number(sessionInput));
+    if (isNaN(value) || value <= 0) return;
+    setBusy(true);
+    try {
+      await api.debugAddSessions(value);
+      onStateChange({
+        ...state,
+        game: {
+          ...game,
+          missedSessions: (game.missedSessions ?? 0) + value,
+          lastSessionTime: null,
+          sessionInProgress: false,
+        },
+      });
+      setSessionInput("");
+    } catch (e) {
+      console.warn("[Debug] add-sessions failed", e);
+    }
+    setBusy(false);
   }
 
   async function resetSession() {
@@ -97,6 +120,20 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
         <div className="debug-body">
           <p className="debug-title">Отладка</p>
           <div className="debug-buttons">
+            <div className="debug-mm-row">
+              <input
+                className="debug-mm-input"
+                type="number"
+                value={sessionInput}
+                placeholder="Количество сессий"
+                onChange={e => setSessionInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && addSessions()}
+              />
+              <button className="debug-btn" onClick={addSessions} disabled={busy}>
+                + сессий
+              </button>
+            </div>
+
             <div className="debug-mm-row">
               <input
                 className="debug-mm-input"
