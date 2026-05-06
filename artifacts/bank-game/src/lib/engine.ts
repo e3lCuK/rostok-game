@@ -31,8 +31,10 @@ export interface UserState {
     sun: boolean;
     fertilizer: boolean;
     streakDays: number;
+    missedSessions: number;
     pendingBaseReward: number;
     pendingBonusReward: number;
+    pendingStoredSessions: number;
     treeGrowthMM: number;
     treeGrowthRemainder: number;
   };

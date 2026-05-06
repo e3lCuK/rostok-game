@@ -10,6 +10,7 @@ import {
   getNextSessionTime,
   getTreeStage,
   getSessionActionsLeft,
+  SESSION_COOLDOWN_MS,
 } from "@/lib/engine";
 import { api } from "@/lib/api";
 import TreeSVG from "@/components/TreeSVG";
@@ -129,6 +130,16 @@ export default function GamePage({ state, onStateChange }: Props) {
   const msLeft = nextTime ? Math.max(0, nextTime - now) : null;
   const sessionMax = balances.active * 0.15 / 365 / 3;
   const actionsLeft = getSessionActionsLeft(game);
+
+  // Compute stored sessions dynamically (missed sessions accumulate until played)
+  const computedMissed = (() => {
+    if (game.sessionInProgress || !game.lastSessionTime) return game.missedSessions ?? 0;
+    const elapsed = now - game.lastSessionTime;
+    const additionalMissed = Math.max(0, Math.floor(elapsed / SESSION_COOLDOWN_MS) - 1);
+    return (game.missedSessions ?? 0) + additionalMissed;
+  })();
+  const storedSessions = 1 + computedMissed;
+  const pendingStoredSessions = game.pendingStoredSessions ?? 1;
 
   const stage = getTreeStage(game.treeGrowthMM ?? 0);
 
@@ -416,7 +427,9 @@ export default function GamePage({ state, onStateChange }: Props) {
               </div>
             </>
           ) : !game.sessionInProgress ? (
-            <p className="session-ready-text">Сессия готова!</p>
+            <p className="session-ready-text" style={{ color: storedSessions > 1 ? '#dc2626' : undefined }}>
+              Сессий к получению: {storedSessions}
+            </p>
           ) : (
             <p className="session-ready-text">Осталось: {actionsLeft} действия</p>
           )}
@@ -533,7 +546,7 @@ export default function GamePage({ state, onStateChange }: Props) {
                 transition={{ duration: 0.35 }}
               >
                 <Play size={16} />
-                Начать сессию
+                {storedSessions > 1 ? "Начать суперсессию" : "Начать сессию"}
               </motion.button>
             )}
           </AnimatePresence>
@@ -600,7 +613,7 @@ export default function GamePage({ state, onStateChange }: Props) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ type: "spring", stiffness: 200, damping: 20 }}
             >
-              Базовый доход +{formatRub(pendingBase)}
+              Базовый доход ×{pendingStoredSessions} +{formatRub(pendingBase)}
             </motion.button>
           )}
           {pendingBonus > 0 && (
@@ -613,7 +626,7 @@ export default function GamePage({ state, onStateChange }: Props) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.07 }}
             >
-              Бонус за активность +{formatRub(pendingBonus)}
+              Бонус за активность ×{pendingStoredSessions} +{formatRub(pendingBonus)}
             </motion.button>
           )}
         </div>

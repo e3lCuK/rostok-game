@@ -73,8 +73,10 @@ router.get("/game/state", requireAuth, async (req: any, res) => {
         sun: game.current_session_sun || false,
         fertilizer: game.current_session_fertilizer || false,
         streakDays: game.streak_days || 0,
+        missedSessions: game.missed_sessions || 0,
         pendingBaseReward: parseFloat(game.pending_base_reward) || 0,
         pendingBonusReward: parseFloat(game.pending_bonus_reward) || 0,
+        pendingStoredSessions: parseInt(game.pending_stored_sessions) || 1,
         treeGrowthMM: parseInt(game.tree_growth_mm) || 0,
         treeGrowthRemainder: parseFloat(game.tree_growth_remainder) || 0,
       },
@@ -194,15 +196,24 @@ router.post("/game/session/start", requireAuth, async (req: any, res) => {
       return res.status(429).json({ error: "Session locked", nextAvailable });
     }
 
+    // Calculate how many sessions were missed since the last one
+    let additionalMissed = 0;
+    if (g.last_session_time) {
+      const elapsed = now - parseInt(g.last_session_time);
+      additionalMissed = Math.max(0, Math.floor(elapsed / COOLDOWN_MS) - 1);
+    }
+    const newMissedSessions = (g.missed_sessions || 0) + additionalMissed;
+
     await pool.query(
       `UPDATE game_state
        SET session_in_progress = TRUE,
            current_session_water = FALSE,
            current_session_sun = FALSE,
            current_session_fertilizer = FALSE,
+           missed_sessions = $2,
            updated_at = NOW()
        WHERE user_id = $1`,
-      [userId],
+      [userId, newMissedSessions],
     );
 
     return res.json({ success: true });
@@ -279,17 +290,19 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
       // daily = activeBalance * rate / 365 | session = daily / SESSIONS_PER_DAY
       // IMPORTANT: use activeBalance only — standard earns separately via /accrue
       // totalBalance is only used for capital tier in calcBonusPercent
+      const missedSessions = g.missed_sessions || 0;
+      const storedSessions = 1 + missedSessions;
+      const bonusMultiplier = Math.max(1 - missedSessions * 0.1, 0.1);
       const bonusPercent = calcBonusPercent(skillScore, totalBalance);
       const dailyBase = activeBalance * 0.12 / 365;
       const dailyBonus = activeBalance * bonusPercent / 365;
-      baseReward = dailyBase / SESSIONS_PER_DAY;
-      bonusReward = dailyBonus / SESSIONS_PER_DAY;
-
-      console.log("DAILY:", dailyBase + dailyBonus, "(activeBalance:", activeBalance, ")");
-      console.log("SESSION:", baseReward + bonusReward);
+      const basePerSession = dailyBase / SESSIONS_PER_DAY;
+      const bonusPerSession = dailyBonus / SESSIONS_PER_DAY;
+      baseReward = basePerSession * storedSessions;
+      bonusReward = bonusPerSession * bonusMultiplier * storedSessions;
 
       req.log.info(
-        { skillScore, bonusPercent, baseReward, bonusReward, totalBalance, dailyBase, dailyBonus },
+        { skillScore, bonusPercent, bonusMultiplier, storedSessions, baseReward, bonusReward, totalBalance },
         "Session rewards calculated",
       );
 
@@ -304,11 +317,13 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
           current_session_water = FALSE,
           current_session_sun = FALSE,
           current_session_fertilizer = FALSE,
-          pending_base_reward = COALESCE(pending_base_reward, 0) + $3,
-          pending_bonus_reward = COALESCE(pending_bonus_reward, 0) + $4,
+          missed_sessions = 0,
+          pending_stored_sessions = $3,
+          pending_base_reward = COALESCE(pending_base_reward, 0) + $4,
+          pending_bonus_reward = COALESCE(pending_bonus_reward, 0) + $5,
           updated_at = NOW()
-         WHERE user_id = $5`,
-        [now, newStreak, baseReward, bonusReward, userId],
+         WHERE user_id = $6`,
+        [now, newStreak, storedSessions, baseReward, bonusReward, userId],
       );
     }
 
@@ -390,6 +405,8 @@ router.post("/game/debug/reset-session", requireAuth, async (req: any, res) => {
         current_session_sun = FALSE,
         current_session_fertilizer = FALSE,
         streak_days = 0,
+        missed_sessions = 0,
+        pending_stored_sessions = 1,
         pending_base_reward = 0,
         pending_bonus_reward = 0,
         updated_at = NOW()
