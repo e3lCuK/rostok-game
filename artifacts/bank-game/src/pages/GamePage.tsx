@@ -615,7 +615,7 @@ export default function GamePage({ state, onStateChange }: Props) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ type: "spring", stiffness: 200, damping: 20 }}
             >
-              Базовый доход ×{storedSessions} +{formatRub(pendingBase)}
+              Базовый доход ×{pendingStoredSessions} +{formatRub(pendingBase)}
             </motion.button>
           )}
           {pendingBonus > 0 && (
@@ -628,7 +628,7 @@ export default function GamePage({ state, onStateChange }: Props) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.07 }}
             >
-              Бонус за активность ×{storedSessions} +{formatRub(pendingBonus)}
+              Бонус за активность ×{pendingStoredSessions} +{formatRub(pendingBonus)}
             </motion.button>
           )}
         </div>
