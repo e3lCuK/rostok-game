@@ -674,7 +674,7 @@ export default function GamePage({ state, onStateChange }: Props) {
                     )}
                     <div className="session-total">
                       <span>Итого</span>
-                      <span>+{formatRub(s.total)} · {formatPercent(pct)}</span>
+                      <span>+{formatRub(s.total)} · {formatPercent(pct)} год.</span>
                     </div>
                   </div>
                 );
