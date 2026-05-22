@@ -17,7 +17,7 @@ interface Props {
 }
 
 export default function HomePage({ state }: Props) {
-  const [historyOpen, setHistoryOpen] = useState(true);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const { standard, active, standardEarned, activeEarned } = state.balances;
   const totalBalance = standard + active;
   const totalEarned = standardEarned + activeEarned;

@@ -11,7 +11,7 @@ interface Props {
 }
 
 export default function StandardPage({ state }: Props) {
-  const [historyOpen, setHistoryOpen] = useState(true);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const { standard, standardEarned } = state.balances;
   const stdDaily = calcStandardDaily(standard);
   const standardAnnual = standard * 0.12;

@@ -46,7 +46,7 @@ export default function GamePage({ state, onStateChange }: Props) {
   const [showCompletionStage, setShowCompletionStage] = useState(hasPendingInit && notInSessionInit);
   const [showRewards, setShowRewards] = useState(hasPendingInit && notInSessionInit);
   const [fadeActivities, setFadeActivities] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false); // collapsed by default
   const [activeAnim, setActiveAnim] = useState<GameType | null>(null);
   const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animParticlesRef = useRef<number[]>([]);
