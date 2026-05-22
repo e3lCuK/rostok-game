@@ -917,7 +917,7 @@ body.modal-open {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 80px;
+  width: 90px;
   min-height: 80px;
   border-radius: 18px;
   border: 2px solid var(--ac, #16a34a);
@@ -927,7 +927,7 @@ body.modal-open {
   font-size: 0.67rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0px;
   transition: background 0.12s, opacity 0.12s;
   backdrop-filter: blur(4px);
 }
@@ -959,8 +959,8 @@ body.modal-open {
 }
 
 .action-btn-percent {
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 700;
+  font-size: 0.67rem;
   line-height: 1;
   text-align: center;
 }
