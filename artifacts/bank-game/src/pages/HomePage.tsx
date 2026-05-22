@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   UserState,
   formatRub,
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export default function HomePage({ state }: Props) {
+  const [historyOpen, setHistoryOpen] = useState(true);
   const { standard, active, standardEarned, activeEarned } = state.balances;
   const totalBalance = standard + active;
   const totalEarned = standardEarned + activeEarned;
@@ -104,18 +106,23 @@ export default function HomePage({ state }: Props) {
         }
         return (
           <div className="history-card">
-            <h3 className="history-title">Последние начисления</h3>
-            <div className="history-list">
-              {merged.slice(0, 6).map((item, idx) => (
-                <div key={idx} className="history-item">
-                  <div className="history-cell-left">
-                    <span className="history-type">{item.label}</span>
-                    <span className="history-date">{item.date}</span>
-                  </div>
-                  <span className="history-amount">+{formatRub(item.amount)}</span>
-                </div>
-              ))}
+            <div className="history-title-row" onClick={() => setHistoryOpen(!historyOpen)}>
+              <h3 className="history-title">История начислений</h3>
+              <span className="history-chevron">{historyOpen ? "▼" : "▶"}</span>
             </div>
+            {historyOpen && (
+              <div className="history-list history-list-scroll">
+                {merged.map((item, idx) => (
+                  <div key={idx} className="history-item">
+                    <div className="history-cell-left">
+                      <span className="history-type">{item.label}</span>
+                      <span className="history-date">{item.date}</span>
+                    </div>
+                    <span className="history-amount">+{formatRub(item.amount)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
       })()}
