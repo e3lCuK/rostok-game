@@ -181,8 +181,13 @@ router.post("/game/session/start", requireAuth, async (req: any, res) => {
   const userId = req.userId;
 
   try {
-    const gameRow = await pool.query("SELECT * FROM game_state WHERE user_id = $1", [userId]);
-    if (gameRow.rows.length === 0) return res.status(404).json({ error: "Account not found" });
+    const [gameRow, accRow] = await Promise.all([
+      pool.query("SELECT * FROM game_state WHERE user_id = $1", [userId]),
+      pool.query("SELECT start_date FROM accounts WHERE user_id = $1", [userId]),
+    ]);
+    if (gameRow.rows.length === 0 || accRow.rows.length === 0) {
+      return res.status(404).json({ error: "Account not found" });
+    }
 
     const g = gameRow.rows[0];
     const now = Date.now();
@@ -196,12 +201,18 @@ router.post("/game/session/start", requireAuth, async (req: any, res) => {
       return res.status(429).json({ error: "Session locked", nextAvailable });
     }
 
-    // Calculate how many sessions were missed since the last one
+    // Calculate how many sessions were missed since the last one.
+    // If last_session_time is null (never played), fall back to start_date so
+    // players who were away from day 1 still accumulate super sessions.
     let additionalMissed = 0;
-    if (g.last_session_time) {
-      const elapsed = now - parseInt(g.last_session_time);
-      additionalMissed = Math.max(0, Math.floor(elapsed / COOLDOWN_MS) - 1);
-    }
+    const referenceTime = g.last_session_time
+      ? parseInt(g.last_session_time)
+      : parseInt(accRow.rows[0].start_date);
+    const elapsed = now - referenceTime;
+    // Each full cooldown period that passed is a potential session;
+    // subtract 1 because the current session is the one being started now.
+    additionalMissed = Math.max(0, Math.floor(elapsed / COOLDOWN_MS) - 1);
+
     const newMissedSessions = (g.missed_sessions || 0) + additionalMissed;
 
     await pool.query(
