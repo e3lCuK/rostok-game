@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   UserState,
   formatRub,
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function StandardPage({ state }: Props) {
+  const [historyOpen, setHistoryOpen] = useState(true);
   const { standard, standardEarned } = state.balances;
   const stdDaily = calcStandardDaily(standard);
   const standardAnnual = standard * 0.12;
@@ -68,21 +70,26 @@ export default function StandardPage({ state }: Props) {
       </div>
 
       <div className="history-card">
-        <h3 className="history-title">История начислений</h3>
-        {stdHistory.length === 0 ? (
-          <p className="std-history-empty">Начисления появятся через 24 часа</p>
-        ) : (
-          <div className="history-list">
-            {stdHistory.slice(0, 30).map((item, idx) => (
-              <div key={idx} className="history-item">
-                <div className="history-cell-left">
-                  <span className="history-type">Стандартный вклад</span>
-                  <span className="history-date">{item.date}</span>
+        <div className="history-title-row" onClick={() => setHistoryOpen(!historyOpen)}>
+          <h3 className="history-title">История начислений</h3>
+          <span className="history-chevron">{historyOpen ? "▼" : "▶"}</span>
+        </div>
+        {historyOpen && (
+          stdHistory.length === 0 ? (
+            <p className="std-history-empty">Начисления появятся через 24 часа</p>
+          ) : (
+            <div className="history-list history-list-scroll">
+              {stdHistory.slice(0, 30).map((item, idx) => (
+                <div key={idx} className="history-item">
+                  <div className="history-cell-left">
+                    <span className="history-type">Стандартный вклад</span>
+                    <span className="history-date">{item.date}</span>
+                  </div>
+                  <span className="history-amount">+{formatRub(item.amount)}</span>
                 </div>
-                <span className="history-amount">+{formatRub(item.amount)}</span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )
         )}
       </div>
     </div>

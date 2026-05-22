@@ -648,13 +648,13 @@ export default function GamePage({ state, onStateChange }: Props) {
 
       {/* Session history */}
       {sessionHistory.length > 0 && (
-        <div className="session-history">
-          <div className="history-header" onClick={() => setHistoryOpen(!historyOpen)}>
-            <span>ИСТОРИЯ СЕССИЙ</span>
+        <div className="history-card">
+          <div className="history-title-row" onClick={() => setHistoryOpen(!historyOpen)}>
+            <h3 className="history-title">История начислений</h3>
             <span className="history-chevron">{historyOpen ? "▼" : "▶"}</span>
           </div>
           {historyOpen && (
-            <div>
+            <div className="history-items-scroll">
               {sessionHistory.map((s, idx) => {
                 const pct = s.base > 0 ? (s.total / s.base) * 12 : 12;
                 return (
