@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "fi18_G6Oe27-_vxTG-v__"
+uri = "file://README.md"
+type = "text"
+title = "README.md — Rostok"
