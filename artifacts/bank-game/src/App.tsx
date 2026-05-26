@@ -1,115 +1,32 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ClerkProvider, SignIn, SignUp, Show, useClerk, useUser, useAuth } from "@clerk/react";
-import { Switch, Route, Redirect, useLocation, Router as WouterRouter } from "wouter";
-import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Home, PiggyBank, TrendingUp, Zap, LogOut } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
-import { api, setTokenGetter } from "@/lib/api";
+import { api } from "@/lib/api";
+import { AuthProvider, useAuth } from "@/lib/auth";
 import { APP_NAME, APP_VERSION, UserState, applyOfflineAccrual } from "@/lib/engine";
 import HomePage from "@/pages/HomePage";
 import SavingsPage from "@/pages/SavingsPage";
 import StandardPage from "@/pages/StandardPage";
 import GamePage from "@/pages/GamePage";
 import OnboardingPage from "@/pages/OnboardingPage";
+import AuthPage from "@/pages/AuthPage";
 import DebugPanel from "@/components/DebugPanel";
 import "@/bank.css";
 
-const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
-const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
-
-if (!clerkPubKey) throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY");
-
-function stripBase(path: string): string {
-  return basePath && path.startsWith(basePath) ? path.slice(basePath.length) || "/" : path;
-}
-
-// ---- Auth pages ----
-function SignInPage() {
-  // To update login providers, app branding, or OAuth settings use the Auth
-  // pane in the workspace toolbar. More information can be found in the Replit docs.
-  return (
-    <div className="auth-center">
-      <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} />
-    </div>
-  );
-}
-
-function SignUpPage() {
-  // To update login providers, app branding, or OAuth settings use the Auth
-  // pane in the workspace toolbar. More information can be found in the Replit docs.
-  return (
-    <div className="auth-center">
-      <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} />
-    </div>
-  );
-}
-
-// ---- Landing for signed-out users ----
-function LandingPage() {
-  const [, setLocation] = useLocation();
-  return (
-    <div className="landing-page">
-      <div className="landing-hero">
-        <span className="landing-icon">🌳</span>
-        <h1 className="landing-title">{APP_NAME}</h1>
-        <p className="landing-subtitle">Вкладывайте и наблюдайте за ростом своего дерева</p>
-        <div className="landing-badge">Бета {APP_VERSION}</div>
-      </div>
-      <div className="landing-features">
-        <div className="landing-feature">
-          <span>📈</span>
-          <p>12% на стандартный вклад</p>
-        </div>
-        <div className="landing-feature">
-          <span>⚡</span>
-          <p>до 15% на активный вклад</p>
-        </div>
-        <div className="landing-feature">
-          <span>🌱</span>
-          <p>Дерево растёт вместе с балансом</p>
-        </div>
-      </div>
-      <div className="landing-actions">
-        <button className="landing-btn-primary" onClick={() => setLocation("/sign-up")}>
-          Начать
-        </button>
-        <button className="landing-btn-secondary" onClick={() => setLocation("/sign-in")}>
-          Войти
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ---- Home redirect ----
-function HomeRedirect() {
-  return (
-    <>
-      <Show when="signed-in">
-        <Redirect to="/app" />
-      </Show>
-      <Show when="signed-out">
-        <LandingPage />
-      </Show>
-    </>
-  );
-}
-
-// ---- Main app shell ----
+// ---- Tab bar ----
 type Tab = "home" | "savings" | "standard" | "active";
 const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
-  { id: "home",     label: "Главная",    icon: Home },
-  { id: "savings",  label: "Вклады",     icon: PiggyBank },
+  { id: "home",     label: "Главная",     icon: Home },
+  { id: "savings",  label: "Вклады",      icon: PiggyBank },
   { id: "standard", label: "Стандартный", icon: TrendingUp },
-  { id: "active",   label: "Активный",   icon: Zap },
+  { id: "active",   label: "Активный",    icon: Zap },
 ];
 
+// ---- Main app shell (authenticated) ----
 function AppShell() {
-  const { signOut } = useClerk();
-  const { user } = useUser();
-  const [, setLocation] = useLocation();
+  const { user, logout } = useAuth();
   const [tab, setTab] = useState<Tab>("home");
   const [loading, setLoading] = useState(true);
   const [state, setState] = useState<UserState | null>(null);
@@ -129,7 +46,6 @@ function AppShell() {
         game: data.game!,
         history: data.history!,
       };
-      // Accrue offline days
       const { state: accrued } = applyOfflineAccrual(userState);
       if (accrued !== userState) {
         api.accrue().catch(() => {});
@@ -151,13 +67,8 @@ function AppShell() {
     await loadState();
   }
 
-  function handleStateChange(next: UserState) {
-    setState(next);
-  }
-
-  function handleTabChange(t: Tab) {
-    setTab(t);
-  }
+  function handleStateChange(next: UserState) { setState(next); }
+  function handleTabChange(t: Tab) { setTab(t); }
 
   if (loading) {
     return (
@@ -202,7 +113,7 @@ function AppShell() {
             {user && (
               <button
                 className="bank-header-signout"
-                onClick={() => signOut(() => setLocation("/"))}
+                onClick={() => logout()}
                 title="Выйти"
               >
                 <LogOut size={16} />
@@ -226,10 +137,7 @@ function AppShell() {
             {tab === "savings"  && <SavingsPage state={state} onTabChange={handleTabChange} />}
             {tab === "standard" && <StandardPage state={state} />}
             {tab === "active"   && (
-              <GamePage
-                state={state}
-                onStateChange={handleStateChange}
-              />
+              <GamePage state={state} onStateChange={handleStateChange} />
             )}
           </motion.div>
         </AnimatePresence>
@@ -253,80 +161,38 @@ function AppShell() {
           state={state}
           onStateChange={handleStateChange}
           onResetAccount={() => { setState(null); setOnboarding(true); }}
-          onSignOut={() => signOut(() => setLocation("/"))}
+          onSignOut={logout}
         />
       )}
     </div>
   );
 }
 
-function ProtectedApp() {
-  return (
-    <>
-      <Show when="signed-in">
-        <AppShell />
-      </Show>
-      <Show when="signed-out">
-        <Redirect to="/" />
-      </Show>
-    </>
-  );
-}
+// ---- Root ----
+function Root() {
+  const { user, loading } = useAuth();
 
-// ---- Clerk token → api.ts bridge ----
-function ClerkTokenSync() {
-  const { getToken } = useAuth();
-  useEffect(() => {
-    setTokenGetter(getToken);
-  }, [getToken]);
-  return null;
-}
+  if (loading) {
+    return (
+      <div className="bank-app">
+        <div className="bank-loading">
+          <span className="bank-loading-icon">🌳</span>
+          <p>Загрузка...</p>
+        </div>
+      </div>
+    );
+  }
 
-// ---- Query cache invalidation on user change ----
-function ClerkQueryClientCacheInvalidator() {
-  const { addListener } = useClerk();
-  const qc = useQueryClient();
-  const prevUserIdRef = useRef<string | null | undefined>(undefined);
-  useEffect(() => {
-    return addListener(({ user }) => {
-      const uid = user?.id ?? null;
-      if (prevUserIdRef.current !== undefined && prevUserIdRef.current !== uid) {
-        qc.clear();
-      }
-      prevUserIdRef.current = uid;
-    });
-  }, [addListener, qc]);
-  return null;
-}
-
-function ClerkProviderWithRoutes() {
-  const [, setLocation] = useLocation();
-  return (
-    <ClerkProvider
-      publishableKey={clerkPubKey}
-      proxyUrl={clerkProxyUrl}
-      routerPush={(to) => setLocation(stripBase(to))}
-      routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
-    >
-      <QueryClientProvider client={queryClient}>
-        <ClerkTokenSync />
-        <ClerkQueryClientCacheInvalidator />
-        <Switch>
-          <Route path="/" component={HomeRedirect} />
-          <Route path="/sign-in/*?" component={SignInPage} />
-          <Route path="/sign-up/*?" component={SignUpPage} />
-          <Route path="/app" component={ProtectedApp} />
-          <Route><Redirect to="/" /></Route>
-        </Switch>
-      </QueryClientProvider>
-    </ClerkProvider>
-  );
+  if (!user) return <AuthPage />;
+  return <AppShell />;
 }
 
 export default function App() {
   return (
-    <WouterRouter base={basePath}>
-      <ClerkProviderWithRoutes />
-    </WouterRouter>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Root />
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }

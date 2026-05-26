@@ -17,6 +17,15 @@ if (Number.isNaN(port) || port <= 0) {
 }
 
 async function runMigrations() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      username VARCHAR(50) UNIQUE NOT NULL,
+      nickname VARCHAR(100) NOT NULL,
+      password_hash VARCHAR(255) NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
   await pool.query(`ALTER TABLE game_state ADD COLUMN IF NOT EXISTS missed_sessions INT NOT NULL DEFAULT 0`);
   await pool.query(`ALTER TABLE game_state ADD COLUMN IF NOT EXISTS pending_stored_sessions INT NOT NULL DEFAULT 1`);
   await pool.query(`ALTER TABLE game_state ADD COLUMN IF NOT EXISTS pending_base_reward NUMERIC NOT NULL DEFAULT 0`);

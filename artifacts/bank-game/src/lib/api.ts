@@ -1,26 +1,14 @@
 // API client — thin wrapper around fetch for game endpoints
 const BASE = "/api";
 
-type TokenGetter = () => Promise<string | null>;
-let _getToken: TokenGetter | null = null;
-
-export function setTokenGetter(fn: TokenGetter) {
-  _getToken = fn;
-}
-
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const token = _getToken ? await _getToken() : null;
-
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(options?.headers as Record<string, string> ?? {}),
-  };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-
-  const { headers: _h, ...restOptions } = options ?? {};
+  const { headers: extraHeaders, ...restOptions } = options ?? {};
   const res = await fetch(`${BASE}${path}`, {
     credentials: "include",
-    headers,
+    headers: {
+      "Content-Type": "application/json",
+      ...(extraHeaders as Record<string, string> ?? {}),
+    },
     ...restOptions,
   });
   if (!res.ok) {
@@ -28,6 +16,12 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     throw Object.assign(new Error(body.error || `HTTP ${res.status}`), { status: res.status });
   }
   return res.json();
+}
+
+export interface AuthUser {
+  id: number;
+  username: string;
+  nickname: string;
 }
 
 export interface GameStateResponse {
@@ -60,6 +54,22 @@ export interface GameStateResponse {
 }
 
 export const api = {
+  // Auth
+  authMe: () => request<AuthUser>("/auth/me"),
+  login: (username: string, password: string) =>
+    request<AuthUser>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ username, password }),
+    }),
+  register: (username: string, nickname: string, password: string) =>
+    request<AuthUser>("/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ username, nickname, password }),
+    }),
+  logout: () =>
+    request<{ success: boolean }>("/auth/logout", { method: "POST" }),
+
+  // Game
   getState: () => request<GameStateResponse>("/game/state"),
 
   initAccount: (startingCapital: number) =>

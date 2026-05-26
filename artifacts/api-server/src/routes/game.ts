@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { getAuth } from "@clerk/express";
 import { pool } from "@workspace/db";
 
 const COOLDOWN_MS = 8 * 60 * 60 * 1000;
@@ -27,12 +26,9 @@ function calcBonusPercent(skillScore: number, totalBalance: number): number {
 const router = Router();
 
 function requireAuth(req: any, res: any, next: any) {
-  const auth = getAuth(req);
-  const userId = auth?.userId;
-  if (!userId) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  req.userId = userId;
+  const userId = req.session?.userId;
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+  req.userId = String(userId);
   next();
 }
 
