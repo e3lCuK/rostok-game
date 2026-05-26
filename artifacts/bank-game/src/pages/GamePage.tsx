@@ -50,6 +50,7 @@ export default function GamePage({ state, onStateChange }: Props) {
   const [fadeActivities, setFadeActivities] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false); // collapsed by default
   const [levelUpData, setLevelUpData] = useState<{ level: number } | null>(null);
+  const [xpGainAmount, setXpGainAmount] = useState<number | null>(null);
   const [activeAnim, setActiveAnim] = useState<GameType | null>(null);
   const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animParticlesRef = useRef<number[]>([]);
@@ -301,6 +302,9 @@ export default function GamePage({ state, onStateChange }: Props) {
           playerLevel: result.newLevel ?? game.playerLevel,
         };
         console.log(`[Session complete] base=${result.baseReward} bonus=${result.bonusReward} xp=+${result.xpGained} level=${result.newLevel}`);
+        if (result.xpGained) {
+          setXpGainAmount(result.xpGained);
+        }
         if (result.levelUp && result.newLevel) {
           setLevelUpData({ level: result.newLevel });
         }
@@ -456,7 +460,7 @@ export default function GamePage({ state, onStateChange }: Props) {
           </div>
         ))}
 
-        <LevelWidget level={game.playerLevel ?? 1} totalXP={game.playerXP ?? 0} />
+        <LevelWidget level={game.playerLevel ?? 1} totalXP={game.playerXP ?? 0} xpGain={xpGainAmount} />
 
         <button
           className={`help-icon${helpPulsing ? " help-icon-pulse" : ""}`}
