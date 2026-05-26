@@ -67,6 +67,14 @@ export default function GamePage({ state, onStateChange }: Props) {
   }, [showHelp]);
   const floaterRef = useRef(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
+  const prevLevelRef = useRef(game.playerLevel ?? 1);
+  useEffect(() => {
+    const cur = game.playerLevel ?? 1;
+    if (cur > prevLevelRef.current) {
+      setLevelUpData({ level: cur });
+    }
+    prevLevelRef.current = cur;
+  }, [game.playerLevel]);
   const skillScoreRef = useRef<number>(40);
   const waterScoreRef = useRef<number>(40);
   const sunScoreRef = useRef<number>(40);

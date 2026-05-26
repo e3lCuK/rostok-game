@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getLevelProgress } from "@/lib/levels";
 
@@ -12,6 +12,13 @@ export default function LevelWidget({ totalXP, level, xpGain }: Props) {
   const progress = getLevelProgress(totalXP);
   const [showGain, setShowGain] = useState(false);
   const [gainVal, setGainVal] = useState(0);
+  const [barPct, setBarPct] = useState(() =>
+    progress.xpNeeded ? Math.min(100, (progress.xpInLevel / progress.xpNeeded) * 100) : 100
+  );
+  const barTarget = progress.xpNeeded
+    ? Math.min(100, (progress.xpInLevel / progress.xpNeeded) * 100)
+    : 100;
+  const barAnimRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (xpGain) {
@@ -21,6 +28,12 @@ export default function LevelWidget({ totalXP, level, xpGain }: Props) {
       return () => clearTimeout(t);
     }
   }, [xpGain]);
+
+  useEffect(() => {
+    if (barAnimRef.current) clearTimeout(barAnimRef.current);
+    barAnimRef.current = setTimeout(() => setBarPct(barTarget), 80);
+    return () => { if (barAnimRef.current) clearTimeout(barAnimRef.current); };
+  }, [barTarget]);
 
   return (
     <div className="level-widget-wrap">
@@ -39,6 +52,12 @@ export default function LevelWidget({ totalXP, level, xpGain }: Props) {
         <span className="level-widget-xp">
           {progress.isMax ? "MAX" : `${progress.xpInLevel} / ${progress.xpNeeded} уход`}
         </span>
+        <div className="level-widget-bar-track">
+          <div
+            className="level-widget-bar-fill"
+            style={{ width: `${barPct}%`, transition: "width 0.5s ease" }}
+          />
+        </div>
       </motion.div>
 
       <AnimatePresence>
