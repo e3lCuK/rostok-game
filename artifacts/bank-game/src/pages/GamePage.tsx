@@ -670,13 +670,15 @@ export default function GamePage({ state, onStateChange }: Props) {
       </div>
 
       {/* Session history */}
-      {sessionHistory.length > 0 && (
-        <div className="history-card">
-          <div className="history-title-row" onClick={() => setHistoryOpen(!historyOpen)}>
-            <h3 className="history-title">История начислений</h3>
-            <span className="history-chevron">{historyOpen ? "▼" : "▶"}</span>
-          </div>
-          {historyOpen && (
+      <div className="history-card">
+        <div className="history-title-row" onClick={() => setHistoryOpen(!historyOpen)}>
+          <h3 className="history-title">История начислений</h3>
+          <span className="history-chevron">{historyOpen ? "▼" : "▶"}</span>
+        </div>
+        {historyOpen && (
+          sessionHistory.length === 0 ? (
+            <p className="history-empty">Начисления появятся после первой сессии</p>
+          ) : (
             <div className="history-items-scroll">
               {sessionHistory.map((s, idx) => {
                 const pct = s.base > 0 ? (s.total / s.base) * 12 : 12;
@@ -703,9 +705,9 @@ export default function GamePage({ state, onStateChange }: Props) {
                 );
               })}
             </div>
-          )}
-        </div>
-      )}
+          )
+        )}
+      </div>
 
       {/* Full-screen mini-game modal — outside game-area to avoid clipping */}
       {activeMinigame && (

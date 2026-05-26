@@ -81,7 +81,7 @@ export default function HomePage({ state }: Props) {
         </div>
       </div>
 
-      {state.history.length > 0 && (() => {
+      {(() => {
         const merged: { date: string; amount: number; label: string }[] = [];
         const reversed = [...state.history].reverse();
         let i = 0;
@@ -111,17 +111,21 @@ export default function HomePage({ state }: Props) {
               <span className="history-chevron">{historyOpen ? "▼" : "▶"}</span>
             </div>
             {historyOpen && (
-              <div className="history-list history-list-scroll">
-                {merged.map((item, idx) => (
-                  <div key={idx} className="history-item">
-                    <div className="history-cell-left">
-                      <span className="history-type">{item.label}</span>
-                      <span className="history-date">{item.date}</span>
+              merged.length === 0 ? (
+                <p className="history-empty">Начисления появятся после первой сессии</p>
+              ) : (
+                <div className="history-list history-list-scroll">
+                  {merged.map((item, idx) => (
+                    <div key={idx} className="history-item">
+                      <div className="history-cell-left">
+                        <span className="history-type">{item.label}</span>
+                        <span className="history-date">{item.date}</span>
+                      </div>
+                      <span className="history-amount">+{formatRub(item.amount)}</span>
                     </div>
-                    <span className="history-amount">+{formatRub(item.amount)}</span>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )
             )}
           </div>
         );

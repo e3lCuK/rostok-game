@@ -146,7 +146,7 @@ body {
   transition: color 0.15s;
 }
 
-.std-history-empty {
+.history-empty {
   text-align: center;
   color: #9ca3af;
   font-size: 0.85rem;

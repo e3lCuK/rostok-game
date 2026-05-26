@@ -76,7 +76,7 @@ export default function StandardPage({ state }: Props) {
         </div>
         {historyOpen && (
           stdHistory.length === 0 ? (
-            <p className="std-history-empty">Начисления появятся через 24 часа</p>
+            <p className="history-empty">Начисления появятся через 24 часа</p>
           ) : (
             <div className="history-list history-list-scroll">
               {stdHistory.slice(0, 30).map((item, idx) => (
