@@ -687,6 +687,17 @@ body.modal-open {
 }
 .level-widget:hover { background: rgba(255, 255, 255, 0.92); }
 
+.level-widget-top {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.level-widget-icon {
+  font-size: 11px;
+  line-height: 1;
+  color: #4d7c0f;
+  font-style: normal;
+}
 .level-widget-lvl {
   font-size: 12px;
   font-weight: 700;
