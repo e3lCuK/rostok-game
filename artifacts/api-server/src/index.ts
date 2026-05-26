@@ -17,22 +17,15 @@ if (Number.isNaN(port) || port <= 0) {
 }
 
 async function runMigrations() {
-  await pool.query(`
-    ALTER TABLE game_state
-    ADD COLUMN IF NOT EXISTS missed_sessions INT NOT NULL DEFAULT 0
-  `);
-  await pool.query(`
-    ALTER TABLE game_state
-    ADD COLUMN IF NOT EXISTS pending_stored_sessions INT NOT NULL DEFAULT 1
-  `);
-  await pool.query(`
-    ALTER TABLE game_state
-    ADD COLUMN IF NOT EXISTS pending_base_reward NUMERIC NOT NULL DEFAULT 0
-  `);
-  await pool.query(`
-    ALTER TABLE game_state
-    ADD COLUMN IF NOT EXISTS pending_bonus_reward NUMERIC NOT NULL DEFAULT 0
-  `);
+  await pool.query(`ALTER TABLE game_state ADD COLUMN IF NOT EXISTS missed_sessions INT NOT NULL DEFAULT 0`);
+  await pool.query(`ALTER TABLE game_state ADD COLUMN IF NOT EXISTS pending_stored_sessions INT NOT NULL DEFAULT 1`);
+  await pool.query(`ALTER TABLE game_state ADD COLUMN IF NOT EXISTS pending_base_reward NUMERIC NOT NULL DEFAULT 0`);
+  await pool.query(`ALTER TABLE game_state ADD COLUMN IF NOT EXISTS pending_bonus_reward NUMERIC NOT NULL DEFAULT 0`);
+  await pool.query(`ALTER TABLE game_state ADD COLUMN IF NOT EXISTS player_xp INTEGER NOT NULL DEFAULT 0`);
+  await pool.query(`ALTER TABLE game_state ADD COLUMN IF NOT EXISTS player_level SMALLINT NOT NULL DEFAULT 1`);
+  await pool.query(`ALTER TABLE game_state ADD COLUMN IF NOT EXISTS session_water_score SMALLINT NOT NULL DEFAULT 40`);
+  await pool.query(`ALTER TABLE game_state ADD COLUMN IF NOT EXISTS session_sun_score SMALLINT NOT NULL DEFAULT 40`);
+  await pool.query(`ALTER TABLE game_state ADD COLUMN IF NOT EXISTS session_fertilizer_score SMALLINT NOT NULL DEFAULT 40`);
   logger.info("DB migrations applied");
 }
 

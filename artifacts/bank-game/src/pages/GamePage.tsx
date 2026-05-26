@@ -18,6 +18,8 @@ import FallingGameWater, { GameType } from "@/components/FallingGameWater";
 import ClickGameSun from "@/components/ClickGameSun";
 import FertilizerMatchGame from "@/components/FertilizerMatchGame";
 import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2, HelpCircle, X } from "lucide-react";
+import LevelWidget from "@/components/LevelWidget";
+import LevelUpAnimation from "@/components/LevelUpAnimation";
 
 interface Props {
   state: UserState;
@@ -47,6 +49,7 @@ export default function GamePage({ state, onStateChange }: Props) {
   const [showRewards, setShowRewards] = useState(hasPendingInit && notInSessionInit);
   const [fadeActivities, setFadeActivities] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false); // collapsed by default
+  const [levelUpData, setLevelUpData] = useState<{ level: number } | null>(null);
   const [activeAnim, setActiveAnim] = useState<GameType | null>(null);
   const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animParticlesRef = useRef<number[]>([]);
@@ -294,8 +297,13 @@ export default function GamePage({ state, onStateChange }: Props) {
           pendingBaseReward: (game.pendingBaseReward ?? 0) + (result.baseReward ?? 0),
           pendingBonusReward: (game.pendingBonusReward ?? 0) + (result.bonusReward ?? 0),
           pendingStoredSessions: result.storedSessions ?? 1,
+          playerXP: (game.playerXP ?? 0) + (result.xpGained ?? 0),
+          playerLevel: result.newLevel ?? game.playerLevel,
         };
-        console.log(`[Session complete] base=${result.baseReward} bonus=${result.bonusReward}`);
+        console.log(`[Session complete] base=${result.baseReward} bonus=${result.bonusReward} xp=+${result.xpGained} level=${result.newLevel}`);
+        if (result.levelUp && result.newLevel) {
+          setLevelUpData({ level: result.newLevel });
+        }
         setShowCompletionStage(true);
         onStateChange({ ...state, game: nextGame });
       } else {
@@ -448,6 +456,8 @@ export default function GamePage({ state, onStateChange }: Props) {
           </div>
         ))}
 
+        <LevelWidget level={game.playerLevel ?? 1} totalXP={game.playerXP ?? 0} />
+
         <button
           className={`help-icon${helpPulsing ? " help-icon-pulse" : ""}`}
           onClick={() => {
@@ -463,6 +473,15 @@ export default function GamePage({ state, onStateChange }: Props) {
         </button>
 
         <p className="tree-growth-label">Рост дерева: {formatTreeGrowth(displayGrowthMM)}</p>
+
+        <AnimatePresence>
+          {levelUpData && (
+            <LevelUpAnimation
+              newLevel={levelUpData.level}
+              onComplete={() => setLevelUpData(null)}
+            />
+          )}
+        </AnimatePresence>
 
         <div className="game-tree-wrap">
           <motion.div animate={treeControls} style={{ display: "inline-block" }}>

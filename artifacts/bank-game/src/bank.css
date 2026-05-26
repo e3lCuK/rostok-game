@@ -668,6 +668,99 @@ body.modal-open {
 }
 
 /* ── Help icon ───────────────────────────────────── */
+/* ── Level Widget ─────────────────────────────────── */
+.level-widget {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  border-radius: 12px;
+  padding: 5px 10px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  z-index: 15;
+  cursor: default;
+  user-select: none;
+  transition: background 0.15s;
+}
+.level-widget:hover { background: rgba(255, 255, 255, 0.92); }
+
+.level-widget-top {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.level-widget-icon { font-size: 13px; line-height: 1; }
+.level-widget-lvl {
+  font-size: 12px;
+  font-weight: 700;
+  color: #166534;
+  line-height: 1;
+}
+.level-widget-xp {
+  font-size: 10px;
+  font-weight: 500;
+  color: #4d7c0f;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* ── Level-up animation overlay ───────────────────── */
+.levelup-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  pointer-events: none;
+  border-radius: var(--radius);
+}
+.levelup-badge {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 20px;
+  padding: 18px 28px 16px;
+  box-shadow: 0 8px 32px rgba(22, 101, 52, 0.25);
+}
+.levelup-glow {
+  position: absolute;
+  inset: -6px;
+  border-radius: 26px;
+  background: radial-gradient(ellipse at center, rgba(134, 239, 172, 0.6) 0%, transparent 70%);
+  z-index: -1;
+}
+.levelup-icon { font-size: 32px; line-height: 1; }
+.levelup-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #4d7c0f;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.levelup-number {
+  font-size: 22px;
+  font-weight: 800;
+  color: #166534;
+  line-height: 1;
+}
+.levelup-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #86efac;
+  top: 50%;
+  left: 50%;
+  margin: -4px 0 0 -4px;
+}
+
 .help-icon {
   position: absolute;
   top: 12px;

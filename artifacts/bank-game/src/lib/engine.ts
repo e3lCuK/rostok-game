@@ -37,6 +37,8 @@ export interface UserState {
     pendingStoredSessions: number;
     treeGrowthMM: number;
     treeGrowthRemainder: number;
+    playerXP: number;
+    playerLevel: number;
   };
   history: {
     date: string;

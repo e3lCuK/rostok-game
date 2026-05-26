@@ -79,6 +79,8 @@ router.get("/game/state", requireAuth, async (req: any, res) => {
         pendingStoredSessions: parseInt(game.pending_stored_sessions) || 1,
         treeGrowthMM: parseInt(game.tree_growth_mm) || 0,
         treeGrowthRemainder: parseFloat(game.tree_growth_remainder) || 0,
+        playerXP: parseInt(game.player_xp) || 0,
+        playerLevel: parseInt(game.player_level) || 1,
       },
       history: historyRows.rows.map((r: any) => ({
         amount: parseFloat(r.amount),
@@ -268,8 +270,8 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
     }
 
     await pool.query(
-      `UPDATE game_state SET current_session_${action} = TRUE, updated_at = NOW() WHERE user_id = $1`,
-      [userId],
+      `UPDATE game_state SET current_session_${action} = TRUE, session_${action}_score = $2, updated_at = NOW() WHERE user_id = $1`,
+      [userId, skillScore],
     );
 
     // Check if all 3 actions done
@@ -313,8 +315,26 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
       baseReward = basePerSession * storedSessionsResult;
       bonusReward = bonusPerSession * bonusMultiplier * storedSessionsResult;
 
+      // XP calculation — average care percent from all 3 action scores
+      const wPct = Math.round(((u.session_water_score || 40) / 80) * 100);
+      const sPct = Math.round(((u.session_sun_score || 40) / 80) * 100);
+      const fPct = Math.round(((u.session_fertilizer_score || 40) / 80) * 100);
+      const xpGained = Math.round((wPct + sPct + fPct) / 3);
+
+      const prevLevel = g.player_level || 1;
+      const newTotalXP = (g.player_xp || 0) + xpGained;
+      function calcLevel(xp: number): number {
+        if (xp >= 5000) return 5;
+        if (xp >= 2500) return 4;
+        if (xp >= 1000) return 3;
+        if (xp >= 300)  return 2;
+        return 1;
+      }
+      const newLevel = calcLevel(newTotalXP);
+      const levelUp = newLevel > prevLevel;
+
       req.log.info(
-        { skillScore, bonusPercent, bonusMultiplier, storedSessions: storedSessionsResult, baseReward, bonusReward, totalBalance },
+        { skillScore, bonusPercent, bonusMultiplier, storedSessions: storedSessionsResult, baseReward, bonusReward, totalBalance, xpGained, newLevel, levelUp },
         "Session rewards calculated",
       );
 
@@ -333,13 +353,17 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
           pending_stored_sessions = $3,
           pending_base_reward = COALESCE(pending_base_reward, 0) + $4,
           pending_bonus_reward = COALESCE(pending_bonus_reward, 0) + $5,
+          player_xp = $7,
+          player_level = $8,
           updated_at = NOW()
          WHERE user_id = $6`,
-        [now, newStreak, storedSessionsResult, baseReward, bonusReward, userId],
+        [now, newStreak, storedSessionsResult, baseReward, bonusReward, userId, newTotalXP, newLevel],
       );
+
+      return res.json({ success: true, sessionComplete: true, baseReward, bonusReward, storedSessions: storedSessionsResult, xpGained, newLevel, prevLevel, levelUp });
     }
 
-    return res.json({ success: true, sessionComplete: allDone, baseReward, bonusReward, storedSessions: storedSessionsResult });
+    return res.json({ success: true, sessionComplete: false, baseReward: 0, bonusReward: 0, storedSessions: 1 });
   } catch (err) {
     req.log.error({ err }, "Error processing action");
     return res.status(500).json({ error: "Internal server error" });

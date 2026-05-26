@@ -53,6 +53,8 @@ export interface GameStateResponse {
     pendingStoredSessions: number;
     treeGrowthMM: number;
     treeGrowthRemainder: number;
+    playerXP: number;
+    playerLevel: number;
   };
   history?: { amount: number; type: "standard" | "active" | "base" | "bonus"; date: string }[];
 }
@@ -73,7 +75,17 @@ export const api = {
     request<{ success: boolean }>("/game/session/start", { method: "POST" }),
 
   doAction: (action: "water" | "sun" | "fertilizer", skillScore?: number) =>
-    request<{ success: boolean; sessionComplete: boolean; baseReward: number; bonusReward: number; storedSessions: number }>(
+    request<{
+      success: boolean;
+      sessionComplete: boolean;
+      baseReward: number;
+      bonusReward: number;
+      storedSessions: number;
+      xpGained?: number;
+      newLevel?: number;
+      prevLevel?: number;
+      levelUp?: boolean;
+    }>(
       "/game/session/action",
       { method: "POST", body: JSON.stringify({ action, skillScore }) },
     ),

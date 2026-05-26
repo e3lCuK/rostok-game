@@ -1,0 +1,200 @@
+Add a player level progression system based on "tree care quality".
+
+The level system should visually fit the existing game UI:
+
+* same soft style
+* same rounded pills/cards
+* same colors as:
+
+  * tree growth label
+  * help icon
+  * session UI
+* minimalistic and clean
+
+---
+
+## PART 1 — LEVEL SYSTEM
+
+Add 5 player levels:
+
+Level 1
+Level 2
+Level 3
+Level 4
+Level 5
+
+Player starts at:
+Level 1
+0 XP
+
+---
+
+## PART 2 — LEVEL XP LOGIC
+
+After every completed session:
+
+Take all 3 activity percentages:
+
+Water %
+Light %
+Fertilizer %
+
+Calculate average:
+
+carePercent =
+(water + light + fertilizer) / 3
+
+Example:
+
+100 + 80 + 60 = 240
+240 / 3 = 80
+
+Result:
++80 XP
+
+---
+
+## IMPORTANT
+
+XP gained per session equals average care percentage.
+
+Maximum possible:
+100 XP
+
+(Perfect score should remain nearly impossible.)
+
+---
+
+## PART 3 — XP STORAGE
+
+XP accumulates permanently.
+
+Do NOT reset between sessions.
+
+Store:
+
+* currentLevel
+* totalXP
+
+---
+
+## PART 4 — LEVEL THRESHOLDS
+
+Use these exact thresholds:
+
+Level 1 → Level 2:
+300 XP
+
+Level 2 → Level 3:
+1000 XP total
+
+Level 3 → Level 4:
+2500 XP total
+
+Level 4 → Level 5:
+5000 XP total
+
+Level 5:
+MAX level
+
+---
+
+## PART 5 — LEVEL UI
+
+Add level widget INSIDE the main game field.
+
+Position:
+TOP LEFT corner.
+
+Current layout:
+
+* left side = new level widget
+* center = tree growth label
+* right side = help icon
+
+The whole top row must feel balanced and symmetrical.
+
+---
+
+## PART 6 — LEVEL WIDGET DESIGN
+
+Style must match:
+
+* growth label
+* help icon
+* overall green soft UI
+
+Use:
+
+* rounded pill/card
+* soft green/cream background
+* subtle shadow
+* smooth hover/scale transitions
+
+---
+
+## PART 7 — LEVEL CONTENT
+
+Compact display.
+
+Example:
+
+⭐ LVL 2
+
+or
+
+🌱 LVL 2
+
+Under it:
+small XP progress text:
+
+650 / 1000 XP
+
+Keep it compact and elegant.
+
+---
+
+## PART 8 — LEVEL UP ANIMATION
+
+When player reaches new level:
+
+Play animation:
+
+* soft glow
+* scale pop
+* particles/confetti/light burst
+* smooth transition
+
+Duration:
+1–1.5s
+
+Must feel rewarding but not excessive.
+
+---
+
+## PART 9 — UX GOAL
+
+The level system should feel like:
+
+* player mastery
+* long-term progression
+* "care skill"
+
+NOT just another stat.
+
+Tree = growth of wealth.
+Level = growth of player skill.
+
+---
+
+## PART 10 — FUTURE READY
+
+Structure level system so later it can support:
+
+* rewards
+* badges
+* unlocks
+* cosmetics
+
+Do not hardcode everything directly inside GamePage.tsx.
+Move level logic into reusable helper/lib if possible.
