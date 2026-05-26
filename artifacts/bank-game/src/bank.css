@@ -679,7 +679,7 @@ body.modal-open {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 1px;
+  gap: 2px;
   z-index: 15;
   cursor: default;
   user-select: none;
@@ -687,12 +687,6 @@ body.modal-open {
 }
 .level-widget:hover { background: rgba(255, 255, 255, 0.92); }
 
-.level-widget-top {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.level-widget-icon { font-size: 13px; line-height: 1; }
 .level-widget-lvl {
   font-size: 12px;
   font-weight: 700;
@@ -700,11 +694,12 @@ body.modal-open {
   line-height: 1;
 }
 .level-widget-xp {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 500;
-  color: #4d7c0f;
+  color: #6b7280;
   line-height: 1;
   white-space: nowrap;
+  opacity: 0.85;
 }
 
 /* ── Level-up animation overlay ───────────────────── */

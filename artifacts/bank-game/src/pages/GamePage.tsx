@@ -791,6 +791,22 @@ export default function GamePage({ state, onStateChange }: Props) {
                     </ul>
                   </div>
                 </div>
+
+                <div className="help-section">
+                  <span className="help-section-icon">🌳</span>
+                  <div>
+                    <p className="help-section-heading">Уровни садовника</p>
+                    <ul className="help-section-list">
+                      <li>Опыт начисляется за каждую сессию</li>
+                      <li>Чем лучше сыграли — тем больше опыта</li>
+                      <li>У. 1 — старт (0 оп.)</li>
+                      <li>У. 2 — 300 оп.</li>
+                      <li>У. 3 — 1 000 оп.</li>
+                      <li>У. 4 — 2 500 оп.</li>
+                      <li>У. 5 — 5 000 оп.</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </motion.div>
           </motion.div>
