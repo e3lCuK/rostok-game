@@ -112,6 +112,12 @@ export const api = {
       body: JSON.stringify({ sessions }),
     }),
 
+  debugAddXP: (xp: number) =>
+    request<{ success: boolean; playerXP: number }>("/game/debug/add-xp", {
+      method: "POST",
+      body: JSON.stringify({ xp }),
+    }),
+
   debugResetAll: () =>
     request<{ success: boolean }>("/game/debug/reset-all", { method: "DELETE" }),
 };

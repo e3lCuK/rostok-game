@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { UserState } from "@/lib/engine";
 import { api } from "@/lib/api";
+import { calcLevel } from "@/lib/levels";
 
 interface Props {
   state: UserState;
@@ -15,6 +16,7 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [mmInput, setMmInput] = useState("");
   const [sessionInput, setSessionInput] = useState("");
+  const [xpInput, setXpInput] = useState("");
 
   const { game } = state;
 
@@ -33,6 +35,24 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
       ...state,
       game: { ...game, treeGrowthMM: 0, treeGrowthRemainder: 0 },
     });
+  }
+
+  async function addXP() {
+    const value = Math.floor(Number(xpInput));
+    if (isNaN(value) || value <= 0) return;
+    setBusy(true);
+    try {
+      const res = await api.debugAddXP(value);
+      const newXP = res.playerXP;
+      onStateChange({
+        ...state,
+        game: { ...game, playerXP: newXP, playerLevel: calcLevel(newXP) },
+      });
+      setXpInput("");
+    } catch (e) {
+      console.warn("[Debug] add-xp failed", e);
+    }
+    setBusy(false);
   }
 
   async function addSessions() {
@@ -96,6 +116,20 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
         <div className="debug-body">
           <p className="debug-title">Отладка</p>
           <div className="debug-buttons">
+            <div className="debug-mm-row">
+              <input
+                className="debug-mm-input"
+                type="number"
+                value={xpInput}
+                placeholder="уход"
+                onChange={e => setXpInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && addXP()}
+              />
+              <button className="debug-btn" onClick={addXP} disabled={busy}>
+                + уход
+              </button>
+            </div>
+
             <div className="debug-mm-row">
               <input
                 className="debug-mm-input"

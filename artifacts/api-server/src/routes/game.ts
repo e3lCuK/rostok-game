@@ -449,6 +449,28 @@ router.post("/game/debug/add-sessions", requireAuth, async (req: any, res) => {
   }
 });
 
+// POST /api/game/debug/add-xp — add XP to player (debug)
+router.post("/game/debug/add-xp", requireAuth, async (req: any, res) => {
+  const userId = req.userId;
+  const value = Math.floor(Number(req.body.xp));
+  if (isNaN(value) || value < 1) {
+    return res.status(400).json({ error: "Invalid xp value" });
+  }
+  try {
+    const result = await pool.query(
+      `UPDATE game_state SET player_xp = player_xp + $2, updated_at = NOW()
+       WHERE user_id = $1
+       RETURNING player_xp`,
+      [userId, value],
+    );
+    const newXP = result.rows[0]?.player_xp ?? 0;
+    return res.json({ success: true, playerXP: Number(newXP) });
+  } catch (err) {
+    req.log.error({ err }, "Error adding XP (debug)");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // DELETE /api/game/debug/reset-all — wipe all user data (debug)
 router.delete("/game/debug/reset-all", requireAuth, async (req: any, res) => {
   const userId = req.userId;
