@@ -653,6 +653,7 @@ body.modal-open {
 .debug-mm-input {
   width: 70px;
   flex: none;
+  font-family: inherit;
   font-size: 0.78rem;
   padding: 4px 8px;
   border: 1px solid #d1d5db;
