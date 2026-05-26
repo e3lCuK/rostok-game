@@ -67,14 +67,7 @@ export default function GamePage({ state, onStateChange }: Props) {
   }, [showHelp]);
   const floaterRef = useRef(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
-  const prevLevelRef = useRef(game.playerLevel ?? 1);
-  useEffect(() => {
-    const cur = game.playerLevel ?? 1;
-    if (cur > prevLevelRef.current) {
-      setLevelUpData({ level: cur });
-    }
-    prevLevelRef.current = cur;
-  }, [game.playerLevel]);
+  const prevLevelRef = useRef(state.game.playerLevel ?? 1);
   const skillScoreRef = useRef<number>(40);
   const waterScoreRef = useRef<number>(40);
   const sunScoreRef = useRef<number>(40);
@@ -112,6 +105,14 @@ export default function GamePage({ state, onStateChange }: Props) {
 
   const { balances, game } = state;
   const totalBalance = balances.standard + balances.active;
+
+  useEffect(() => {
+    const cur = game.playerLevel ?? 1;
+    if (cur > prevLevelRef.current) {
+      setLevelUpData({ level: cur });
+    }
+    prevLevelRef.current = cur;
+  }, [game.playerLevel]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
