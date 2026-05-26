@@ -74,7 +74,7 @@ export default function AuthPage() {
             <input
               className="auth-input"
               type="text"
-              placeholder={mode === "login" ? "Введите ваш логин" : "Латиница, цифры и _ (3–30 символов)"}
+              placeholder="Латиница, цифры"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
