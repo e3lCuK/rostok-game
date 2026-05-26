@@ -11,7 +11,7 @@ export default function LevelWidget({ totalXP, level }: Props) {
   return (
     <div className="level-widget">
       <div className="level-widget-top">
-        <span className="level-widget-icon">⬡</span>
+        <span className="level-widget-icon">◆</span>
         <span className="level-widget-lvl">Ур.{level}</span>
       </div>
       <span className="level-widget-xp">
