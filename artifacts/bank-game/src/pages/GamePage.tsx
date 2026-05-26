@@ -797,7 +797,7 @@ export default function GamePage({ state, onStateChange }: Props) {
                   <div>
                     <p className="help-section-heading">Уровни</p>
                     <ul className="help-section-list">
-                      <li>Опыт (уход) — средний результат трёх мини-игр</li>
+                      <li>Опыт (уход) — результат трёх мини-игр</li>
                       <li>Опыт начисляется за каждую сессию</li>
                       <li>Чем лучше сыграли — тем больше опыта</li>
                     </ul>
