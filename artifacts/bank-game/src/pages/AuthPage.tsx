@@ -74,7 +74,7 @@ export default function AuthPage() {
             <input
               className="auth-input"
               type="text"
-              placeholder="только латиница, цифры, _"
+              placeholder={mode === "login" ? "Введите ваш логин" : "Латиница, цифры и _ (3–30 символов)"}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
@@ -88,7 +88,7 @@ export default function AuthPage() {
               <input
                 className="auth-input"
                 type="text"
-                placeholder="отображаемое имя"
+                placeholder="Ваше отображаемое имя"
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 required
@@ -101,7 +101,7 @@ export default function AuthPage() {
             <input
               className="auth-input"
               type="password"
-              placeholder={mode === "register" ? "минимум 6 символов" : ""}
+              placeholder={mode === "register" ? "Не менее 6 символов" : "Введите ваш пароль"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -114,7 +114,7 @@ export default function AuthPage() {
               <input
                 className="auth-input"
                 type="password"
-                placeholder=""
+                placeholder="Повторите введённый пароль"
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 required
