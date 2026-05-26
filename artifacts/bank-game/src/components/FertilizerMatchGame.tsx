@@ -9,7 +9,7 @@ interface Props {
 const GRID = 5;
 const TYPES = 5;
 const GAME_MS = 15_000;
-const MAX_MATCHES = 18;
+const MAX_MATCHES = 14;
 
 const COLORS = ["green", "brown", "yellow", "blue", "purple"] as const;
 type Color = (typeof COLORS)[number];
