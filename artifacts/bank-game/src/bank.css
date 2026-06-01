@@ -817,7 +817,7 @@ body.modal-open {
 }
 .xp-result-pct   { font-size: 13px; font-weight: 700; color: #f1f5f9; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
 .xp-result-arrow { font-size: 11px; color: #cbd5e1; text-shadow: 0 1px 3px rgba(0,0,0,0.4); }
-.xp-result-xp    { font-size: 13px; font-weight: 800; color: #fde047; text-shadow: 0 1px 6px rgba(0,0,0,0.6); }
+.xp-result-xp    { font-size: 13px; font-weight: 800; color: #fb923c; text-shadow: 0 1px 6px rgba(0,0,0,0.6); }
 
 /* ── Level-up animation overlay ───────────────────── */
 .levelup-overlay {
