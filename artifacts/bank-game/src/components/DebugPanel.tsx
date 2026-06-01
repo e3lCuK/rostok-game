@@ -126,10 +126,6 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
               </button>
             </div>
 
-            <button className="debug-btn" onClick={addOneSession} disabled={busy}>
-              Увеличение сессий
-            </button>
-
             <div className="debug-mm-row">
               <input
                 className="debug-mm-input"
@@ -143,6 +139,10 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
                 + мм дереву
               </button>
             </div>
+
+            <button className="debug-btn" onClick={addOneSession} disabled={busy}>
+              Увеличение сессий
+            </button>
 
             <button className="debug-btn" onClick={resetTreeGrowth} disabled={busy}>
               Сброс роста
