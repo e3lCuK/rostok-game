@@ -648,9 +648,13 @@ export default function GamePage({ state, onStateChange }: Props) {
           </AnimatePresence>
         ) : (
           !showRewards && (
-            <div className={`session-actions ${fadeActivities ? "activities-fade" : ""}`}>
+            <div
+              className={`session-actions ${fadeActivities ? "activities-fade" : ""}${showCompletionStage ? " session-actions-ready" : ""}`}
+              onClick={showCompletionStage ? handleGoToRewards : undefined}
+              style={showCompletionStage ? { cursor: "pointer" } : undefined}
+            >
               <p className="session-actions-title">
-                Ухаживайте за деревом
+                {showCompletionStage ? "Перейти к начислениям" : "Ухаживайте за деревом"}
               </p>
               <div className="action-buttons-row">
                 {[
@@ -690,7 +694,7 @@ export default function GamePage({ state, onStateChange }: Props) {
         )}
       </div>
 
-      {showCompletionStage && !showRewards && (
+      {false && showCompletionStage && !showRewards && (
         <button className="transition-btn" onClick={handleGoToRewards}>
           Перейти к начислениям
         </button>
