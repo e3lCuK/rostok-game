@@ -274,31 +274,42 @@ export default function GamePage({ state, onStateChange }: Props) {
       pendingXpRef.current = null;
     }
 
-    // 2. Tree grow animation
+    // Step 1 — tree grow animation
     treeControls.start({
       scale: [1, 1.20, 1],
       filter: ["brightness(1)", "brightness(1.65)", "brightness(1)"],
       transition: { duration: 0.85, ease: "easeInOut" },
     });
 
-    // 3. XP floater + financial floaters
-    if (sessionScores) {
-      setXpGainAmount(sessionScores.xp);
-      const rect = gameAreaRef.current?.getBoundingClientRect();
-      const cx = (rect?.width ?? 200) / 2;
-      if (sessionScores.base > 0) addFloater(`+${formatRub(sessionScores.base)}`, cx - 28, 52);
-      if (sessionScores.bonus > 0) addFloater(`+${formatRub(sessionScores.bonus)}`, cx + 28, 78);
-    }
+    const scores = sessionScores;
+    const rect = gameAreaRef.current?.getBoundingClientRect();
+    const cx = (rect?.width ?? 200) / 2;
 
-    // 4. History row highlight
-    setHistoryHighlight(true);
-    setTimeout(() => setHistoryHighlight(false), 2800);
-
-    setFadeActivities(true);
+    // Step 2 — XP floater on level widget
     setTimeout(() => {
-      setShowRewards(true);
-      setFadeActivities(false);
-    }, 400);
+      if (scores) setXpGainAmount(scores.xp);
+    }, 450);
+
+    // Step 3 — base reward floater
+    setTimeout(() => {
+      if (scores && scores.base > 0) addFloater(`+${formatRub(scores.base)}`, cx - 28, 52);
+    }, 750);
+
+    // Step 4 — bonus reward floater
+    setTimeout(() => {
+      if (scores && scores.bonus > 0) addFloater(`+${formatRub(scores.bonus)}`, cx + 28, 78);
+    }, 1000);
+
+    // Step 5 — history highlight + fade widget + open rewards
+    setTimeout(() => {
+      setHistoryHighlight(true);
+      setTimeout(() => setHistoryHighlight(false), 2800);
+      setFadeActivities(true);
+      setTimeout(() => {
+        setShowRewards(true);
+        setFadeActivities(false);
+      }, 400);
+    }, 1200);
   }
 
   function handleMinigameComplete(type: GameType, skillScore: number) {
