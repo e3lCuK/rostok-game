@@ -747,7 +747,7 @@ body.modal-open {
 }
 /* ── Session History Widget ─────────────────────────── */
 .sh-widget {
-  background: rgba(120, 120, 120, 0.18);
+  background: rgba(120, 120, 120, 0.09);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   border: 1px solid rgba(255,255,255,0.18);
@@ -780,7 +780,7 @@ body.modal-open {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
+  gap: 3px;
   font-size: 9px;
   line-height: 1.35;
   white-space: nowrap;
