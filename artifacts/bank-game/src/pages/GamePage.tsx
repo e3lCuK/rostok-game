@@ -79,7 +79,7 @@ export default function GamePage({ state, onStateChange }: Props) {
   const floaterRef = useRef(0);
   const stateRef = useRef(state);
   useEffect(() => { stateRef.current = state; }, [state]);
-  const pendingXpRef = useRef<{ xpGained: number; newLevel?: number; xpHistory?: unknown[]; levelUp?: boolean } | null>(null);
+  const pendingXpRef = useRef<{ xpGained: number; newLevel?: number; xpHistory?: unknown[]; levelUp?: boolean; newMM: number; newRemainder: number } | null>(null);
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const prevLevelRef = useRef(state.game.playerLevel ?? 1);
   const skillScoreRef = useRef<number>(40);
@@ -257,8 +257,15 @@ export default function GamePage({ state, onStateChange }: Props) {
   }
 
   function handleGoToRewards() {
-    // 1. Apply pending XP/level to state now
     const px = pendingXpRef.current;
+    pendingXpRef.current = null;
+
+    // Step 1 — tree grow animation + apply MM
+    treeControls.start({
+      scale: [1, 1.20, 1],
+      filter: ["brightness(1)", "brightness(1.65)", "brightness(1)"],
+      transition: { duration: 0.85, ease: "easeInOut" },
+    });
     if (px) {
       const cur = stateRef.current;
       onStateChange({
@@ -268,18 +275,13 @@ export default function GamePage({ state, onStateChange }: Props) {
           playerXP: (cur.game.playerXP ?? 0) + px.xpGained,
           playerLevel: px.newLevel ?? cur.game.playerLevel,
           xpHistory: (px.xpHistory as typeof cur.game.xpHistory) ?? cur.game.xpHistory,
+          treeGrowthMM: px.newMM,
+          treeGrowthRemainder: px.newRemainder,
         },
       });
+      animateGrowth(displayGrowthMMRef.current, px.newMM);
       if (px.levelUp && px.newLevel) setLevelUpData({ level: px.newLevel });
-      pendingXpRef.current = null;
     }
-
-    // Step 1 — tree grow animation
-    treeControls.start({
-      scale: [1, 1.20, 1],
-      filter: ["brightness(1)", "brightness(1.65)", "brightness(1)"],
-      transition: { duration: 0.85, ease: "easeInOut" },
-    });
 
     const scores = sessionScores;
     const rect = gameAreaRef.current?.getBoundingClientRect();
@@ -364,21 +366,23 @@ export default function GamePage({ state, onStateChange }: Props) {
           pendingStoredSessions: result.storedSessions ?? 1,
           // XP/level applied later in handleGoToRewards
         };
-        // Save XP/level to apply on "Go to rewards" click
-        pendingXpRef.current = {
-          xpGained: result.xpGained ?? 0,
-          newLevel: result.newLevel,
-          xpHistory: result.xpHistory,
-          levelUp: result.levelUp,
-        };
         console.log(`[Session complete] base=${result.baseReward} bonus=${result.bonusReward} xp=+${result.xpGained} level=${result.newLevel}`);
         const wPct = Math.round((waterScoreRef.current / 80) * 100);
         const sPct = Math.round((sunScoreRef.current / 80) * 100);
         const fPct = Math.round((fertilizerScoreRef.current / 80) * 100);
         const totalReward = (result.baseReward ?? 0) + (result.bonusReward ?? 0);
-        const { newMM: mmAfter } = applyTreeGrowth(totalReward, game.treeGrowthMM ?? 0, game.treeGrowthRemainder ?? 0);
+        const { newMM: mmAfter, newRemainder: remAfter } = applyTreeGrowth(totalReward, game.treeGrowthMM ?? 0, game.treeGrowthRemainder ?? 0);
         const mmGained = mmAfter - (game.treeGrowthMM ?? 0);
         setSessionScores({ water: wPct, sun: sPct, fert: fPct, xp: result.xpGained ?? 0, base: result.baseReward ?? 0, bonus: result.bonusReward ?? 0, mm: mmGained });
+        // Save XP/level/MM to apply on "Ухаживать" click
+        pendingXpRef.current = {
+          xpGained: result.xpGained ?? 0,
+          newLevel: result.newLevel,
+          xpHistory: result.xpHistory,
+          levelUp: result.levelUp,
+          newMM: mmAfter,
+          newRemainder: remAfter,
+        };
         setShowCompletionStage(true);
         onStateChange({ ...state, game: nextGame });
       } else {
@@ -400,7 +404,6 @@ export default function GamePage({ state, onStateChange }: Props) {
       const rect = gameAreaRef.current?.getBoundingClientRect();
       addFloater(`+${formatRub(amount)}`, (rect?.width ?? 200) / 2, 40);
       const cur = stateRef.current;
-      const { newMM, newRemainder } = applyTreeGrowth(amount, cur.game.treeGrowthMM ?? 0, cur.game.treeGrowthRemainder ?? 0);
       onStateChange({
         ...cur,
         balances: {
@@ -408,13 +411,12 @@ export default function GamePage({ state, onStateChange }: Props) {
           active: cur.balances.active + amount,
           activeEarned: cur.balances.activeEarned + amount,
         },
-        game: { ...cur.game, pendingBaseReward: 0, treeGrowthMM: newMM, treeGrowthRemainder: newRemainder },
+        game: { ...cur.game, pendingBaseReward: 0 },
         history: [
           ...cur.history,
           { date: new Date().toLocaleDateString("ru-RU"), amount, type: "base" as const },
         ].slice(-30),
       });
-      animateGrowth(displayGrowthMMRef.current, newMM);
     } catch (err) {
       console.error("[Claim base] failed:", err);
     } finally {
@@ -431,7 +433,6 @@ export default function GamePage({ state, onStateChange }: Props) {
       const rect = gameAreaRef.current?.getBoundingClientRect();
       addFloater(`+${formatRub(amount)}`, (rect?.width ?? 200) / 2 + 60, 40);
       const cur = stateRef.current;
-      const { newMM, newRemainder } = applyTreeGrowth(amount, cur.game.treeGrowthMM ?? 0, cur.game.treeGrowthRemainder ?? 0);
       onStateChange({
         ...cur,
         balances: {
@@ -439,13 +440,12 @@ export default function GamePage({ state, onStateChange }: Props) {
           active: cur.balances.active + amount,
           activeEarned: cur.balances.activeEarned + amount,
         },
-        game: { ...cur.game, pendingBonusReward: 0, treeGrowthMM: newMM, treeGrowthRemainder: newRemainder },
+        game: { ...cur.game, pendingBonusReward: 0 },
         history: [
           ...cur.history,
           { date: new Date().toLocaleDateString("ru-RU"), amount, type: "bonus" as const },
         ].slice(-30),
       });
-      animateGrowth(displayGrowthMMRef.current, newMM);
     } catch (err) {
       console.error("[Claim bonus] failed:", err);
     } finally {
