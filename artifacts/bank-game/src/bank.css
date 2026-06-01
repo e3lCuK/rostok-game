@@ -771,6 +771,7 @@ body.modal-open {
   gap: 2px;
   max-height: 38px;
   overflow-y: auto;
+  padding-right: 5px;
   scrollbar-width: thin;
   scrollbar-color: rgba(0,0,0,0.15) transparent;
 }
