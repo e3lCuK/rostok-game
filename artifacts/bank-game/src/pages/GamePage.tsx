@@ -57,7 +57,7 @@ export default function GamePage({ state, onStateChange }: Props) {
   const animParticlesRef = useRef<number[]>([]);
   const [showHelp, setShowHelp] = useState(false);
   const [helpPulsing, setHelpPulsing] = useState(() => !localStorage.getItem("active_help_seen"));
-  const [sessionScores, setSessionScores] = useState<{ water: number; sun: number; fert: number; xp: number; base: number; bonus: number } | null>(null);
+  const [sessionScores, setSessionScores] = useState<{ water: number; sun: number; fert: number; xp: number; base: number; bonus: number; mm: number } | null>(null);
   const [historyHighlight, setHistoryHighlight] = useState(false);
 
   useEffect(() => {
@@ -338,7 +338,10 @@ export default function GamePage({ state, onStateChange }: Props) {
         const wPct = Math.round((waterScoreRef.current / 80) * 100);
         const sPct = Math.round((sunScoreRef.current / 80) * 100);
         const fPct = Math.round((fertilizerScoreRef.current / 80) * 100);
-        setSessionScores({ water: wPct, sun: sPct, fert: fPct, xp: result.xpGained ?? 0, base: result.baseReward ?? 0, bonus: result.bonusReward ?? 0 });
+        const totalReward = (result.baseReward ?? 0) + (result.bonusReward ?? 0);
+        const { newMM: mmAfter } = applyTreeGrowth(totalReward, game.treeGrowthMM ?? 0, game.treeGrowthRemainder ?? 0);
+        const mmGained = mmAfter - (game.treeGrowthMM ?? 0);
+        setSessionScores({ water: wPct, sun: sPct, fert: fPct, xp: result.xpGained ?? 0, base: result.baseReward ?? 0, bonus: result.bonusReward ?? 0, mm: mmGained });
         setHistoryHighlight(true);
         setTimeout(() => setHistoryHighlight(false), 2800);
         if (result.levelUp && result.newLevel) {
@@ -578,6 +581,9 @@ export default function GamePage({ state, onStateChange }: Props) {
               <span className="xp-result-pct">об. {sessionScores.xp}%</span>
               <span className="xp-result-arrow">→</span>
               <span className="xp-result-xp">+{sessionScores.xp} оп.</span>
+              {sessionScores.mm > 0 && (
+                <span className="xp-result-mm">+{sessionScores.mm} мм</span>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
