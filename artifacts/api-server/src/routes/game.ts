@@ -439,22 +439,26 @@ router.post("/game/session/claim", requireAuth, async (req: any, res) => {
   }
 });
 
-// POST /api/game/debug/add-sessions — increment missed_sessions by 1 and unlock cooldown (debug)
+// POST /api/game/debug/add-sessions — set missed_sessions to targetMissed and unlock cooldown (debug)
 router.post("/game/debug/add-sessions", requireAuth, async (req: any, res) => {
   const userId = req.userId;
+  const { targetMissed } = req.body as { targetMissed?: number };
+  if (typeof targetMissed !== "number" || targetMissed < 0) {
+    return res.status(400).json({ error: "targetMissed must be a non-negative number" });
+  }
   // Set last_session_time to exactly COOLDOWN_MS ago so the cooldown is expired
-  // but computedMissed on the client picks up 0 additional sessions (elapsed == 1 cooldown period).
+  // but the client's computedMissed picks up 0 additional time-based sessions.
   const justExpired = Date.now() - COOLDOWN_MS;
   try {
     const result = await pool.query(
       `UPDATE game_state SET
-        missed_sessions = missed_sessions + 1,
-        last_session_time = $2,
+        missed_sessions = $2,
+        last_session_time = $3,
         session_in_progress = FALSE,
         updated_at = NOW()
        WHERE user_id = $1
        RETURNING missed_sessions`,
-      [userId, justExpired],
+      [userId, targetMissed, justExpired],
     );
     const missed = result.rows[0]?.missed_sessions ?? 0;
     return res.json({ success: true, missedSessions: missed, lastSessionTime: justExpired });

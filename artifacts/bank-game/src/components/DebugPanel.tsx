@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { UserState } from "@/lib/engine";
+import { UserState, computeMissedSessions } from "@/lib/engine";
 import { api } from "@/lib/api";
 import { calcLevel } from "@/lib/levels";
 
@@ -57,13 +57,15 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
   async function addOneSession() {
     setBusy(true);
     try {
-      const res = await api.debugAddSessions(1);
-      const missed = res.missedSessions ?? (game.missedSessions ?? 0) + 1;
+      // Use the same formula as GamePage so we always get exactly +1 on display
+      const currentMissed = computeMissedSessions(game, state.balances.startDate, Date.now());
+      const targetMissed = currentMissed + 1;
+      const res = await api.debugAddSessions(targetMissed);
       onStateChange({
         ...state,
         game: {
           ...game,
-          missedSessions: missed,
+          missedSessions: res.missedSessions ?? targetMissed,
           lastSessionTime: res.lastSessionTime ?? game.lastSessionTime,
           sessionInProgress: false,
         },

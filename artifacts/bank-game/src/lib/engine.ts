@@ -103,6 +103,15 @@ export function getTreeStage(mm: number): 0 | 1 | 2 | 3 | 4 {
 
 export const TREE_STAGE_NAMES = ["Росток", "Саженец", "Деревце", "Молодое дерево", "Могучее дерево"];
 
+// ---- Computed missed sessions (mirrors GamePage formula) ----
+export function computeMissedSessions(game: UserState["game"], startDate: number, now: number): number {
+  if (game.sessionInProgress) return game.missedSessions ?? 0;
+  const referenceTime = game.lastSessionTime ?? startDate;
+  const elapsed = now - referenceTime;
+  const additional = Math.max(0, Math.floor(elapsed / SESSION_COOLDOWN_MS) - 1);
+  return (game.missedSessions ?? 0) + additional;
+}
+
 // ---- Session helpers ----
 export function isSessionLocked(lastSessionTime: number | null, now: number): boolean {
   if (!lastSessionTime) return false;
