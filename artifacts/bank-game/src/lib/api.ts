@@ -106,10 +106,9 @@ export const api = {
       { method: "POST", body: JSON.stringify({ type }) },
     ),
 
-  debugAddSessions: (sessions: number) =>
-    request<{ success: boolean }>("/game/debug/add-sessions", {
+  debugAddSessions: (_sessions?: number) =>
+    request<{ success: boolean; missedSessions: number }>("/game/debug/add-sessions", {
       method: "POST",
-      body: JSON.stringify({ sessions }),
     }),
 
   debugAddXP: (xp: number) =>

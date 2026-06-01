@@ -425,24 +425,22 @@ router.post("/game/session/claim", requireAuth, async (req: any, res) => {
   }
 });
 
-// POST /api/game/debug/add-sessions — add missed sessions and unlock cooldown (debug)
+// POST /api/game/debug/add-sessions — increment missed_sessions by 1 and unlock cooldown (debug)
 router.post("/game/debug/add-sessions", requireAuth, async (req: any, res) => {
   const userId = req.userId;
-  const value = Math.floor(Number(req.body.sessions));
-  if (isNaN(value) || value < 1) {
-    return res.status(400).json({ error: "Invalid sessions value" });
-  }
   try {
-    await pool.query(
+    const result = await pool.query(
       `UPDATE game_state SET
-        missed_sessions = $2,
+        missed_sessions = missed_sessions + 1,
         last_session_time = NULL,
         session_in_progress = FALSE,
         updated_at = NOW()
-       WHERE user_id = $1`,
-      [userId, value - 1],
+       WHERE user_id = $1
+       RETURNING missed_sessions`,
+      [userId],
     );
-    return res.json({ success: true });
+    const missed = result.rows[0]?.missed_sessions ?? 0;
+    return res.json({ success: true, missedSessions: missed });
   } catch (err) {
     req.log.error({ err }, "Error adding sessions (debug)");
     return res.status(500).json({ error: "Internal server error" });

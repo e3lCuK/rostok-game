@@ -15,7 +15,6 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [mmInput, setMmInput] = useState("");
-  const [sessionInput, setSessionInput] = useState("");
   const [xpInput, setXpInput] = useState("");
 
   const { game } = state;
@@ -55,23 +54,20 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
     setBusy(false);
   }
 
-  async function addSessions() {
-    const value = Math.floor(Number(sessionInput));
-    if (isNaN(value) || value <= 0) return;
+  async function addOneSession() {
     setBusy(true);
     try {
-      await api.debugAddSessions(value);
+      const res = await api.debugAddSessions(1);
+      const missed = res.missedSessions ?? (game.missedSessions ?? 0) + 1;
       onStateChange({
         ...state,
         game: {
           ...game,
-          missedSessions: value - 1,
-          pendingStoredSessions: value,
+          missedSessions: missed,
           lastSessionTime: null,
           sessionInProgress: false,
         },
       });
-      setSessionInput("");
     } catch (e) {
       console.warn("[Debug] add-sessions failed", e);
     }
@@ -130,19 +126,9 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
               </button>
             </div>
 
-            <div className="debug-mm-row">
-              <input
-                className="debug-mm-input"
-                type="number"
-                value={sessionInput}
-                placeholder="ед"
-                onChange={e => setSessionInput(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && addSessions()}
-              />
-              <button className="debug-btn" onClick={addSessions} disabled={busy}>
-                + сессий
-              </button>
-            </div>
+            <button className="debug-btn" onClick={addOneSession} disabled={busy}>
+              Увеличение сессий
+            </button>
 
             <div className="debug-mm-row">
               <input
