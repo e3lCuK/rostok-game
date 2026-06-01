@@ -311,14 +311,11 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
       baseReward = basePerSession * storedSessionsResult;
       bonusReward = bonusPerSession * bonusMultiplier * storedSessionsResult;
 
-      // XP calculation — average care percent × storedSessions (capped at 3× to prevent
-      // giant level jumps from long absences; money has no cap, XP does).
+      // XP calculation — always ×1 regardless of stored sessions
       const wPct = Math.round(((u.session_water_score || 40) / 80) * 100);
       const sPct = Math.round(((u.session_sun_score || 40) / 80) * 100);
       const fPct = Math.round(((u.session_fertilizer_score || 40) / 80) * 100);
-      const baseXP = Math.round((wPct + sPct + fPct) / 3);
-      const xpMultiplier = Math.min(storedSessionsResult, 3);
-      const xpGained = Math.round(baseXP * xpMultiplier);
+      const xpGained = Math.round((wPct + sPct + fPct) / 3);
 
       const prevLevel = g.player_level || 1;
       const newTotalXP = (g.player_xp || 0) + xpGained;
