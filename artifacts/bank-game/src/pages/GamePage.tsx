@@ -50,6 +50,7 @@ export default function GamePage({ state, onStateChange }: Props) {
   const [showRewards, setShowRewards] = useState(hasPendingInit && notInSessionInit);
   const [fadeActivities, setFadeActivities] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false); // collapsed by default
+  const [historyNotif, setHistoryNotif] = useState(false);
   const [levelUpData, setLevelUpData] = useState<{ level: number } | null>(null);
   const [xpGainAmount, setXpGainAmount] = useState<number | null>(null);
   const [activeAnim, setActiveAnim] = useState<GameType | null>(null);
@@ -417,6 +418,7 @@ export default function GamePage({ state, onStateChange }: Props) {
           { date: new Date().toLocaleDateString("ru-RU"), amount, type: "base" as const },
         ].slice(-30),
       });
+      if (pendingBonus === 0) setHistoryNotif(true);
     } catch (err) {
       console.error("[Claim base] failed:", err);
     } finally {
@@ -446,6 +448,7 @@ export default function GamePage({ state, onStateChange }: Props) {
           { date: new Date().toLocaleDateString("ru-RU"), amount, type: "bonus" as const },
         ].slice(-30),
       });
+      if (pendingBase === 0) setHistoryNotif(true);
     } catch (err) {
       console.error("[Claim bonus] failed:", err);
     } finally {
@@ -768,8 +771,11 @@ export default function GamePage({ state, onStateChange }: Props) {
 
       {/* Session history */}
       <div className="history-card">
-        <div className="history-title-row" onClick={() => setHistoryOpen(!historyOpen)}>
-          <h3 className="history-title">История начислений</h3>
+        <div className="history-title-row" onClick={() => { setHistoryOpen(!historyOpen); if (!historyOpen) setHistoryNotif(false); }}>
+          <h3 className="history-title">
+            История начислений
+            {historyNotif && <span className="history-notif-dot" />}
+          </h3>
           <span className="history-chevron">{historyOpen ? "▼" : "▶"}</span>
         </div>
         {historyOpen && (
