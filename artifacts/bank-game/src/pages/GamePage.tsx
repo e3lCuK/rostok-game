@@ -313,6 +313,7 @@ export default function GamePage({ state, onStateChange }: Props) {
           pendingStoredSessions: result.storedSessions ?? 1,
           playerXP: (game.playerXP ?? 0) + (result.xpGained ?? 0),
           playerLevel: result.newLevel ?? game.playerLevel,
+          xpHistory: result.xpHistory ?? game.xpHistory,
         };
         console.log(`[Session complete] base=${result.baseReward} bonus=${result.bonusReward} xp=+${result.xpGained} level=${result.newLevel}`);
         if (result.xpGained) {

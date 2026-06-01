@@ -370,7 +370,7 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
         [now, newStreak, storedSessionsResult, baseReward, bonusReward, userId, newTotalXP, newLevel, JSON.stringify(newXpHistory)],
       );
 
-      return res.json({ success: true, sessionComplete: true, baseReward, bonusReward, storedSessions: storedSessionsResult, xpGained, newLevel, prevLevel, levelUp });
+      return res.json({ success: true, sessionComplete: true, baseReward, bonusReward, storedSessions: storedSessionsResult, xpGained, newLevel, prevLevel, levelUp, xpHistory: newXpHistory });
     }
 
     return res.json({ success: true, sessionComplete: false, baseReward: 0, bonusReward: 0, storedSessions: 1 });

@@ -95,6 +95,7 @@ export const api = {
       newLevel?: number;
       prevLevel?: number;
       levelUp?: boolean;
+      xpHistory?: import("@/lib/engine").XpHistoryEntry[];
     }>(
       "/game/session/action",
       { method: "POST", body: JSON.stringify({ action, skillScore }) },
