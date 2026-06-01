@@ -769,7 +769,7 @@ body.modal-open {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  max-height: 110px;
+  max-height: 38px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(0,0,0,0.15) transparent;
