@@ -418,7 +418,7 @@ export default function GamePage({ state, onStateChange }: Props) {
           { date: new Date().toLocaleDateString("ru-RU"), amount, type: "base" as const },
         ].slice(-30),
       });
-      if (pendingBonus === 0) setHistoryNotif(true);
+      if ((stateRef.current.game.pendingBonusReward ?? 0) === 0) setHistoryNotif(true);
     } catch (err) {
       console.error("[Claim base] failed:", err);
     } finally {
@@ -448,7 +448,7 @@ export default function GamePage({ state, onStateChange }: Props) {
           { date: new Date().toLocaleDateString("ru-RU"), amount, type: "bonus" as const },
         ].slice(-30),
       });
-      if (pendingBase === 0) setHistoryNotif(true);
+      if ((stateRef.current.game.pendingBaseReward ?? 0) === 0) setHistoryNotif(true);
     } catch (err) {
       console.error("[Claim bonus] failed:", err);
     } finally {
