@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 interface Props {
@@ -14,10 +14,13 @@ const PARTICLES = Array.from({ length: 12 }, (_, i) => ({
 }));
 
 export default function LevelUpAnimation({ newLevel, onComplete }: Props) {
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
   useEffect(() => {
-    const t = setTimeout(onComplete, 1600);
+    const t = setTimeout(() => onCompleteRef.current(), 1600);
     return () => clearTimeout(t);
-  }, [onComplete]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <motion.div
