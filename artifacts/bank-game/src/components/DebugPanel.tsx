@@ -117,12 +117,12 @@ export default function DebugPanel({ state, onStateChange, onResetAccount, onSig
                 className="debug-mm-input"
                 type="number"
                 value={xpInput}
-                placeholder="уход"
+                placeholder="опыт"
                 onChange={e => setXpInput(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && addXP()}
               />
               <button className="debug-btn" onClick={addXP} disabled={busy}>
-                + уход
+                + опыт
               </button>
             </div>
 

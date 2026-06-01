@@ -50,7 +50,7 @@ export default function LevelWidget({ totalXP, level, xpGain }: Props) {
           <span className="level-widget-lvl">Ур.{level}</span>
         </div>
         <span className="level-widget-xp">
-          {progress.isMax ? "MAX" : `${progress.xpInLevel} / ${progress.xpNeeded} уход`}
+          {progress.isMax ? "MAX" : `${progress.xpInLevel} / ${progress.xpNeeded} опыт`}
         </span>
         <div className="level-widget-bar-track">
           <div
@@ -70,7 +70,7 @@ export default function LevelWidget({ totalXP, level, xpGain }: Props) {
             exit={{ opacity: 0 }}
             transition={{ duration: 1.2, ease: "easeOut" }}
           >
-            +{gainVal} уход
+            +{gainVal} опыт
           </motion.div>
         )}
       </AnimatePresence>
