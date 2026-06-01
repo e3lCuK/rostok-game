@@ -318,7 +318,7 @@ export default function GamePage({ state, onStateChange }: Props) {
     animParticlesRef.current = [14, 22, 31, 40, 50, 60, 69, 78];
     setActiveAnim(type);
     if (animTimerRef.current) clearTimeout(animTimerRef.current);
-    animTimerRef.current = setTimeout(() => setActiveAnim(null), 1800);
+    animTimerRef.current = setTimeout(() => setActiveAnim(null), 2800);
 
     const waterScore      = waterScoreRef.current || 0;
     const sunScore        = sunScoreRef.current || 0;
