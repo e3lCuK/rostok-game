@@ -288,17 +288,17 @@ export default function GamePage({ state, onStateChange }: Props) {
     // Step 2 — XP floater on level widget
     setTimeout(() => {
       if (scores) setXpGainAmount(scores.xp);
-    }, 450);
+    }, 900);
 
     // Step 3 — base reward floater
     setTimeout(() => {
       if (scores && scores.base > 0) addFloater(`+${formatRub(scores.base)}`, cx - 28, 52);
-    }, 750);
+    }, 1600);
 
     // Step 4 — bonus reward floater
     setTimeout(() => {
       if (scores && scores.bonus > 0) addFloater(`+${formatRub(scores.bonus)}`, cx + 28, 78);
-    }, 1000);
+    }, 2200);
 
     // Step 5 — history highlight + fade widget + open rewards
     setTimeout(() => {
@@ -309,7 +309,7 @@ export default function GamePage({ state, onStateChange }: Props) {
         setShowRewards(true);
         setFadeActivities(false);
       }, 400);
-    }, 1200);
+    }, 2800);
   }
 
   function handleMinigameComplete(type: GameType, skillScore: number) {
