@@ -57,6 +57,8 @@ export default function GamePage({ state, onStateChange }: Props) {
   const animParticlesRef = useRef<number[]>([]);
   const [showHelp, setShowHelp] = useState(false);
   const [helpPulsing, setHelpPulsing] = useState(() => !localStorage.getItem("active_help_seen"));
+  const [sessionScores, setSessionScores] = useState<{ water: number; sun: number; fert: number; xp: number } | null>(null);
+  const [historyHighlight, setHistoryHighlight] = useState(false);
 
   useEffect(() => {
     if (showHelp) {
@@ -316,6 +318,12 @@ export default function GamePage({ state, onStateChange }: Props) {
           xpHistory: result.xpHistory ?? game.xpHistory,
         };
         console.log(`[Session complete] base=${result.baseReward} bonus=${result.bonusReward} xp=+${result.xpGained} level=${result.newLevel}`);
+        const wPct = Math.round((waterScoreRef.current / 80) * 100);
+        const sPct = Math.round((sunScoreRef.current / 80) * 100);
+        const fPct = Math.round((fertilizerScoreRef.current / 80) * 100);
+        setSessionScores({ water: wPct, sun: sPct, fert: fPct, xp: result.xpGained ?? 0 });
+        setHistoryHighlight(true);
+        setTimeout(() => setHistoryHighlight(false), 2800);
         if (result.xpGained) {
           setXpGainAmount(result.xpGained);
         }
@@ -476,7 +484,7 @@ export default function GamePage({ state, onStateChange }: Props) {
 
         <div className="game-left-widgets">
           <LevelWidget level={game.playerLevel ?? 1} totalXP={game.playerXP ?? 0} xpGain={xpGainAmount} />
-          <SessionHistoryWidget xpHistory={game.xpHistory ?? []} />
+          <SessionHistoryWidget xpHistory={game.xpHistory ?? []} highlightFirst={historyHighlight} />
         </div>
 
         <button
@@ -637,9 +645,59 @@ export default function GamePage({ state, onStateChange }: Props) {
       </div>
 
       {showCompletionStage && !showRewards && (
-        <button className="transition-btn" onClick={handleGoToRewards}>
-          Перейти к начислениям
-        </button>
+        <>
+          <AnimatePresence>
+            {sessionScores && (
+              <motion.div
+                className="xp-breakdown"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ type: "spring", stiffness: 220, damping: 22 }}
+              >
+                <div className="xp-break-activities">
+                  {([
+                    { icon: "💧", pct: sessionScores.water },
+                    { icon: "☀️", pct: sessionScores.sun },
+                    { icon: "🌿", pct: sessionScores.fert },
+                  ] as const).map((item, i) => (
+                    <motion.div
+                      key={i}
+                      className="xp-break-item"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.08 + i * 0.18, type: "spring", stiffness: 260, damping: 22 }}
+                    >
+                      <span className="xp-break-icon">{item.icon}</span>
+                      <span className="xp-break-pct">{item.pct}%</span>
+                    </motion.div>
+                  ))}
+                </div>
+                <motion.div
+                  className="xp-break-arrow"
+                  initial={{ opacity: 0, scaleY: 0 }}
+                  animate={{ opacity: 1, scaleY: 1 }}
+                  transition={{ delay: 0.65, duration: 0.25 }}
+                >
+                  ↓
+                </motion.div>
+                <motion.div
+                  className="xp-break-result"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.92, type: "spring", stiffness: 200, damping: 18 }}
+                >
+                  <span className="xp-break-avg">{sessionScores.xp}%</span>
+                  <span className="xp-break-sep">→</span>
+                  <span className="xp-break-xp">+{sessionScores.xp} оп.</span>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <button className="transition-btn" onClick={handleGoToRewards}>
+            Перейти к начислениям
+          </button>
+        </>
       )}
 
       {/* Reward claim area — shown after session complete */}
