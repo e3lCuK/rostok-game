@@ -442,19 +442,22 @@ router.post("/game/session/claim", requireAuth, async (req: any, res) => {
 // POST /api/game/debug/add-sessions — increment missed_sessions by 1 and unlock cooldown (debug)
 router.post("/game/debug/add-sessions", requireAuth, async (req: any, res) => {
   const userId = req.userId;
+  // Set last_session_time to exactly COOLDOWN_MS ago so the cooldown is expired
+  // but computedMissed on the client picks up 0 additional sessions (elapsed == 1 cooldown period).
+  const justExpired = Date.now() - COOLDOWN_MS;
   try {
     const result = await pool.query(
       `UPDATE game_state SET
         missed_sessions = missed_sessions + 1,
-        last_session_time = NULL,
+        last_session_time = $2,
         session_in_progress = FALSE,
         updated_at = NOW()
        WHERE user_id = $1
        RETURNING missed_sessions`,
-      [userId],
+      [userId, justExpired],
     );
     const missed = result.rows[0]?.missed_sessions ?? 0;
-    return res.json({ success: true, missedSessions: missed });
+    return res.json({ success: true, missedSessions: missed, lastSessionTime: justExpired });
   } catch (err) {
     req.log.error({ err }, "Error adding sessions (debug)");
     return res.status(500).json({ error: "Internal server error" });

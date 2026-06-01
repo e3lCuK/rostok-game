@@ -107,7 +107,7 @@ export const api = {
     ),
 
   debugAddSessions: (_sessions?: number) =>
-    request<{ success: boolean; missedSessions: number }>("/game/debug/add-sessions", {
+    request<{ success: boolean; missedSessions: number; lastSessionTime: number }>("/game/debug/add-sessions", {
       method: "POST",
     }),
 
