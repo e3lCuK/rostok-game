@@ -752,7 +752,7 @@ body.modal-open {
   -webkit-backdrop-filter: blur(6px);
   border: 1px solid rgba(255,255,255,0.18);
   border-radius: 12px;
-  padding: 6px 10px 7px;
+  padding: 6px 14px 7px 10px;
   min-width: 110px;
   max-width: 130px;
   user-select: none;
