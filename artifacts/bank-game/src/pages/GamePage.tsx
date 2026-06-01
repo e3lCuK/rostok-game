@@ -57,6 +57,14 @@ export default function GamePage({ state, onStateChange }: Props) {
   const animParticlesRef = useRef<number[]>([]);
   const [showHelp, setShowHelp] = useState(false);
   const [helpPulsing, setHelpPulsing] = useState(() => !localStorage.getItem("active_help_seen"));
+  useEffect(() => {
+    if (!helpPulsing) return;
+    const t = setTimeout(() => {
+      setHelpPulsing(false);
+      localStorage.setItem("active_help_seen", "true");
+    }, 10000);
+    return () => clearTimeout(t);
+  }, []);
   const [sessionScores, setSessionScores] = useState<{ water: number; sun: number; fert: number; xp: number; base: number; bonus: number; mm: number } | null>(null);
   const [historyHighlight, setHistoryHighlight] = useState(false);
 
