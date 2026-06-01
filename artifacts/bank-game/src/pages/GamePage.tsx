@@ -260,28 +260,30 @@ export default function GamePage({ state, onStateChange }: Props) {
     const px = pendingXpRef.current;
     pendingXpRef.current = null;
 
-    // Step 1 — tree grow animation + apply MM
-    treeControls.start({
-      scale: [1, 1.20, 1],
-      filter: ["brightness(1)", "brightness(1.65)", "brightness(1)"],
-      transition: { duration: 0.85, ease: "easeInOut" },
-    });
-    if (px) {
-      const cur = stateRef.current;
-      onStateChange({
-        ...cur,
-        game: {
-          ...cur.game,
-          playerXP: (cur.game.playerXP ?? 0) + px.xpGained,
-          playerLevel: px.newLevel ?? cur.game.playerLevel,
-          xpHistory: (px.xpHistory as typeof cur.game.xpHistory) ?? cur.game.xpHistory,
-          treeGrowthMM: px.newMM,
-          treeGrowthRemainder: px.newRemainder,
-        },
+    // Step 1 — tree grow animation + apply MM (с задержкой)
+    setTimeout(() => {
+      treeControls.start({
+        scale: [1, 1.20, 1],
+        filter: ["brightness(1)", "brightness(1.65)", "brightness(1)"],
+        transition: { duration: 0.85, ease: "easeInOut" },
       });
-      animateGrowth(displayGrowthMMRef.current, px.newMM);
-      if (px.levelUp && px.newLevel) setLevelUpData({ level: px.newLevel });
-    }
+      if (px) {
+        const cur = stateRef.current;
+        onStateChange({
+          ...cur,
+          game: {
+            ...cur.game,
+            playerXP: (cur.game.playerXP ?? 0) + px.xpGained,
+            playerLevel: px.newLevel ?? cur.game.playerLevel,
+            xpHistory: (px.xpHistory as typeof cur.game.xpHistory) ?? cur.game.xpHistory,
+            treeGrowthMM: px.newMM,
+            treeGrowthRemainder: px.newRemainder,
+          },
+        });
+        animateGrowth(displayGrowthMMRef.current, px.newMM);
+        if (px.levelUp && px.newLevel) setLevelUpData({ level: px.newLevel });
+      }
+    }, 600);
 
     const scores = sessionScores;
     const rect = gameAreaRef.current?.getBoundingClientRect();
