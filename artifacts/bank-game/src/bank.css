@@ -753,8 +753,8 @@ body.modal-open {
   border: 1px solid rgba(255,255,255,0.18);
   border-radius: 12px;
   padding: 6px 10px 7px;
-  min-width: 152px;
-  max-width: 180px;
+  min-width: 110px;
+  max-width: 130px;
   user-select: none;
 }
 .sh-widget-title {
@@ -777,16 +777,15 @@ body.modal-open {
 .sh-widget-scroll::-webkit-scrollbar { width: 3px; }
 .sh-widget-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.18); border-radius: 99px; }
 .sh-row {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
   align-items: center;
-  gap: 5px;
+  justify-content: space-between;
+  gap: 6px;
   font-size: 9px;
   line-height: 1.35;
   white-space: nowrap;
 }
 .sh-date { color: #6b7280; font-weight: 500; font-variant-numeric: tabular-nums; }
-.sh-pct  { color: #9ca3af; text-align: right; }
 .sh-xp   { color: #16a34a; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* ── Level-up animation overlay ───────────────────── */

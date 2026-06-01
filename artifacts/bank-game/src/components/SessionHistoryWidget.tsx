@@ -19,7 +19,6 @@ export default function SessionHistoryWidget({ xpHistory }: Props) {
         {xpHistory.map((e, i) => (
           <div key={i} className="sh-row">
             <span className="sh-date">{fmtDate(e.date, e.n)}</span>
-            <span className="sh-pct">{e.pct}%</span>
             <span className="sh-xp">+{e.xp} оп.</span>
           </div>
         ))}
