@@ -613,7 +613,7 @@ export default function GamePage({ state, onStateChange }: Props) {
                 <span className="xp-result-xp">+{sessionScores.xp} оп.</span>
               </div>
               {sessionScores.mm > 0 && (
-                <span className="xp-result-mm">+{sessionScores.mm} мм</span>
+                <span className="xp-result-mm">+{sessionScores.mm} мм.</span>
               )}
             </motion.div>
           )}
