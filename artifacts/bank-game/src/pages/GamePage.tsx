@@ -19,6 +19,7 @@ import ClickGameSun from "@/components/ClickGameSun";
 import FertilizerMatchGame from "@/components/FertilizerMatchGame";
 import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2, HelpCircle, X } from "lucide-react";
 import LevelWidget from "@/components/LevelWidget";
+import SessionHistoryWidget from "@/components/SessionHistoryWidget";
 import LevelUpAnimation from "@/components/LevelUpAnimation";
 
 interface Props {
@@ -472,7 +473,10 @@ export default function GamePage({ state, onStateChange }: Props) {
           </div>
         ))}
 
-        <LevelWidget level={game.playerLevel ?? 1} totalXP={game.playerXP ?? 0} xpGain={xpGainAmount} xpHistory={game.xpHistory ?? []} />
+        <div className="game-left-widgets">
+          <LevelWidget level={game.playerLevel ?? 1} totalXP={game.playerXP ?? 0} xpGain={xpGainAmount} />
+          <SessionHistoryWidget xpHistory={game.xpHistory ?? []} />
+        </div>
 
         <button
           className={`help-icon${helpPulsing ? " help-icon-pulse" : ""}`}

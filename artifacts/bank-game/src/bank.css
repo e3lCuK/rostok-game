@@ -670,11 +670,18 @@ body.modal-open {
 
 /* ── Help icon ───────────────────────────────────── */
 /* ── Level Widget ─────────────────────────────────── */
-.level-widget-wrap {
+.game-left-widgets {
   position: absolute;
   top: 10px;
   left: 12px;
   z-index: 15;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+.level-widget-wrap {
+  position: relative;
 }
 .level-widget-gain {
   position: absolute;
@@ -738,24 +745,49 @@ body.modal-open {
   background: #16a34a;
   border-radius: 99px;
 }
-.level-widget-history {
-  margin-top: 4px;
+/* ── Session History Widget ─────────────────────────── */
+.sh-widget {
+  background: rgba(120, 120, 120, 0.18);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 12px;
+  padding: 6px 10px 7px;
+  min-width: 152px;
+  max-width: 180px;
+  user-select: none;
+}
+.sh-widget-title {
+  font-size: 8px;
+  font-weight: 700;
+  color: #6b7280;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.sh-widget-scroll {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
+  max-height: 110px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.15) transparent;
 }
-.level-widget-history-row {
-  display: flex;
+.sh-widget-scroll::-webkit-scrollbar { width: 3px; }
+.sh-widget-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.18); border-radius: 99px; }
+.sh-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  font-size: 8px;
-  line-height: 1.3;
-  color: #9ca3af;
+  gap: 5px;
+  font-size: 9px;
+  line-height: 1.35;
   white-space: nowrap;
 }
-.lw-hist-date { color: #6b7280; font-weight: 500; }
-.lw-hist-sep  { color: #d1d5db; }
-.lw-hist-pct  { color: #6b7280; }
-.lw-hist-xp   { color: #16a34a; font-weight: 600; }
+.sh-date { color: #6b7280; font-weight: 500; font-variant-numeric: tabular-nums; }
+.sh-pct  { color: #9ca3af; text-align: right; }
+.sh-xp   { color: #16a34a; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* ── Level-up animation overlay ───────────────────── */
 .levelup-overlay {

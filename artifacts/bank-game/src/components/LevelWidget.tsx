@@ -1,21 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getLevelProgress } from "@/lib/levels";
-import type { XpHistoryEntry } from "@/lib/engine";
 
 interface Props {
   totalXP: number;
   level: number;
   xpGain?: number | null;
-  xpHistory?: XpHistoryEntry[];
 }
 
-function fmtXpDate(iso: string, n: number): string {
-  const [y, m, d] = iso.split("-");
-  return `${d}.${m}.${y.slice(2)}(${n})`;
-}
-
-export default function LevelWidget({ totalXP, level, xpGain, xpHistory = [] }: Props) {
+export default function LevelWidget({ totalXP, level, xpGain }: Props) {
   const progress = getLevelProgress(totalXP);
   const [showGain, setShowGain] = useState(false);
   const [gainVal, setGainVal] = useState(0);
@@ -65,19 +58,6 @@ export default function LevelWidget({ totalXP, level, xpGain, xpHistory = [] }: 
             style={{ width: `${barPct}%`, transition: "width 0.5s ease" }}
           />
         </div>
-        {xpHistory.length > 0 && (
-          <div className="level-widget-history">
-            {xpHistory.map((e, i) => (
-              <div key={i} className="level-widget-history-row">
-                <span className="lw-hist-date">{fmtXpDate(e.date, e.n)}</span>
-                <span className="lw-hist-sep"> — </span>
-                <span className="lw-hist-pct">{e.pct}%</span>
-                <span className="lw-hist-sep"> — </span>
-                <span className="lw-hist-xp">{e.xp} оп.</span>
-              </div>
-            ))}
-          </div>
-        )}
       </motion.div>
 
       <AnimatePresence>
