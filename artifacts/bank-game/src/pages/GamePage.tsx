@@ -575,7 +575,7 @@ export default function GamePage({ state, onStateChange }: Props) {
               exit={{ opacity: 0, x: 10 }}
               transition={{ type: "spring", stiffness: 220, damping: 22, delay: 0.15 }}
             >
-              <span className="xp-result-pct">{sessionScores.xp}%</span>
+              <span className="xp-result-pct">об. {sessionScores.xp}%</span>
               <span className="xp-result-arrow">→</span>
               <span className="xp-result-xp">+{sessionScores.xp} оп.</span>
             </motion.div>
