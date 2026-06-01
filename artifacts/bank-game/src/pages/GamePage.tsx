@@ -668,13 +668,13 @@ export default function GamePage({ state, onStateChange }: Props) {
                   >
                     {btn.done ? (
                       <>
+                        {btn.pct !== null && (
+                          <div className="action-btn-fill" style={{ height: `${btn.pct}%` }} />
+                        )}
                         <div className="action-btn-top">
                           <CheckCircle2 size={20} />
                           <span>{btn.label}</span>
                         </div>
-                        {btn.pct !== null && (
-                          <div className="action-btn-percent">{btn.pct}%</div>
-                        )}
                       </>
                     ) : (
                       <div className="action-btn-content">

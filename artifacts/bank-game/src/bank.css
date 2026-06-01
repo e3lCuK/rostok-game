@@ -1162,6 +1162,8 @@ body.modal-open {
   letter-spacing: 0px;
   transition: background 0.12s, opacity 0.12s;
   backdrop-filter: blur(4px);
+  overflow: hidden;
+  position: relative;
 }
 
 .action-btn-bank:hover:not(:disabled) {
@@ -1177,8 +1179,7 @@ body.modal-open {
 
 .action-btn-done {
   flex-direction: column;
-  justify-content: space-between;
-  padding: 10px 0;
+  justify-content: center;
   background: rgba(255,255,255,0.55);
   cursor: default;
 }
@@ -1188,13 +1189,20 @@ body.modal-open {
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  position: relative;
+  z-index: 1;
 }
 
-.action-btn-percent {
-  font-weight: 700;
-  font-size: 0.67rem;
-  line-height: 1;
-  text-align: center;
+.action-btn-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: var(--ac, #16a34a);
+  opacity: 0.22;
+  border-radius: 0 0 16px 16px;
+  transition: height 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
 }
 
 .session-actions {
