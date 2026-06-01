@@ -779,8 +779,8 @@ body.modal-open {
 .sh-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 3px;
+  justify-content: flex-start;
+  gap: 1px;
   font-size: 9px;
   line-height: 1.35;
   white-space: nowrap;
