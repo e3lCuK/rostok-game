@@ -77,6 +77,9 @@ router.get("/game/state", requireAuth, async (req: any, res) => {
         treeGrowthRemainder: parseFloat(game.tree_growth_remainder) || 0,
         playerXP: parseInt(game.player_xp) || 0,
         playerLevel: parseInt(game.player_level) || 1,
+        xpHistory: Array.isArray(game.xp_history)
+          ? game.xp_history
+          : (game.xp_history ? JSON.parse(game.xp_history) : []),
       },
       history: historyRows.rows.map((r: any) => ({
         amount: parseFloat(r.amount),
@@ -316,6 +319,16 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
       const sPct = Math.round(((u.session_sun_score || 40) / 80) * 100);
       const fPct = Math.round(((u.session_fertilizer_score || 40) / 80) * 100);
       const xpGained = Math.round((wPct + sPct + fPct) / 3);
+      const skillPct = xpGained; // same value — average care percent
+
+      // XP history — keep last 5 entries
+      const today = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+      const prevXpHistory: any[] = Array.isArray(g.xp_history)
+        ? g.xp_history
+        : (g.xp_history ? JSON.parse(g.xp_history) : []);
+      const sameDayCount = prevXpHistory.filter((e: any) => e.date === today).length;
+      const newXpEntry = { date: today, n: sameDayCount + 1, pct: skillPct, xp: xpGained };
+      const newXpHistory = [newXpEntry, ...prevXpHistory].slice(0, 5);
 
       const prevLevel = g.player_level || 1;
       const newTotalXP = (g.player_xp || 0) + xpGained;
@@ -351,9 +364,10 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
           pending_bonus_reward = COALESCE(pending_bonus_reward, 0) + $5,
           player_xp = $7,
           player_level = $8,
+          xp_history = $9::jsonb,
           updated_at = NOW()
          WHERE user_id = $6`,
-        [now, newStreak, storedSessionsResult, baseReward, bonusReward, userId, newTotalXP, newLevel],
+        [now, newStreak, storedSessionsResult, baseReward, bonusReward, userId, newTotalXP, newLevel, JSON.stringify(newXpHistory)],
       );
 
       return res.json({ success: true, sessionComplete: true, baseReward, bonusReward, storedSessions: storedSessionsResult, xpGained, newLevel, prevLevel, levelUp });

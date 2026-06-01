@@ -39,12 +39,20 @@ export interface UserState {
     treeGrowthRemainder: number;
     playerXP: number;
     playerLevel: number;
+    xpHistory: XpHistoryEntry[];
   };
   history: {
     date: string;
     amount: number;
     type: "standard" | "active" | "base" | "bonus";
   }[];
+}
+
+export interface XpHistoryEntry {
+  date: string;   // "YYYY-MM-DD"
+  n: number;      // session number within day (1, 2, 3…)
+  pct: number;    // average skill percent 0–100
+  xp: number;     // XP gained
 }
 
 // ---- Income formulas ----

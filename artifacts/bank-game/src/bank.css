@@ -738,6 +738,24 @@ body.modal-open {
   background: #16a34a;
   border-radius: 99px;
 }
+.level-widget-history {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.level-widget-history-row {
+  display: flex;
+  align-items: center;
+  font-size: 8px;
+  line-height: 1.3;
+  color: #9ca3af;
+  white-space: nowrap;
+}
+.lw-hist-date { color: #6b7280; font-weight: 500; }
+.lw-hist-sep  { color: #d1d5db; }
+.lw-hist-pct  { color: #6b7280; }
+.lw-hist-xp   { color: #16a34a; font-weight: 600; }
 
 /* ── Level-up animation overlay ───────────────────── */
 .levelup-overlay {

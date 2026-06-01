@@ -472,7 +472,7 @@ export default function GamePage({ state, onStateChange }: Props) {
           </div>
         ))}
 
-        <LevelWidget level={game.playerLevel ?? 1} totalXP={game.playerXP ?? 0} xpGain={xpGainAmount} />
+        <LevelWidget level={game.playerLevel ?? 1} totalXP={game.playerXP ?? 0} xpGain={xpGainAmount} xpHistory={game.xpHistory ?? []} />
 
         <button
           className={`help-icon${helpPulsing ? " help-icon-pulse" : ""}`}

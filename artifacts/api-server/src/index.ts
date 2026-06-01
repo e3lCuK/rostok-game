@@ -44,6 +44,7 @@ async function runMigrations() {
   await pool.query(`ALTER TABLE game_state ADD COLUMN IF NOT EXISTS session_water_score SMALLINT NOT NULL DEFAULT 40`);
   await pool.query(`ALTER TABLE game_state ADD COLUMN IF NOT EXISTS session_sun_score SMALLINT NOT NULL DEFAULT 40`);
   await pool.query(`ALTER TABLE game_state ADD COLUMN IF NOT EXISTS session_fertilizer_score SMALLINT NOT NULL DEFAULT 40`);
+  await pool.query(`ALTER TABLE game_state ADD COLUMN IF NOT EXISTS xp_history JSONB NOT NULL DEFAULT '[]'`);
   logger.info("DB migrations applied");
 }
 
