@@ -711,6 +711,7 @@ body.modal-open {
   display: flex;
   align-items: center;
   gap: 4px;
+  margin-left: -8px;
 }
 .level-widget-icon {
   font-size: 11px;
