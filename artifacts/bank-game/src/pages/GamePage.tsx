@@ -79,6 +79,7 @@ export default function GamePage({ state, onStateChange }: Props) {
   const floaterRef = useRef(0);
   const stateRef = useRef(state);
   useEffect(() => { stateRef.current = state; }, [state]);
+  const pendingXpRef = useRef<{ xpGained: number; newLevel?: number; xpHistory?: unknown[]; levelUp?: boolean } | null>(null);
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const prevLevelRef = useRef(state.game.playerLevel ?? 1);
   const skillScoreRef = useRef<number>(40);
@@ -256,21 +257,43 @@ export default function GamePage({ state, onStateChange }: Props) {
   }
 
   function handleGoToRewards() {
-    // 1. Tree grow animation
+    // 1. Apply pending XP/level to state now
+    const px = pendingXpRef.current;
+    if (px) {
+      const cur = stateRef.current;
+      onStateChange({
+        ...cur,
+        game: {
+          ...cur.game,
+          playerXP: (cur.game.playerXP ?? 0) + px.xpGained,
+          playerLevel: px.newLevel ?? cur.game.playerLevel,
+          xpHistory: (px.xpHistory as typeof cur.game.xpHistory) ?? cur.game.xpHistory,
+        },
+      });
+      if (px.levelUp && px.newLevel) setLevelUpData({ level: px.newLevel });
+      pendingXpRef.current = null;
+    }
+
+    // 2. Tree grow animation
     treeControls.start({
       scale: [1, 1.20, 1],
       filter: ["brightness(1)", "brightness(1.65)", "brightness(1)"],
       transition: { duration: 0.85, ease: "easeInOut" },
     });
-    // 2. XP animation in level widget
+
+    // 3. XP floater + financial floaters
     if (sessionScores) {
       setXpGainAmount(sessionScores.xp);
-      // 3. Financial floaters
       const rect = gameAreaRef.current?.getBoundingClientRect();
       const cx = (rect?.width ?? 200) / 2;
       if (sessionScores.base > 0) addFloater(`+${formatRub(sessionScores.base)}`, cx - 28, 52);
       if (sessionScores.bonus > 0) addFloater(`+${formatRub(sessionScores.bonus)}`, cx + 28, 78);
     }
+
+    // 4. History row highlight
+    setHistoryHighlight(true);
+    setTimeout(() => setHistoryHighlight(false), 2800);
+
     setFadeActivities(true);
     setTimeout(() => {
       setShowRewards(true);
@@ -338,9 +361,14 @@ export default function GamePage({ state, onStateChange }: Props) {
           pendingBaseReward: (game.pendingBaseReward ?? 0) + (result.baseReward ?? 0),
           pendingBonusReward: (game.pendingBonusReward ?? 0) + (result.bonusReward ?? 0),
           pendingStoredSessions: result.storedSessions ?? 1,
-          playerXP: (game.playerXP ?? 0) + (result.xpGained ?? 0),
-          playerLevel: result.newLevel ?? game.playerLevel,
-          xpHistory: result.xpHistory ?? game.xpHistory,
+          // XP/level applied later in handleGoToRewards
+        };
+        // Save XP/level to apply on "Go to rewards" click
+        pendingXpRef.current = {
+          xpGained: result.xpGained ?? 0,
+          newLevel: result.newLevel,
+          xpHistory: result.xpHistory,
+          levelUp: result.levelUp,
         };
         console.log(`[Session complete] base=${result.baseReward} bonus=${result.bonusReward} xp=+${result.xpGained} level=${result.newLevel}`);
         const wPct = Math.round((waterScoreRef.current / 80) * 100);
@@ -350,11 +378,6 @@ export default function GamePage({ state, onStateChange }: Props) {
         const { newMM: mmAfter } = applyTreeGrowth(totalReward, game.treeGrowthMM ?? 0, game.treeGrowthRemainder ?? 0);
         const mmGained = mmAfter - (game.treeGrowthMM ?? 0);
         setSessionScores({ water: wPct, sun: sPct, fert: fPct, xp: result.xpGained ?? 0, base: result.baseReward ?? 0, bonus: result.bonusReward ?? 0, mm: mmGained });
-        setHistoryHighlight(true);
-        setTimeout(() => setHistoryHighlight(false), 2800);
-        if (result.levelUp && result.newLevel) {
-          setLevelUpData({ level: result.newLevel });
-        }
         setShowCompletionStage(true);
         onStateChange({ ...state, game: nextGame });
       } else {

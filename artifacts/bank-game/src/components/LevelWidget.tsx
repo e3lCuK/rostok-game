@@ -27,6 +27,7 @@ export default function LevelWidget({ totalXP, level, xpGain }: Props) {
       const t = setTimeout(() => setShowGain(false), 1400);
       return () => clearTimeout(t);
     }
+    return undefined;
   }, [xpGain]);
 
   useEffect(() => {
