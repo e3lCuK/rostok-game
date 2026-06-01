@@ -439,29 +439,47 @@ router.post("/game/session/claim", requireAuth, async (req: any, res) => {
   }
 });
 
-// POST /api/game/debug/add-sessions — set missed_sessions to targetMissed and unlock cooldown (debug)
+// POST /api/game/debug/add-sessions — add exactly +1 to the displayed storedSessions (debug)
+// The server computes the current "computedMissed" from DB data (same formula as the frontend)
+// and sets missed_sessions = computedMissed + 1, so the display always goes up by exactly 1.
 router.post("/game/debug/add-sessions", requireAuth, async (req: any, res) => {
   const userId = req.userId;
-  const { targetMissed } = req.body as { targetMissed?: number };
-  if (typeof targetMissed !== "number" || targetMissed < 0) {
-    return res.status(400).json({ error: "targetMissed must be a non-negative number" });
-  }
-  // Set last_session_time to exactly COOLDOWN_MS ago so the cooldown is expired
-  // but the client's computedMissed picks up 0 additional time-based sessions.
-  const justExpired = Date.now() - COOLDOWN_MS;
+  const now = Date.now();
   try {
-    const result = await pool.query(
+    const [gsRow, accRow] = await Promise.all([
+      pool.query("SELECT missed_sessions, last_session_time FROM game_state WHERE user_id = $1", [userId]),
+      pool.query("SELECT start_date FROM accounts WHERE user_id = $1", [userId]),
+    ]);
+    if (!gsRow.rows[0] || !accRow.rows[0]) {
+      return res.status(404).json({ error: "Account not found" });
+    }
+    const g = gsRow.rows[0];
+    const dbMissed = g.missed_sessions || 0;
+    const lastSessionTime = g.last_session_time ? parseInt(g.last_session_time) : null;
+    const startDate = parseInt(accRow.rows[0].start_date);
+
+    // Mirror the client's computedMissed formula exactly
+    const referenceTime = lastSessionTime ?? startDate;
+    const elapsed = now - referenceTime;
+    const additional = Math.max(0, Math.floor(elapsed / COOLDOWN_MS) - 1);
+    const currentComputedMissed = dbMissed + additional;
+
+    // Add exactly +1 to the displayed count
+    const newMissed = currentComputedMissed + 1;
+    // Set last_session_time to exactly one cooldown ago so elapsed = COOLDOWN_MS,
+    // additional = 0, and computedMissed = newMissed (no extra time-based sessions).
+    const justExpired = now - COOLDOWN_MS;
+
+    await pool.query(
       `UPDATE game_state SET
         missed_sessions = $2,
         last_session_time = $3,
         session_in_progress = FALSE,
         updated_at = NOW()
-       WHERE user_id = $1
-       RETURNING missed_sessions`,
-      [userId, targetMissed, justExpired],
+       WHERE user_id = $1`,
+      [userId, newMissed, justExpired],
     );
-    const missed = result.rows[0]?.missed_sessions ?? 0;
-    return res.json({ success: true, missedSessions: missed, lastSessionTime: justExpired });
+    return res.json({ success: true, missedSessions: newMissed, lastSessionTime: justExpired });
   } catch (err) {
     req.log.error({ err }, "Error adding sessions (debug)");
     return res.status(500).json({ error: "Internal server error" });
