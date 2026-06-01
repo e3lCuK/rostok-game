@@ -283,16 +283,14 @@ export default function GamePage({ state, onStateChange }: Props) {
         animateGrowth(displayGrowthMMRef.current, px.newMM);
         if (px.levelUp && px.newLevel) setLevelUpData({ level: px.newLevel });
       }
-    }, 600);
+    }, 1000);
 
     const scores = sessionScores;
-    const rect = gameAreaRef.current?.getBoundingClientRect();
-    const cx = (rect?.width ?? 200) / 2;
 
     // Step 2 — XP floater on level widget
     setTimeout(() => {
       if (scores) setXpGainAmount(scores.xp);
-    }, 1800);
+    }, 3000);
 
     // Step 3 — history highlight + fade widget + open rewards
     setTimeout(() => {
@@ -303,7 +301,7 @@ export default function GamePage({ state, onStateChange }: Props) {
         setShowRewards(true);
         setFadeActivities(false);
       }, 400);
-    }, 2800);
+    }, 4000);
   }
 
   function handleMinigameComplete(type: GameType, skillScore: number) {
