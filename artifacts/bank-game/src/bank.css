@@ -803,20 +803,21 @@ body.modal-open {
   top: 28%;
   transform: translateY(-50%);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 2px;
+  gap: 5px;
   background: rgba(255,255,255,0.10);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 14px;
-  padding: 10px 12px;
+  border-radius: 20px;
+  padding: 6px 12px;
+  white-space: nowrap;
   pointer-events: none;
 }
-.xp-result-pct   { font-size: 15px; font-weight: 700; color: rgba(255,255,255,0.75); }
-.xp-result-arrow { font-size: 11px; color: rgba(255,255,255,0.35); line-height: 1.2; }
-.xp-result-xp    { font-size: 16px; font-weight: 800; color: #86efac; }
+.xp-result-pct   { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.75); }
+.xp-result-arrow { font-size: 11px; color: rgba(255,255,255,0.35); }
+.xp-result-xp    { font-size: 13px; font-weight: 800; color: #86efac; }
 
 /* ── Level-up animation overlay ───────────────────── */
 .levelup-overlay {
