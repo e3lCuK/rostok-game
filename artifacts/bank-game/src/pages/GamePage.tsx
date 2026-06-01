@@ -292,7 +292,7 @@ export default function GamePage({ state, onStateChange }: Props) {
     // Step 2 — XP floater on level widget
     setTimeout(() => {
       if (scores) setXpGainAmount(scores.xp);
-    }, 900);
+    }, 1800);
 
     // Step 3 — history highlight + fade widget + open rewards
     setTimeout(() => {
