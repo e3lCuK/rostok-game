@@ -57,7 +57,7 @@ export default function GamePage({ state, onStateChange }: Props) {
   const animParticlesRef = useRef<number[]>([]);
   const [showHelp, setShowHelp] = useState(false);
   const [helpPulsing, setHelpPulsing] = useState(() => !localStorage.getItem("active_help_seen"));
-  const [sessionScores, setSessionScores] = useState<{ water: number; sun: number; fert: number; xp: number } | null>(null);
+  const [sessionScores, setSessionScores] = useState<{ water: number; sun: number; fert: number; xp: number; base: number; bonus: number } | null>(null);
   const [historyHighlight, setHistoryHighlight] = useState(false);
 
   useEffect(() => {
@@ -246,11 +246,26 @@ export default function GamePage({ state, onStateChange }: Props) {
   }
 
   function handleGoToRewards() {
+    // 1. Tree grow animation
+    treeControls.start({
+      scale: [1, 1.20, 1],
+      filter: ["brightness(1)", "brightness(1.65)", "brightness(1)"],
+      transition: { duration: 0.85, ease: "easeInOut" },
+    });
+    // 2. XP animation in level widget
+    if (sessionScores) {
+      setXpGainAmount(sessionScores.xp);
+      // 3. Financial floaters
+      const rect = gameAreaRef.current?.getBoundingClientRect();
+      const cx = (rect?.width ?? 200) / 2;
+      if (sessionScores.base > 0) addFloater(`+${formatRub(sessionScores.base)}`, cx - 28, 52);
+      if (sessionScores.bonus > 0) addFloater(`+${formatRub(sessionScores.bonus)}`, cx + 28, 78);
+    }
     setFadeActivities(true);
     setTimeout(() => {
       setShowRewards(true);
       setFadeActivities(false);
-    }, 300);
+    }, 400);
   }
 
   function handleMinigameComplete(type: GameType, skillScore: number) {
@@ -321,12 +336,9 @@ export default function GamePage({ state, onStateChange }: Props) {
         const wPct = Math.round((waterScoreRef.current / 80) * 100);
         const sPct = Math.round((sunScoreRef.current / 80) * 100);
         const fPct = Math.round((fertilizerScoreRef.current / 80) * 100);
-        setSessionScores({ water: wPct, sun: sPct, fert: fPct, xp: result.xpGained ?? 0 });
+        setSessionScores({ water: wPct, sun: sPct, fert: fPct, xp: result.xpGained ?? 0, base: result.baseReward ?? 0, bonus: result.bonusReward ?? 0 });
         setHistoryHighlight(true);
         setTimeout(() => setHistoryHighlight(false), 2800);
-        if (result.xpGained) {
-          setXpGainAmount(result.xpGained);
-        }
         if (result.levelUp && result.newLevel) {
           setLevelUpData({ level: result.newLevel });
         }
@@ -552,6 +564,22 @@ export default function GamePage({ state, onStateChange }: Props) {
           )}
         </div>
 
+        <AnimatePresence>
+          {showCompletionStage && !showRewards && sessionScores && (
+            <motion.div
+              className="xp-result-badge"
+              initial={{ opacity: 0, x: 14 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              transition={{ type: "spring", stiffness: 220, damping: 22, delay: 0.15 }}
+            >
+              <span className="xp-result-pct">{sessionScores.xp}%</span>
+              <span className="xp-result-arrow">→</span>
+              <span className="xp-result-xp">+{sessionScores.xp} оп.</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {!game.sessionInProgress && !showCompletionStage ? (
           <AnimatePresence mode="wait">
             {locked ? (
@@ -645,59 +673,9 @@ export default function GamePage({ state, onStateChange }: Props) {
       </div>
 
       {showCompletionStage && !showRewards && (
-        <>
-          <AnimatePresence>
-            {sessionScores && (
-              <motion.div
-                className="xp-breakdown"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ type: "spring", stiffness: 220, damping: 22 }}
-              >
-                <div className="xp-break-activities">
-                  {([
-                    { icon: "💧", pct: sessionScores.water },
-                    { icon: "☀️", pct: sessionScores.sun },
-                    { icon: "🌿", pct: sessionScores.fert },
-                  ] as const).map((item, i) => (
-                    <motion.div
-                      key={i}
-                      className="xp-break-item"
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.08 + i * 0.18, type: "spring", stiffness: 260, damping: 22 }}
-                    >
-                      <span className="xp-break-icon">{item.icon}</span>
-                      <span className="xp-break-pct">{item.pct}%</span>
-                    </motion.div>
-                  ))}
-                </div>
-                <motion.div
-                  className="xp-break-arrow"
-                  initial={{ opacity: 0, scaleY: 0 }}
-                  animate={{ opacity: 1, scaleY: 1 }}
-                  transition={{ delay: 0.65, duration: 0.25 }}
-                >
-                  ↓
-                </motion.div>
-                <motion.div
-                  className="xp-break-result"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.92, type: "spring", stiffness: 200, damping: 18 }}
-                >
-                  <span className="xp-break-avg">{sessionScores.xp}%</span>
-                  <span className="xp-break-sep">→</span>
-                  <span className="xp-break-xp">+{sessionScores.xp} оп.</span>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <button className="transition-btn" onClick={handleGoToRewards}>
-            Перейти к начислениям
-          </button>
-        </>
+        <button className="transition-btn" onClick={handleGoToRewards}>
+          Перейти к начислениям
+        </button>
       )}
 
       {/* Reward claim area — shown after session complete */}

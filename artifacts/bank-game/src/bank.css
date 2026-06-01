@@ -796,52 +796,27 @@ body.modal-open {
 }
 .sh-row-new { animation: sh-row-flash 2.4s ease-out forwards; border-radius: 4px; }
 
-/* ── XP breakdown animation ───────────────────────── */
-.xp-breakdown {
+/* ── XP result badge (inside game-area, right of tree) */
+.xp-result-badge {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 7px;
-  margin: 6px 0 2px;
-  padding: 12px 16px;
-  background: rgba(255,255,255,0.08);
+  gap: 2px;
+  background: rgba(255,255,255,0.10);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.16);
-  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 14px;
+  padding: 10px 12px;
+  pointer-events: none;
 }
-.xp-break-activities {
-  display: flex;
-  gap: 8px;
-}
-.xp-break-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  background: rgba(255,255,255,0.10);
-  border-radius: 10px;
-  padding: 7px 11px;
-  min-width: 52px;
-}
-.xp-break-icon { font-size: 17px; line-height: 1; }
-.xp-break-pct  { font-size: 13px; font-weight: 700; color: #fff; }
-.xp-break-arrow {
-  font-size: 15px;
-  color: rgba(255,255,255,0.40);
-  line-height: 1;
-  transform-origin: center;
-}
-.xp-break-result {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  font-weight: 700;
-}
-.xp-break-avg { color: rgba(255,255,255,0.65); }
-.xp-break-sep { color: rgba(255,255,255,0.35); }
-.xp-break-xp  { color: #86efac; font-size: 17px; font-weight: 800; }
+.xp-result-pct   { font-size: 15px; font-weight: 700; color: rgba(255,255,255,0.75); }
+.xp-result-arrow { font-size: 11px; color: rgba(255,255,255,0.35); line-height: 1.2; }
+.xp-result-xp    { font-size: 16px; font-weight: 800; color: #86efac; }
 
 /* ── Level-up animation overlay ───────────────────── */
 .levelup-overlay {
