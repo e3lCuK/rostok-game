@@ -610,8 +610,6 @@ export default function GamePage({ state, onStateChange }: Props) {
               transition={{ type: "spring", stiffness: 220, damping: 22, delay: 0.15 }}
             >
               <div className="xp-result-row">
-                <span className="xp-result-pct">об. {sessionScores.xp}%</span>
-                <span className="xp-result-arrow">→</span>
                 <span className="xp-result-xp">+{sessionScores.xp} оп.</span>
               </div>
               {sessionScores.mm > 0 && (
@@ -677,7 +675,7 @@ export default function GamePage({ state, onStateChange }: Props) {
               style={showCompletionStage ? { cursor: "pointer" } : undefined}
             >
               <p className="session-actions-title">
-                {showCompletionStage ? "Перейти к начислениям" : "Ухаживайте за деревом"}
+                {showCompletionStage ? "Ухаживать" : "Ухаживайте за деревом"}
               </p>
               <div className="action-buttons-row">
                 {[
