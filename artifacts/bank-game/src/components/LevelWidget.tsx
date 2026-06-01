@@ -46,7 +46,6 @@ export default function LevelWidget({ totalXP, level, xpGain }: Props) {
         transition={{ duration: 0.55, ease: "easeOut" }}
       >
         <div className="level-widget-top">
-          <span className="level-widget-icon">◆</span>
           <span className="level-widget-lvl">Ур.{level}</span>
         </div>
         <span className="level-widget-xp">
