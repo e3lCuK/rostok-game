@@ -145,9 +145,12 @@ export default function GamePage({ state, onStateChange }: Props) {
   const actionsLeft = getSessionActionsLeft(game);
 
   // Compute stored sessions dynamically (missed sessions accumulate until played)
+  // When lastSessionTime is null (never played) fall back to startDate — mirrors server logic.
   const computedMissed = (() => {
-    if (game.sessionInProgress || !game.lastSessionTime) return game.missedSessions ?? 0;
-    const elapsed = now - game.lastSessionTime;
+    if (game.sessionInProgress) return game.missedSessions ?? 0;
+    const referenceTime = game.lastSessionTime ?? balances.startDate ?? null;
+    if (!referenceTime) return game.missedSessions ?? 0;
+    const elapsed = now - referenceTime;
     const additionalMissed = Math.max(0, Math.floor(elapsed / SESSION_COOLDOWN_MS) - 1);
     return (game.missedSessions ?? 0) + additionalMissed;
   })();
