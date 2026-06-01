@@ -69,6 +69,8 @@ export default function GamePage({ state, onStateChange }: Props) {
     return () => document.body.classList.remove("modal-open");
   }, [showHelp]);
   const floaterRef = useRef(0);
+  const stateRef = useRef(state);
+  useEffect(() => { stateRef.current = state; }, [state]);
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const prevLevelRef = useRef(state.game.playerLevel ?? 1);
   const skillScoreRef = useRef<number>(40);
@@ -362,22 +364,22 @@ export default function GamePage({ state, onStateChange }: Props) {
       const amount = result.amount ?? 0;
       const rect = gameAreaRef.current?.getBoundingClientRect();
       addFloater(`+${formatRub(amount)}`, (rect?.width ?? 200) / 2, 40);
-      const { newMM, newRemainder } = applyTreeGrowth(amount, game.treeGrowthMM ?? 0, game.treeGrowthRemainder ?? 0);
+      const cur = stateRef.current;
+      const { newMM, newRemainder } = applyTreeGrowth(amount, cur.game.treeGrowthMM ?? 0, cur.game.treeGrowthRemainder ?? 0);
       onStateChange({
-        ...state,
+        ...cur,
         balances: {
-          ...balances,
-          active: balances.active + amount,
-          activeEarned: balances.activeEarned + amount,
+          ...cur.balances,
+          active: cur.balances.active + amount,
+          activeEarned: cur.balances.activeEarned + amount,
         },
-        game: { ...game, pendingBaseReward: 0, treeGrowthMM: newMM, treeGrowthRemainder: newRemainder },
+        game: { ...cur.game, pendingBaseReward: 0, treeGrowthMM: newMM, treeGrowthRemainder: newRemainder },
         history: [
-          ...state.history,
+          ...cur.history,
           { date: new Date().toLocaleDateString("ru-RU"), amount, type: "base" as const },
         ].slice(-30),
       });
       animateGrowth(displayGrowthMMRef.current, newMM);
-      triggerTreeAnim();
     } catch (err) {
       console.error("[Claim base] failed:", err);
     } finally {
@@ -393,22 +395,22 @@ export default function GamePage({ state, onStateChange }: Props) {
       const amount = result.amount ?? 0;
       const rect = gameAreaRef.current?.getBoundingClientRect();
       addFloater(`+${formatRub(amount)}`, (rect?.width ?? 200) / 2 + 60, 40);
-      const { newMM, newRemainder } = applyTreeGrowth(amount, game.treeGrowthMM ?? 0, game.treeGrowthRemainder ?? 0);
+      const cur = stateRef.current;
+      const { newMM, newRemainder } = applyTreeGrowth(amount, cur.game.treeGrowthMM ?? 0, cur.game.treeGrowthRemainder ?? 0);
       onStateChange({
-        ...state,
+        ...cur,
         balances: {
-          ...balances,
-          active: balances.active + amount,
-          activeEarned: balances.activeEarned + amount,
+          ...cur.balances,
+          active: cur.balances.active + amount,
+          activeEarned: cur.balances.activeEarned + amount,
         },
-        game: { ...game, pendingBonusReward: 0, treeGrowthMM: newMM, treeGrowthRemainder: newRemainder },
+        game: { ...cur.game, pendingBonusReward: 0, treeGrowthMM: newMM, treeGrowthRemainder: newRemainder },
         history: [
-          ...state.history,
+          ...cur.history,
           { date: new Date().toLocaleDateString("ru-RU"), amount, type: "bonus" as const },
         ].slice(-30),
       });
       animateGrowth(displayGrowthMMRef.current, newMM);
-      triggerTreeAnim();
     } catch (err) {
       console.error("[Claim bonus] failed:", err);
     } finally {
