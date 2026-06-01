@@ -1149,9 +1149,9 @@ body.modal-open {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 90px;
-  min-height: 80px;
-  border-radius: 18px;
+  width: 76px;
+  min-height: 68px;
+  border-radius: 15px;
   border: 2px solid var(--ac, #16a34a);
   background: rgba(255,255,255,0.80);
   color: var(--ac, #16a34a);
