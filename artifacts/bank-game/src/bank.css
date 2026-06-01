@@ -803,22 +803,28 @@ body.modal-open {
   top: 28%;
   transform: translateY(-50%);
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 2px;
   background: rgba(255,255,255,0.10);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 20px;
-  padding: 6px 12px;
+  border-radius: 14px;
+  padding: 7px 12px;
   white-space: nowrap;
   pointer-events: none;
+}
+.xp-result-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
 }
 .xp-result-pct   { font-size: 13px; font-weight: 700; color: #f1f5f9; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
 .xp-result-arrow { font-size: 11px; color: #cbd5e1; text-shadow: 0 1px 3px rgba(0,0,0,0.4); }
 .xp-result-xp    { font-size: 13px; font-weight: 800; color: #4ade80; text-shadow: 0 2px 8px rgba(0,0,0,0.7); }
-.xp-result-mm    { font-size: 12px; font-weight: 700; color: #a3e635; text-shadow: 0 1px 5px rgba(0,0,0,0.6); margin-left: 2px; }
+.xp-result-mm    { font-size: 12px; font-weight: 700; color: #a16207; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
 
 /* ── Level-up animation overlay ───────────────────── */
 .levelup-overlay {
