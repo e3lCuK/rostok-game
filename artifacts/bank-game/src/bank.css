@@ -2073,6 +2073,37 @@ body.modal-open {
   text-align: center;
   margin: -8px 0 0;
 }
+.auth-success {
+  font-size: 12px;
+  color: #15803d;
+  text-align: center;
+  margin: 0;
+  padding: 8px 10px;
+  background: #f0fdf4;
+  border-radius: 8px;
+  line-height: 1.5;
+}
+.auth-mode-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #365314;
+  text-align: center;
+  margin: 0 0 4px;
+}
+.auth-forgot-link {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: center;
+  display: block;
+  width: 100%;
+  padding: 4px 0;
+  margin-top: 4px;
+  transition: color 0.15s;
+}
+.auth-forgot-link:hover { color: #374151; }
 
 /* ============================
    LANDING PAGE
