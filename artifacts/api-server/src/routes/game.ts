@@ -515,6 +515,8 @@ router.delete("/game/debug/reset-all", requireAuth, async (req: any, res) => {
     await pool.query("DELETE FROM income_history WHERE user_id = $1", [userId]);
     await pool.query("DELETE FROM game_state WHERE user_id = $1", [userId]);
     await pool.query("DELETE FROM accounts WHERE user_id = $1", [userId]);
+    await pool.query("DELETE FROM session WHERE sess::jsonb->>'userId' = $1::text", [userId]);
+    await pool.query("DELETE FROM users WHERE id = $1", [userId]);
     return res.json({ success: true });
   } catch (err) {
     req.log.error({ err }, "Error wiping user data (debug)");
