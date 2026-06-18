@@ -114,7 +114,8 @@ export function computeMissedSessions(game: UserState["game"], startDate: number
 
 // ---- Streak bonus seconds (day 1=+1s … day 5=+5s, cycles every 5) ----
 export function getStreakBonusSeconds(streakDays: number): number {
-  return (streakDays % 5) + 1;
+  if (streakDays <= 0) return 1;
+  return ((streakDays - 1) % 5) + 1;
 }
 
 // ---- Session helpers ----

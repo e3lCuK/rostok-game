@@ -865,7 +865,7 @@ export default function GamePage({ state, onStateChange }: Props) {
               <p className="streak-widget-sub">Заходите каждый день, чтобы получать бонусы</p>
 
               {(() => {
-                const cycleDay = state.game.streakDays % 5; // 0-indexed today's slot
+                const cycleDay = state.game.streakDays > 0 ? (state.game.streakDays - 1) % 5 : 0; // 0-indexed today's slot
                 const days = [
                   { label: "День 1", reward: "+1 сек" },
                   { label: "День 2", reward: "+2 сек" },

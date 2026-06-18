@@ -303,7 +303,7 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
         newStreak = currentStreak;
       } else if (lastStreakDate === yesterdayUTC) {
         // Consecutive day — increment (max 7)
-        newStreak = Math.min(currentStreak + 1, 7);
+        newStreak = currentStreak + 1;
       } else {
         // Missed one or more days — reset
         newStreak = 1;
