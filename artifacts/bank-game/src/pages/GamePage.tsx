@@ -13,11 +13,12 @@ import {
   SESSION_COOLDOWN_MS,
 } from "@/lib/engine";
 import { api } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 import TreeSVG from "@/components/TreeSVG";
 import FallingGameWater, { GameType } from "@/components/FallingGameWater";
 import ClickGameSun from "@/components/ClickGameSun";
 import FertilizerMatchGame from "@/components/FertilizerMatchGame";
-import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2, HelpCircle, X } from "lucide-react";
+import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2, HelpCircle, X, LogOut } from "lucide-react";
 import LevelWidget from "@/components/LevelWidget";
 import LevelUpAnimation from "@/components/LevelUpAnimation";
 
@@ -34,6 +35,7 @@ interface Floater {
 }
 
 export default function GamePage({ state, onStateChange }: Props) {
+  const { user, logout } = useAuth();
   const [now, setNow] = useState(Date.now());
   const [floaters, setFloaters] = useState<Floater[]>([]);
   const [actionLoading, setActionLoading] = useState(false);
@@ -848,7 +850,13 @@ export default function GamePage({ state, onStateChange }: Props) {
               transition={{ duration: 0.22 }}
               onClick={e => e.stopPropagation()}
             >
-              <div className="help-modal-header">
+              <div className="xp-history-modal-topbar">
+                <span className="xp-history-modal-nick">{user?.nickname ?? user?.username}</span>
+                <button className="xp-history-modal-logout" onClick={logout} title="Выйти">
+                  <LogOut size={15} />
+                </button>
+              </div>
+              <div className="help-modal-header" style={{ marginBottom: 12 }}>
                 <span className="help-modal-title">История опыта</span>
                 <button className="help-modal-close" onClick={() => setShowXpHistory(false)}>✕</button>
               </div>

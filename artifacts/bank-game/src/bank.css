@@ -746,7 +746,38 @@ body.modal-open {
 .level-widget.level-widget-clickable { cursor: pointer; }
 .level-widget.level-widget-clickable:hover { background: rgba(255, 255, 255, 0.95); }
 
-.xp-history-modal { max-width: 340px; }
+.xp-history-modal { max-width: 340px; padding-top: 14px; }
+
+.xp-history-modal-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.xp-history-modal-nick {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: 0.01em;
+}
+
+.xp-history-modal-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: #f3f4f6;
+  color: #6b7280;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.xp-history-modal-logout:hover { background: #fee2e2; color: #ef4444; }
 .xp-history-empty {
   text-align: center;
   color: #9ca3af;
