@@ -18,7 +18,7 @@ import TreeSVG from "@/components/TreeSVG";
 import FallingGameWater, { GameType } from "@/components/FallingGameWater";
 import ClickGameSun from "@/components/ClickGameSun";
 import FertilizerMatchGame from "@/components/FertilizerMatchGame";
-import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2, HelpCircle, X, LogOut, Pencil, Check } from "lucide-react";
+import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2, HelpCircle, X, Pencil, Check } from "lucide-react";
 import LevelWidget from "@/components/LevelWidget";
 import LevelUpAnimation from "@/components/LevelUpAnimation";
 
@@ -914,12 +914,7 @@ export default function GamePage({ state, onStateChange }: Props) {
                     <span className="xp-history-modal-nick">{user?.nickname ?? user?.username}</span>
                   </div>
                 )}
-                <div className="xp-topbar-actions">
-                  <button className="xp-history-modal-logout" onClick={logout} title="Выйти">
-                    <LogOut size={15} />
-                  </button>
-                  <button className="help-modal-close" onClick={() => setShowXpHistory(false)}>✕</button>
-                </div>
+                <button className="help-modal-close" onClick={() => setShowXpHistory(false)}>✕</button>
               </div>
 
               <div className="xp-modal-tabs">
