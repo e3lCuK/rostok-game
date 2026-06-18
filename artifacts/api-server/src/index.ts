@@ -57,6 +57,7 @@ async function runMigrations() {
     )
   `);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_prt_token ON password_reset_tokens (token)`);
+  await pool.query(`ALTER TABLE game_state ADD COLUMN IF NOT EXISTS last_streak_date TEXT`);
   logger.info("DB migrations applied");
 }
 

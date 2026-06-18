@@ -288,15 +288,25 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
       const totalBalance = activeBalance + standardBalance;
       const now = Date.now();
 
-      // Streak logic
-      const STREAK_WINDOW_MS = 48 * 60 * 60 * 1000;
-      const lastSessionTime = g.last_session_time ? parseInt(g.last_session_time) : null;
+      // Streak logic — one increment per calendar day (UTC), using last_streak_date
+      // last_streak_date is ONLY updated by real session completions (not debug)
+      const todayUTC = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+      const yesterdayUTC = new Date(now - 86400000).toISOString().slice(0, 10);
+      const lastStreakDate: string | null = g.last_streak_date ?? null;
       const currentStreak: number = g.streak_days || 0;
       let newStreak: number;
-      if (!lastSessionTime || now - lastSessionTime > STREAK_WINDOW_MS) {
+      if (!lastStreakDate) {
+        // First ever session
         newStreak = 1;
-      } else {
+      } else if (lastStreakDate === todayUTC) {
+        // Already completed a session today — keep streak unchanged
+        newStreak = currentStreak;
+      } else if (lastStreakDate === yesterdayUTC) {
+        // Consecutive day — increment (max 7)
         newStreak = Math.min(currentStreak + 1, 7);
+      } else {
+        // Missed one or more days — reset
+        newStreak = 1;
       }
 
       // New economy formula — single source of truth
@@ -355,19 +365,20 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
           session_in_progress = FALSE,
           last_session_time = $1,
           streak_days = $2,
+          last_streak_date = $3,
           current_session_water = FALSE,
           current_session_sun = FALSE,
           current_session_fertilizer = FALSE,
           missed_sessions = 0,
-          pending_stored_sessions = $3,
-          pending_base_reward = COALESCE(pending_base_reward, 0) + $4,
-          pending_bonus_reward = COALESCE(pending_bonus_reward, 0) + $5,
-          player_xp = $7,
-          player_level = $8,
-          xp_history = $9::jsonb,
+          pending_stored_sessions = $4,
+          pending_base_reward = COALESCE(pending_base_reward, 0) + $5,
+          pending_bonus_reward = COALESCE(pending_bonus_reward, 0) + $6,
+          player_xp = $8,
+          player_level = $9,
+          xp_history = $10::jsonb,
           updated_at = NOW()
-         WHERE user_id = $6`,
-        [now, newStreak, storedSessionsResult, baseReward, bonusReward, userId, newTotalXP, newLevel, JSON.stringify(newXpHistory)],
+         WHERE user_id = $7`,
+        [now, newStreak, todayUTC, storedSessionsResult, baseReward, bonusReward, userId, newTotalXP, newLevel, JSON.stringify(newXpHistory)],
       );
 
       return res.json({ success: true, sessionComplete: true, baseReward, bonusReward, storedSessions: storedSessionsResult, xpGained, newLevel, prevLevel, levelUp, xpHistory: newXpHistory });
