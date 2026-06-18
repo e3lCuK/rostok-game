@@ -869,6 +869,11 @@ body.modal-open {
   min-width: 0;
 }
 
+.xp-nick-tree-icon {
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
 .xp-nick-pencil {
   display: flex;
   align-items: center;

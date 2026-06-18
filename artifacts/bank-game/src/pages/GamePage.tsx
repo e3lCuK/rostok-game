@@ -18,7 +18,7 @@ import TreeSVG from "@/components/TreeSVG";
 import FallingGameWater, { GameType } from "@/components/FallingGameWater";
 import ClickGameSun from "@/components/ClickGameSun";
 import FertilizerMatchGame from "@/components/FertilizerMatchGame";
-import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2, HelpCircle, X, Pencil, Check } from "lucide-react";
+import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2, HelpCircle, X, Pencil, Check, TreePine } from "lucide-react";
 import LevelWidget from "@/components/LevelWidget";
 import LevelUpAnimation from "@/components/LevelUpAnimation";
 
@@ -904,6 +904,7 @@ export default function GamePage({ state, onStateChange }: Props) {
                   </div>
                 ) : (
                   <div className="xp-nick-row">
+                    <TreePine size={15} className="xp-nick-tree-icon" />
                     <span className="xp-history-modal-nick">{user?.nickname ?? user?.username}</span>
                     <button
                       className="xp-nick-pencil"
