@@ -759,7 +759,7 @@ body.modal-open {
   align-items: center;
   gap: 4px;
   margin-bottom: 14px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #d9f99d;
   padding-bottom: 10px;
   flex-shrink: 0;
 }
@@ -770,13 +770,13 @@ body.modal-open {
   background: none;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #9ca3af;
+  color: #6b7280;
   cursor: pointer;
   border-radius: 8px;
   transition: color 0.15s, background 0.15s;
 }
-.xp-modal-tab:hover { background: #f3f4f6; color: #374151; }
-.xp-modal-tab-active { color: #111827 !important; background: #f3f4f6 !important; }
+.xp-modal-tab:hover { background: #ecfccb; color: #365314; }
+.xp-modal-tab-active { color: #365314 !important; background: #ecfccb !important; }
 
 .xp-topbar-actions {
   display: flex;
@@ -857,7 +857,7 @@ body.modal-open {
   justify-content: space-between;
   margin-bottom: 14px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #d9f99d;
   flex-shrink: 0;
   gap: 8px;
 }
@@ -1225,13 +1225,14 @@ body.modal-open {
 }
 
 .help-modal {
-  background: #fff;
+  background: #f7fee7;
   border-radius: 20px;
   width: 90%;
   max-width: 420px;
   padding: 20px 20px 28px;
   max-height: 85vh;
   overflow-y: auto;
+  border: 1.5px solid #d9f99d;
 }
 
 .help-modal-header {
@@ -1244,7 +1245,7 @@ body.modal-open {
 .help-modal-title {
   font-size: 1.05rem;
   font-weight: 700;
-  color: #111827;
+  color: #365314;
 }
 
 .help-modal-close {
@@ -1252,8 +1253,8 @@ body.modal-open {
   height: 32px;
   border-radius: 50%;
   border: none;
-  background: #f3f4f6;
-  color: #6b7280;
+  background: #d9f99d;
+  color: #4d7c0f;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1262,7 +1263,7 @@ body.modal-open {
 }
 
 .help-modal-close:hover {
-  background: #e5e7eb;
+  background: #bef264;
 }
 
 .help-sections {
@@ -1276,8 +1277,9 @@ body.modal-open {
   gap: 14px;
   align-items: flex-start;
   padding: 14px;
-  background: #f9fafb;
+  background: #ecfccb;
   border-radius: 14px;
+  border: 1px solid #d9f99d;
 }
 
 .help-section-icon {
@@ -1290,7 +1292,7 @@ body.modal-open {
 .help-section-heading {
   font-size: 0.88rem;
   font-weight: 700;
-  color: #111827;
+  color: #365314;
   margin-bottom: 6px;
 }
 
@@ -1314,7 +1316,7 @@ body.modal-open {
   content: "·";
   position: absolute;
   left: 0;
-  color: #9ca3af;
+  color: #84cc16;
 }
 
 /* Water */
