@@ -12,7 +12,7 @@ import {
   getSessionActionsLeft,
   SESSION_COOLDOWN_MS,
 } from "@/lib/engine";
-import { api } from "@/lib/api";
+import { api, type LeaderboardPlayer } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import TreeSVG from "@/components/TreeSVG";
 import FallingGameWater, { GameType } from "@/components/FallingGameWater";
@@ -59,6 +59,9 @@ export default function GamePage({ state, onStateChange }: Props) {
   const animParticlesRef = useRef<number[]>([]);
   const [showHelp, setShowHelp] = useState(false);
   const [showXpHistory, setShowXpHistory] = useState(false);
+  const [xpModalTab, setXpModalTab] = useState<"history" | "rating">("history");
+  const [leaderboard, setLeaderboard] = useState<LeaderboardPlayer[]>([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [helpPulsing, setHelpPulsing] = useState(() => !localStorage.getItem("active_help_seen"));
   useEffect(() => {
     if (!helpPulsing) return;
@@ -68,6 +71,15 @@ export default function GamePage({ state, onStateChange }: Props) {
     }, 10000);
     return () => clearTimeout(t);
   }, []);
+  useEffect(() => {
+    if (!showXpHistory || xpModalTab !== "rating") return;
+    setLeaderboardLoading(true);
+    api.getLeaderboard()
+      .then(r => setLeaderboard(r.players))
+      .catch(() => {})
+      .finally(() => setLeaderboardLoading(false));
+  }, [showXpHistory, xpModalTab]);
+
   const [sessionScores, setSessionScores] = useState<{ water: number; sun: number; fert: number; xp: number; base: number; bonus: number; mm: number } | null>(null);
   const [historyHighlight, setHistoryHighlight] = useState(false);
 
@@ -856,24 +868,61 @@ export default function GamePage({ state, onStateChange }: Props) {
                   <LogOut size={15} />
                 </button>
               </div>
-              <div className="help-modal-header" style={{ marginBottom: 12 }}>
-                <span className="help-modal-title">История опыта</span>
-                <button className="help-modal-close" onClick={() => setShowXpHistory(false)}>✕</button>
+
+              <div className="xp-modal-tabs">
+                <button
+                  className={`xp-modal-tab${xpModalTab === "history" ? " xp-modal-tab-active" : ""}`}
+                  onClick={() => setXpModalTab("history")}
+                >История опыта</button>
+                <button
+                  className={`xp-modal-tab${xpModalTab === "rating" ? " xp-modal-tab-active" : ""}`}
+                  onClick={() => setXpModalTab("rating")}
+                >Рейтинг</button>
+                <button className="help-modal-close xp-modal-close" onClick={() => setShowXpHistory(false)}>✕</button>
               </div>
-              {(game.xpHistory ?? []).length === 0 ? (
-                <p className="xp-history-empty">Пока нет сессий</p>
-              ) : (
-                <div className="xp-history-list">
-                  {(game.xpHistory ?? []).map((e, i) => {
-                    const [y, m, d] = e.date.split("-");
-                    return (
-                      <div key={i} className={`xp-history-row${i === 0 && historyHighlight ? " xp-history-row-new" : ""}`}>
-                        <span className="xp-history-date">{d}.{m}.{y.slice(2)} <span className="xp-history-n">#{e.n}</span></span>
-                        <span className="xp-history-xp">+{e.xp} опыт</span>
+
+              {xpModalTab === "history" && (
+                (game.xpHistory ?? []).length === 0 ? (
+                  <p className="xp-history-empty">Пока нет сессий</p>
+                ) : (
+                  <div className="xp-history-list">
+                    {(game.xpHistory ?? []).map((e, i) => {
+                      const [y, m, d] = e.date.split("-");
+                      return (
+                        <div key={i} className={`xp-history-row${i === 0 && historyHighlight ? " xp-history-row-new" : ""}`}>
+                          <span className="xp-history-date">{d}.{m}.{y.slice(2)} <span className="xp-history-n">#{e.n}</span></span>
+                          <span className="xp-history-xp">+{e.xp} опыт</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )
+              )}
+
+              {xpModalTab === "rating" && (
+                leaderboardLoading ? (
+                  <p className="xp-history-empty">Загрузка...</p>
+                ) : leaderboard.length === 0 ? (
+                  <p className="xp-history-empty">Пока нет игроков</p>
+                ) : (
+                  <div className="xp-leaderboard-list">
+                    {leaderboard.map((p) => (
+                      <div key={p.rank} className={`xp-lb-row${p.isMe ? " xp-lb-row-me" : ""}`}>
+                        <span className={`xp-lb-rank${p.rank <= 3 ? ` xp-lb-rank-top${p.rank}` : ""}`}>
+                          {p.rank <= 3 ? ["🥇","🥈","🥉"][p.rank - 1] : `#${p.rank}`}
+                        </span>
+                        <div className="xp-lb-info">
+                          <span className="xp-lb-nick">{p.nickname}{p.isMe ? " (я)" : ""}</span>
+                          <span className="xp-lb-meta">Ур.{p.level} · {p.streakDays > 0 ? `🔥${p.streakDays}д` : "нет стрика"}</span>
+                        </div>
+                        <div className="xp-lb-right">
+                          <span className="xp-lb-xp">{p.xp} оп.</span>
+                          {p.lastSessionXp > 0 && <span className="xp-lb-last">+{p.lastSessionXp}</span>}
+                        </div>
                       </div>
-                    );
-                  })}
-                </div>
+                    ))}
+                  </div>
+                )
               )}
             </motion.div>
           </motion.div>

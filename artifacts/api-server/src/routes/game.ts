@@ -508,6 +508,45 @@ router.post("/game/debug/add-xp", requireAuth, async (req: any, res) => {
   }
 });
 
+// GET /api/game/leaderboard — top players by XP
+router.get("/game/leaderboard", requireAuth, async (req: any, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        u.id::text AS user_id,
+        u.nickname,
+        gs.player_xp,
+        gs.player_level,
+        gs.streak_days,
+        gs.tree_growth_mm,
+        gs.xp_history
+      FROM game_state gs
+      JOIN users u ON u.id::text = gs.user_id
+      ORDER BY gs.player_xp DESC
+      LIMIT 100
+    `);
+    const me = req.userId;
+    const rows = result.rows.map((r: any, i: number) => {
+      const history: { xp: number; date: string; n: number }[] = r.xp_history ?? [];
+      const lastSession = history.length > 0 ? history[0] : null;
+      return {
+        rank: i + 1,
+        nickname: r.nickname,
+        xp: r.player_xp ?? 0,
+        level: r.player_level ?? 1,
+        streakDays: r.streak_days ?? 0,
+        treeGrowthMM: r.tree_growth_mm ?? 0,
+        lastSessionXp: lastSession?.xp ?? 0,
+        isMe: r.user_id === me,
+      };
+    });
+    return res.json({ players: rows });
+  } catch (err) {
+    req.log.error({ err }, "Error fetching leaderboard");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // DELETE /api/game/debug/reset-all — wipe all user data (debug)
 router.delete("/game/debug/reset-all", requireAuth, async (req: any, res) => {
   const userId = req.userId;

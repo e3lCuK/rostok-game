@@ -746,7 +746,98 @@ body.modal-open {
 .level-widget.level-widget-clickable { cursor: pointer; }
 .level-widget.level-widget-clickable:hover { background: rgba(255, 255, 255, 0.95); }
 
-.xp-history-modal { max-width: 340px; padding-top: 14px; }
+.xp-history-modal { max-width: 360px; padding-top: 14px; }
+
+.xp-modal-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+.xp-modal-tab {
+  flex: 1;
+  padding: 6px 0;
+  border: none;
+  background: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #9ca3af;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: color 0.15s, background 0.15s;
+}
+.xp-modal-tab:hover { background: #f3f4f6; color: #374151; }
+.xp-modal-tab-active { color: #111827 !important; background: #f3f4f6 !important; }
+.xp-modal-close { flex-shrink: 0; margin-left: 4px; }
+
+.xp-leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.xp-lb-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #f9fafb;
+}
+.xp-lb-row-me {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+.xp-lb-rank {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #6b7280;
+  min-width: 26px;
+  text-align: center;
+}
+.xp-lb-rank-top1 { font-size: 1.1rem; }
+.xp-lb-rank-top2 { font-size: 1.05rem; }
+.xp-lb-rank-top3 { font-size: 1rem; }
+.xp-lb-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.xp-lb-nick {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.xp-lb-meta {
+  font-size: 0.72rem;
+  color: #9ca3af;
+}
+.xp-lb-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  flex-shrink: 0;
+}
+.xp-lb-xp {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #374151;
+}
+.xp-lb-last {
+  font-size: 0.7rem;
+  color: #16a34a;
+  font-weight: 600;
+}
 
 .xp-history-modal-topbar {
   display: flex;

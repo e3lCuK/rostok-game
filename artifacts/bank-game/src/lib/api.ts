@@ -120,4 +120,18 @@ export const api = {
 
   debugResetAll: () =>
     request<{ success: boolean }>("/game/debug/reset-all", { method: "DELETE" }),
+
+  getLeaderboard: () =>
+    request<{ players: LeaderboardPlayer[] }>("/game/leaderboard"),
 };
+
+export interface LeaderboardPlayer {
+  rank: number;
+  nickname: string;
+  xp: number;
+  level: number;
+  streakDays: number;
+  treeGrowthMM: number;
+  lastSessionXp: number;
+  isMe: boolean;
+}
