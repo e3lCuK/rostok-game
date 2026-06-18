@@ -557,7 +557,7 @@ export default function GamePage({ state, onStateChange }: Props) {
 
       {/* Tree + game area */}
       <div className="game-area" ref={gameAreaRef}>
-        <GameAreaBg groundY={storedSessions > 1 ? -116 : (game.sessionInProgress || showCompletionStage) ? -127 : -120} />
+        <GameAreaBg groundY={showRewards ? -112 : storedSessions > 1 ? -116 : (game.sessionInProgress || showCompletionStage) ? -127 : -120} />
 
         {floaters.map(fl => (
           <div key={fl.id} className="game-floater" style={{ left: fl.x, top: fl.y }}>
