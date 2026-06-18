@@ -6,6 +6,7 @@ export type GameType = "water" | "sun" | "fertilizer";
 interface Props {
   type?: GameType;
   onComplete: (skillScore: number) => void;
+  bonusSeconds?: number;
 }
 
 const CONFIGS = {
@@ -63,8 +64,8 @@ function feedbackLabel(n: number): string {
   return "Попробуйте ещё";
 }
 
-function makeDrop(id: number) {
-  const spawnAt = (id / TOTAL_DROPS) * (GAME_MS * 0.87) + (Math.random() * 300 - 150);
+function makeDrop(id: number, gameDuration: number) {
+  const spawnAt = (id / TOTAL_DROPS) * (gameDuration * 0.87) + (Math.random() * 300 - 150);
   return {
     id,
     x:       DROP_R + Math.random() * (W - DROP_R * 2),
@@ -77,11 +78,12 @@ function makeDrop(id: number) {
 
 type Drop = ReturnType<typeof makeDrop>;
 
-export default function FallingGameWater({ type = "water", onComplete }: Props) {
+export default function FallingGameWater({ type = "water", onComplete, bonusSeconds = 0 }: Props) {
+  const totalMs = GAME_MS + bonusSeconds * 1000;
   const canvasRef  = useRef<HTMLCanvasElement>(null);
   const barX       = useRef(W / 2);
   const doneRef    = useRef(false);
-  const [timerMs, setTimerMs]     = useState(GAME_MS);
+  const [timerMs, setTimerMs]     = useState(totalMs);
   const [catchCount, setCatchCount] = useState(0);
   const [result, setResult]       = useState<{ catches: number; skillScore: number } | null>(null);
 
@@ -114,7 +116,7 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
     canvas.addEventListener("touchmove", onTouchMove, { passive: false });
     canvas.style.cursor = "none";
 
-    const drops: Drop[] = Array.from({ length: TOTAL_DROPS }, (_, i) => makeDrop(i));
+    const drops: Drop[] = Array.from({ length: TOTAL_DROPS }, (_, i) => makeDrop(i, totalMs));
     let catches = 0;
     let spawned = 0;
     let rafId   = 0;
@@ -175,7 +177,7 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
         activeCnt++;
       }
 
-      if (elapsed >= GAME_MS && activeCnt === 0) { finish(); return; }
+      if (elapsed >= totalMs && activeCnt === 0) { finish(); return; }
 
       ctx.clearRect(0, 0, W, H);
       ctx.fillStyle = cfg.bg;
@@ -228,7 +230,7 @@ export default function FallingGameWater({ type = "water", onComplete }: Props) 
   return (
     <div className="mini-game-card" style={{ background: cfg.bg, border: cfg.border }}>
       <div className="mini-game-header">
-        <GameTimer timeLeftMs={timerMs} totalMs={GAME_MS} color={cfg.timerColor} trackColor={cfg.timerBg} />
+        <GameTimer timeLeftMs={timerMs} totalMs={totalMs} color={cfg.timerColor} trackColor={cfg.timerBg} />
         <div className="mini-game-counter">
           <span>{cfg.scoreEmoji}</span>
           <span className="mini-game-counter-val">{catchCount}</span>

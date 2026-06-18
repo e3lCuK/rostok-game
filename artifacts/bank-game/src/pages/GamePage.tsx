@@ -10,6 +10,7 @@ import {
   getNextSessionTime,
   getTreeStage,
   getSessionActionsLeft,
+  getStreakBonusSeconds,
   SESSION_COOLDOWN_MS,
 } from "@/lib/engine";
 import { api, type LeaderboardPlayer } from "@/lib/api";
@@ -870,11 +871,11 @@ export default function GamePage({ state, onStateChange }: Props) {
               {(() => {
                 const cycleDay = state.game.streakDays % 5; // 0-indexed today's slot
                 const days = [
-                  { label: "День 1", reward: "+2% бонус" },
-                  { label: "День 2", reward: "+5% бонус" },
-                  { label: "День 3", reward: "+8% бонус" },
-                  { label: "День 4", reward: "+12% бонус" },
-                  { label: "День 5", reward: "🏆 Максимум" },
+                  { label: "День 1", reward: "+1 сек" },
+                  { label: "День 2", reward: "+2 сек" },
+                  { label: "День 3", reward: "+3 сек" },
+                  { label: "День 4", reward: "+4 сек" },
+                  { label: "День 5", reward: "+5 сек" },
                 ];
                 return (
                   <div className="streak-days-row">
@@ -914,15 +915,18 @@ export default function GamePage({ state, onStateChange }: Props) {
           {activeMinigame === "sun" ? (
             <ClickGameSun
               onComplete={(score) => handleMinigameComplete("sun", score)}
+              bonusSeconds={getStreakBonusSeconds(game.streakDays)}
             />
           ) : activeMinigame === "fertilizer" ? (
             <FertilizerMatchGame
               onComplete={(score) => handleMinigameComplete("fertilizer", score)}
+              bonusSeconds={getStreakBonusSeconds(game.streakDays)}
             />
           ) : (
             <FallingGameWater
               type={activeMinigame}
               onComplete={(score) => handleMinigameComplete(activeMinigame, score)}
+              bonusSeconds={getStreakBonusSeconds(game.streakDays)}
             />
           )}
         </div>

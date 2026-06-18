@@ -4,6 +4,7 @@ import GameTimer from "./GameTimer";
 
 interface Props {
   onComplete: (skillScore: number) => void;
+  bonusSeconds?: number;
 }
 
 const GRID = 5;
@@ -123,12 +124,13 @@ function makeGrid(): Grid {
   return g;
 }
 
-export default function FertilizerMatchGame({ onComplete }: Props) {
+export default function FertilizerMatchGame({ onComplete, bonusSeconds = 0 }: Props) {
+  const totalMs = GAME_MS + bonusSeconds * 1000;
   const [grid, setGrid] = useState<Grid>(() => makeGrid());
   const [selected, setSelected] = useState<[number, number] | null>(null);
   const [highlighted, setHighlighted] = useState<Set<string>>(new Set());
   const [matchCount, setMatchCount] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(GAME_MS);
+  const [timeLeft, setTimeLeft] = useState(totalMs);
   const [gameOver, setGameOver] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
@@ -276,7 +278,7 @@ export default function FertilizerMatchGame({ onComplete }: Props) {
       <div className="mini-game-header">
         <GameTimer
           timeLeftMs={timeLeft}
-          totalMs={GAME_MS}
+          totalMs={totalMs}
           color="#22c55e"
           trackColor="#dcfce7"
         />

@@ -3,6 +3,7 @@ import GameTimer from "./GameTimer";
 
 interface Props {
   onComplete: (skillScore: number) => void;
+  bonusSeconds?: number;
 }
 
 const GAME_MS        = 15_000;
@@ -57,11 +58,12 @@ function drawSun(ctx: CanvasRenderingContext2D, x: number, y: number, alpha: num
   ctx.restore();
 }
 
-export default function ClickGameSun({ onComplete }: Props) {
+export default function ClickGameSun({ onComplete, bonusSeconds = 0 }: Props) {
+  const totalMs = GAME_MS + bonusSeconds * 1000;
   const canvasRef  = useRef<HTMLCanvasElement>(null);
   const doneRef    = useRef(false);
   const cursorRef  = useRef<{ x: number; y: number } | null>(null);
-  const [timerMs, setTimerMs]       = useState(GAME_MS);
+  const [timerMs, setTimerMs]       = useState(totalMs);
   const [catchCount, setCatchCount] = useState(0);
   const [result, setResult]         = useState<{ catches: number; skillScore: number } | null>(null);
 
@@ -137,7 +139,7 @@ export default function ClickGameSun({ onComplete }: Props) {
       const elapsed = ts - start;
 
       timeSinceLastSpawn += dt;
-      if (!sun && timeSinceLastSpawn >= nextSpawnDelay && elapsed < GAME_MS - 300) {
+      if (!sun && timeSinceLastSpawn >= nextSpawnDelay && elapsed < totalMs - 300) {
         const margin = SUN_R + 18;
         sun = {
           x: margin + Math.random() * (W - margin * 2),
@@ -154,7 +156,7 @@ export default function ClickGameSun({ onComplete }: Props) {
         nextSpawnDelay = SPAWN_MIN + Math.random() * (SPAWN_MAX - SPAWN_MIN);
       }
 
-      if (elapsed >= GAME_MS && !sun) { finish(); return; }
+      if (elapsed >= totalMs && !sun) { finish(); return; }
 
       ctx.clearRect(0, 0, W, H);
       ctx.fillStyle = CFG.bg;
@@ -209,7 +211,7 @@ export default function ClickGameSun({ onComplete }: Props) {
   return (
     <div className="mini-game-card" style={{ background: CFG.bg, border: CFG.border }}>
       <div className="mini-game-header">
-        <GameTimer timeLeftMs={timerMs} totalMs={GAME_MS} color={CFG.timerColor} trackColor={CFG.timerBg} />
+        <GameTimer timeLeftMs={timerMs} totalMs={totalMs} color={CFG.timerColor} trackColor={CFG.timerBg} />
         <div className="mini-game-counter">
           <span>☀️</span>
           <span className="mini-game-counter-val">{catchCount}</span>
