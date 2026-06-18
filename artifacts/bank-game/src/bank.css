@@ -1775,6 +1775,148 @@ body.modal-open {
   background: var(--surface2);
 }
 
+.bank-header-signout-active {
+  color: var(--text);
+  background: var(--surface2);
+}
+
+/* Settings widget */
+.settings-wrap {
+  position: relative;
+}
+
+.settings-widget {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  padding: 12px;
+  min-width: 220px;
+  z-index: 200;
+}
+
+.settings-icon-row {
+  display: flex;
+  gap: 6px;
+  justify-content: space-between;
+}
+
+.settings-action-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #374151;
+  font-size: 0.65rem;
+  font-weight: 600;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.settings-action-btn:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.settings-action-active {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+.settings-action-logout {
+  color: #dc2626;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.settings-action-logout:hover {
+  background: #fee2e2;
+  border-color: #f87171;
+}
+
+.settings-form {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.settings-input:focus {
+  border-color: #6b7280;
+}
+
+.settings-form-btns {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.settings-save-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background: #111827;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.settings-save-btn:hover { background: #374151; }
+.settings-save-btn:disabled { opacity: 0.5; cursor: default; }
+
+.settings-cancel-btn {
+  padding: 6px 8px;
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background 0.15s;
+}
+
+.settings-cancel-btn:hover { background: #e5e7eb; }
+
+.settings-err {
+  font-size: 0.75rem;
+  color: #dc2626;
+  margin: 0;
+}
+
+.settings-ok {
+  font-size: 0.75rem;
+  color: #16a34a;
+  margin: 0;
+}
+
 /* ============================
    LOADING STATE
 ==============================*/

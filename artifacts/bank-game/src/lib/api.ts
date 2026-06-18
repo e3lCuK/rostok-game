@@ -22,6 +22,7 @@ export interface AuthUser {
   id: number;
   username: string;
   nickname: string;
+  email?: string | null;
 }
 
 export interface GameStateResponse {
@@ -120,6 +121,12 @@ export const api = {
 
   updateNickname: (nickname: string) =>
     request<AuthUser>("/auth/nickname", { method: "PATCH", body: JSON.stringify({ nickname }) }),
+
+  updateEmail: (email: string) =>
+    request<AuthUser>("/auth/email", { method: "PATCH", body: JSON.stringify({ email }) }),
+
+  changePassword: (currentPassword: string, newPassword: string) =>
+    request<{ success: boolean }>("/auth/password", { method: "PATCH", body: JSON.stringify({ currentPassword, newPassword }) }),
 
   debugResetAll: () =>
     request<{ success: boolean }>("/game/debug/reset-all", { method: "DELETE" }),

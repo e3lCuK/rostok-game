@@ -8,6 +8,8 @@ interface AuthCtx {
   register: (username: string, nickname: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   updateNickname: (nickname: string) => Promise<void>;
+  updateEmail: (email: string) => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthCtx | null>(null);
@@ -43,8 +45,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(u);
   }
 
+  async function updateEmail(email: string) {
+    const u = await api.updateEmail(email);
+    setUser(u);
+  }
+
+  async function changePassword(currentPassword: string, newPassword: string) {
+    await api.changePassword(currentPassword, newPassword);
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, updateNickname }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateNickname, updateEmail, changePassword }}>
       {children}
     </AuthContext.Provider>
   );

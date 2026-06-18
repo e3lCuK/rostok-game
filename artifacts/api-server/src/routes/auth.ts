@@ -113,6 +113,57 @@ router.patch("/auth/nickname", async (req: any, res: any) => {
   }
 });
 
+// PATCH /api/auth/email
+router.patch("/auth/email", async (req: any, res: any) => {
+  const userId = req.session?.userId;
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+  const { email } = req.body ?? {};
+  const e = String(email ?? "").trim();
+  if (e.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) {
+    return res.status(400).json({ error: "Некорректный email" });
+  }
+  try {
+    const result = await pool.query(
+      "UPDATE users SET email = $1 WHERE id = $2 RETURNING id, username, nickname, email",
+      [e || null, userId],
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: "Not found" });
+    const u = result.rows[0];
+    return res.json({ id: u.id, username: u.username, nickname: u.nickname, email: u.email });
+  } catch (err) {
+    req.log.error({ err }, "Email update error");
+    return res.status(500).json({ error: "Ошибка сервера" });
+  }
+});
+
+// PATCH /api/auth/password
+router.patch("/auth/password", async (req: any, res: any) => {
+  const userId = req.session?.userId;
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+  const { currentPassword, newPassword } = req.body ?? {};
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: "Все поля обязательны" });
+  }
+  if (String(newPassword).length < 6) {
+    return res.status(400).json({ error: "Пароль: минимум 6 символов" });
+  }
+  try {
+    const result = await pool.query(
+      "SELECT password_hash FROM users WHERE id = $1",
+      [userId],
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: "Not found" });
+    const ok = await bcrypt.compare(String(currentPassword), result.rows[0].password_hash);
+    if (!ok) return res.status(400).json({ error: "Неверный текущий пароль" });
+    const newHash = await bcrypt.hash(String(newPassword), 10);
+    await pool.query("UPDATE users SET password_hash = $1 WHERE id = $2", [newHash, userId]);
+    return res.json({ success: true });
+  } catch (err) {
+    req.log.error({ err }, "Password change error");
+    return res.status(500).json({ error: "Ошибка сервера" });
+  }
+});
+
 // GET /api/auth/me
 router.get("/auth/me", async (req: any, res: any) => {
   const userId = req.session?.userId;
@@ -120,12 +171,12 @@ router.get("/auth/me", async (req: any, res: any) => {
 
   try {
     const result = await pool.query(
-      "SELECT id, username, nickname FROM users WHERE id = $1",
+      "SELECT id, username, nickname, email FROM users WHERE id = $1",
       [userId],
     );
     if (result.rows.length === 0) return res.status(401).json({ error: "Not found" });
     const user = result.rows[0];
-    return res.json({ id: user.id, username: user.username, nickname: user.nickname });
+    return res.json({ id: user.id, username: user.username, nickname: user.nickname, email: user.email });
   } catch (err) {
     req.log.error({ err }, "Me error");
     return res.status(500).json({ error: "Ошибка сервера" });
