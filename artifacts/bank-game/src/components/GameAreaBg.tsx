@@ -5,14 +5,14 @@ export default function GameAreaBg() {
 
         {/* Clouds — mid-sky, clear of top widgets (level, growth label, help btn) */}
         <g opacity="0.55">
-          <ellipse cx="55" cy="100" rx="22" ry="13" fill="#fff" />
-          <ellipse cx="39" cy="106" rx="14" ry="10" fill="#fff" />
-          <ellipse cx="72" cy="106" rx="13" ry="9" fill="#fff" />
+          <ellipse cx="55" cy="68" rx="22" ry="13" fill="#fff" />
+          <ellipse cx="39" cy="74" rx="14" ry="10" fill="#fff" />
+          <ellipse cx="72" cy="74" rx="13" ry="9" fill="#fff" />
         </g>
         <g opacity="0.45">
-          <ellipse cx="282" cy="88" rx="18" ry="10" fill="#fff" />
-          <ellipse cx="268" cy="93" rx="11" ry="8" fill="#fff" />
-          <ellipse cx="296" cy="93" rx="10" ry="7" fill="#fff" />
+          <ellipse cx="282" cy="56" rx="18" ry="10" fill="#fff" />
+          <ellipse cx="268" cy="61" rx="11" ry="8" fill="#fff" />
+          <ellipse cx="296" cy="61" rx="10" ry="7" fill="#fff" />
         </g>
 
         {/* Birds */}
