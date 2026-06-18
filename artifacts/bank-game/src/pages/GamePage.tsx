@@ -721,7 +721,7 @@ export default function GamePage({ state, onStateChange }: Props) {
                   <motion.button
                     key={btn.key}
                     className={`action-btn-bank ${btn.done ? "action-btn-done" : ""}`}
-                    style={{ "--ac": btn.color } as React.CSSProperties}
+                    style={{ "--ac": btn.color, ...(showCompletionStage ? { pointerEvents: "none" } : {}) } as React.CSSProperties}
                     onClick={!btn.done ? () => setActiveMinigame(btn.key) : undefined}
                     disabled={!!btn.done || actionLoading}
                     whileTap={!btn.done ? { scale: 0.91 } : {}}
