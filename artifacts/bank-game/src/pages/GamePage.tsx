@@ -557,7 +557,7 @@ export default function GamePage({ state, onStateChange }: Props) {
 
       {/* Tree + game area */}
       <div className="game-area" ref={gameAreaRef}>
-        <GameAreaBg />
+        <GameAreaBg raiseGround={storedSessions > 1} />
 
         {floaters.map(fl => (
           <div key={fl.id} className="game-floater" style={{ left: fl.x, top: fl.y }}>
@@ -687,6 +687,7 @@ export default function GamePage({ state, onStateChange }: Props) {
               <motion.div
                 key="start"
                 className="session-actions"
+                style={{ marginTop: storedSessions > 1 ? 18 : 36 }}
                 initial={{ opacity: 0, scale: 0.92 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.92 }}

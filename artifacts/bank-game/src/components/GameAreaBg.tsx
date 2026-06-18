@@ -1,4 +1,9 @@
-export default function GameAreaBg() {
+interface Props {
+  raiseGround?: boolean;
+}
+
+export default function GameAreaBg({ raiseGround = false }: Props) {
+  const groundY = raiseGround ? -130 : -115;
   return (
     <div className="game-area-bg-wrap">
       <svg className="game-area-bg" viewBox="0 0 340 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -42,7 +47,7 @@ export default function GameAreaBg() {
         </g>
 
         {/* Ground group — raised high so it aligns with activity buttons */}
-        <g transform="translate(0,-115)">
+        <g transform={`translate(0,${groundY})`}>
           {/* Ground strip */}
           <ellipse cx="170" cy="295" rx="175" ry="18" fill="#8dc63f" opacity="0.35" />
           {/* Grass tufts left */}
