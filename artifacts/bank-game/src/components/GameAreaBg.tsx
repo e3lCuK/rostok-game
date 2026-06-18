@@ -27,8 +27,8 @@ export default function GameAreaBg({ groundY = -120, skyOffset = 0 }: Props) {
           <path d="M168 71 Q170 67 173 71" />
         </g>
 
-        {/* Sun — top-right, shifted left to avoid help btn overlap */}
-        <g opacity="0.35" transform={`translate(0,${skyOffset})`}>
+        {/* Sun — top-right, fixed position */}
+        <g opacity="0.35">
           <circle cx="298" cy="18" r="9" fill="#fde68a" />
           <line x1="284" y1="18" x2="279" y2="18" stroke="#f59e0b" strokeWidth="1.5" />
           <line x1="288" y1="28" x2="285" y2="33" stroke="#f59e0b" strokeWidth="1.5" />
