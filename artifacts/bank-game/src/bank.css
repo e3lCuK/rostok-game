@@ -1562,7 +1562,7 @@ body.modal-open {
   align-items: center;
   gap: 6px;
   width: auto;
-  margin-top: 20px;
+  margin-top: 36px;
   border-radius: 16px;
   transition: box-shadow 0.3s ease;
 }
