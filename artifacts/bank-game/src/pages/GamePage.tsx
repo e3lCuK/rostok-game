@@ -684,20 +684,25 @@ export default function GamePage({ state, onStateChange }: Props) {
                 </div>
               </motion.div>
             ) : (
-              <motion.button
+              <motion.div
                 key="start"
-                className="start-session-btn"
-                onClick={handleStartSession}
-                disabled={actionLoading}
-                whileTap={{ scale: 0.96 }}
+                className="session-actions"
                 initial={{ opacity: 0, scale: 0.92 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.92 }}
                 transition={{ duration: 0.35 }}
               >
-                <Play size={16} />
-                {storedSessions > 1 ? "Начать суперсессию" : "Начать сессию"}
-              </motion.button>
+                <div className="action-buttons-row" style={{ minHeight: 68, alignItems: "center", justifyContent: "center" }}>
+                  <button
+                    className="start-session-btn"
+                    onClick={handleStartSession}
+                    disabled={actionLoading}
+                  >
+                    <Play size={16} />
+                    {storedSessions > 1 ? "Начать суперсессию" : "Начать сессию"}
+                  </button>
+                </div>
+              </motion.div>
             )}
           </AnimatePresence>
         ) : (
