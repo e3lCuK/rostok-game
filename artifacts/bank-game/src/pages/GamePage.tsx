@@ -904,6 +904,7 @@ export default function GamePage({ state, onStateChange }: Props) {
                   </div>
                 ) : (
                   <div className="xp-nick-row">
+                    <span className="xp-history-modal-nick">{user?.nickname ?? user?.username}</span>
                     <button
                       className="xp-nick-pencil"
                       onClick={() => { setNickInput(user?.nickname ?? ""); setEditingNick(true); setNickError(null); }}
@@ -911,7 +912,6 @@ export default function GamePage({ state, onStateChange }: Props) {
                     >
                       <Pencil size={13} />
                     </button>
-                    <span className="xp-history-modal-nick">{user?.nickname ?? user?.username}</span>
                   </div>
                 )}
                 <button className="help-modal-close" onClick={() => setShowXpHistory(false)}>✕</button>
