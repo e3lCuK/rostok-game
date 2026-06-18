@@ -549,6 +549,26 @@ body {
   box-shadow: var(--shadow-md);
 }
 
+.game-area-bg-wrap {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.game-area-bg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.game-area > *:not(.game-area-bg-wrap) {
+  position: relative;
+  z-index: 1;
+}
+
 .game-floater {
   position: absolute;
   font-size: 1.1rem;

@@ -22,6 +22,7 @@ import FertilizerMatchGame from "@/components/FertilizerMatchGame";
 import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2, HelpCircle, X, TreePine } from "lucide-react";
 import LevelWidget from "@/components/LevelWidget";
 import LevelUpAnimation from "@/components/LevelUpAnimation";
+import GameAreaBg from "@/components/GameAreaBg";
 
 interface Props {
   state: UserState;
@@ -556,6 +557,8 @@ export default function GamePage({ state, onStateChange }: Props) {
 
       {/* Tree + game area */}
       <div className="game-area" ref={gameAreaRef}>
+        <GameAreaBg />
+
         {floaters.map(fl => (
           <div key={fl.id} className="game-floater" style={{ left: fl.x, top: fl.y }}>
             {fl.label}

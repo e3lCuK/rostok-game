@@ -1,0 +1,82 @@
+export default function GameAreaBg() {
+  return (
+    <div className="game-area-bg-wrap">
+      <svg className="game-area-bg" viewBox="0 0 340 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <ellipse cx="170" cy="295" rx="175" ry="18" fill="#8dc63f" opacity="0.35" />
+        <g fill="#5a9e1e" opacity="0.55">
+          <ellipse cx="22" cy="274" rx="12" ry="7" />
+          <ellipse cx="36" cy="271" rx="9" ry="6" />
+          <ellipse cx="10" cy="271" rx="7" ry="5" />
+        </g>
+        <g fill="#5a9e1e" opacity="0.55">
+          <ellipse cx="318" cy="274" rx="12" ry="7" />
+          <ellipse cx="304" cy="271" rx="9" ry="6" />
+          <ellipse cx="330" cy="271" rx="7" ry="5" />
+        </g>
+        <g opacity="0.45">
+          <circle cx="45" cy="258" r="14" fill="#4a8f12" />
+          <circle cx="34" cy="262" r="10" fill="#5aab1a" />
+          <circle cx="56" cy="263" r="10" fill="#5aab1a" />
+        </g>
+        <g opacity="0.45">
+          <circle cx="295" cy="258" r="14" fill="#4a8f12" />
+          <circle cx="284" cy="262" r="10" fill="#5aab1a" />
+          <circle cx="306" cy="263" r="10" fill="#5aab1a" />
+        </g>
+        <g opacity="0.7">
+          <circle cx="68" cy="267" r="3" fill="#fbbf24" />
+          <circle cx="68" cy="262" r="2.5" fill="#f9a8d4" />
+          <circle cx="73" cy="265" r="2.5" fill="#f9a8d4" />
+          <circle cx="63" cy="265" r="2.5" fill="#f9a8d4" />
+          <circle cx="68" cy="270" r="2.5" fill="#f9a8d4" />
+          <line x1="68" y1="272" x2="68" y2="278" stroke="#4d7c0f" strokeWidth="1.2" />
+        </g>
+        <g opacity="0.7">
+          <circle cx="272" cy="267" r="3" fill="#fbbf24" />
+          <circle cx="272" cy="262" r="2.5" fill="#c4b5fd" />
+          <circle cx="277" cy="265" r="2.5" fill="#c4b5fd" />
+          <circle cx="267" cy="265" r="2.5" fill="#c4b5fd" />
+          <circle cx="272" cy="270" r="2.5" fill="#c4b5fd" />
+          <line x1="272" y1="272" x2="272" y2="278" stroke="#4d7c0f" strokeWidth="1.2" />
+        </g>
+        <g opacity="0.5">
+          <rect x="78" y="271" width="5" height="8" rx="1" fill="#e5c07b" />
+          <ellipse cx="80.5" cy="271" rx="9" ry="5" fill="#e06c75" />
+          <ellipse cx="78" cy="270" rx="2" ry="1.2" fill="#fff" opacity="0.6" />
+        </g>
+        <g opacity="0.55">
+          <ellipse cx="38" cy="38" rx="22" ry="13" fill="#fff" />
+          <ellipse cx="22" cy="44" rx="14" ry="10" fill="#fff" />
+          <ellipse cx="55" cy="44" rx="13" ry="9" fill="#fff" />
+        </g>
+        <g opacity="0.45">
+          <ellipse cx="295" cy="28" rx="18" ry="10" fill="#fff" />
+          <ellipse cx="281" cy="33" rx="11" ry="8" fill="#fff" />
+          <ellipse cx="309" cy="33" rx="10" ry="7" fill="#fff" />
+        </g>
+        <g stroke="#365314" strokeWidth="1.3" fill="none" opacity="0.45">
+          <path d="M148 52 Q151 48 154 52" />
+          <path d="M158 46 Q161 42 164 46" />
+          <path d="M168 55 Q170 51 173 55" />
+        </g>
+        <g opacity="0.35">
+          <circle cx="316" cy="18" r="9" fill="#fde68a" />
+          <line x1="316" y1="4" x2="316" y2="0" stroke="#f59e0b" strokeWidth="1.5" />
+          <line x1="326" y1="8" x2="329" y2="5" stroke="#f59e0b" strokeWidth="1.5" />
+          <line x1="330" y1="18" x2="335" y2="18" stroke="#f59e0b" strokeWidth="1.5" />
+          <line x1="326" y1="28" x2="329" y2="31" stroke="#f59e0b" strokeWidth="1.5" />
+        </g>
+        <ellipse cx="115" cy="280" rx="7" ry="4" fill="#a8a29e" opacity="0.3" />
+        <ellipse cx="225" cy="282" rx="5" ry="3" fill="#a8a29e" opacity="0.25" />
+        <g opacity="0.5" transform="translate(250,80)">
+          <path d="M0,0 Q-10,-12 -18,-4 Q-10,4 0,0" fill="#fb923c" />
+          <path d="M0,0 Q10,-12 18,-4 Q10,4 0,0" fill="#fb923c" />
+          <path d="M0,0 Q-8,8 -14,4 Q-8,0 0,0" fill="#fdba74" />
+          <path d="M0,0 Q8,8 14,4 Q8,0 0,0" fill="#fdba74" />
+          <line x1="0" y1="-3" x2="-4" y2="-10" stroke="#78350f" strokeWidth="0.8" />
+          <line x1="0" y1="-3" x2="4" y2="-10" stroke="#78350f" strokeWidth="0.8" />
+        </g>
+      </svg>
+    </div>
+  );
+}
