@@ -3,32 +3,36 @@ export default function GameAreaBg() {
     <div className="game-area-bg-wrap">
       <svg className="game-area-bg" viewBox="0 0 340 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 
-        {/* Sky elements — clouds, birds, sun stay in place */}
+        {/* Clouds — mid-sky, clear of top widgets (level, growth label, help btn) */}
         <g opacity="0.55">
-          <ellipse cx="38" cy="38" rx="22" ry="13" fill="#fff" />
-          <ellipse cx="22" cy="44" rx="14" ry="10" fill="#fff" />
-          <ellipse cx="55" cy="44" rx="13" ry="9" fill="#fff" />
+          <ellipse cx="55" cy="100" rx="22" ry="13" fill="#fff" />
+          <ellipse cx="39" cy="106" rx="14" ry="10" fill="#fff" />
+          <ellipse cx="72" cy="106" rx="13" ry="9" fill="#fff" />
         </g>
         <g opacity="0.45">
-          <ellipse cx="295" cy="28" rx="18" ry="10" fill="#fff" />
-          <ellipse cx="281" cy="33" rx="11" ry="8" fill="#fff" />
-          <ellipse cx="309" cy="33" rx="10" ry="7" fill="#fff" />
-        </g>
-        <g stroke="#365314" strokeWidth="1.3" fill="none" opacity="0.45">
-          <path d="M148 52 Q151 48 154 52" />
-          <path d="M158 46 Q161 42 164 46" />
-          <path d="M168 55 Q170 51 173 55" />
-        </g>
-        <g opacity="0.35">
-          <circle cx="316" cy="18" r="9" fill="#fde68a" />
-          <line x1="316" y1="4" x2="316" y2="0" stroke="#f59e0b" strokeWidth="1.5" />
-          <line x1="326" y1="8" x2="329" y2="5" stroke="#f59e0b" strokeWidth="1.5" />
-          <line x1="330" y1="18" x2="335" y2="18" stroke="#f59e0b" strokeWidth="1.5" />
-          <line x1="326" y1="28" x2="329" y2="31" stroke="#f59e0b" strokeWidth="1.5" />
+          <ellipse cx="282" cy="88" rx="18" ry="10" fill="#fff" />
+          <ellipse cx="268" cy="93" rx="11" ry="8" fill="#fff" />
+          <ellipse cx="296" cy="93" rx="10" ry="7" fill="#fff" />
         </g>
 
-        {/* Butterfly — stays mid-area */}
-        <g opacity="0.5" transform="translate(250,80)">
+        {/* Birds */}
+        <g stroke="#365314" strokeWidth="1.3" fill="none" opacity="0.45">
+          <path d="M148 68 Q151 64 154 68" />
+          <path d="M158 62 Q161 58 164 62" />
+          <path d="M168 71 Q170 67 173 71" />
+        </g>
+
+        {/* Sun — top-right, shifted left to avoid help btn overlap */}
+        <g opacity="0.35">
+          <circle cx="298" cy="18" r="9" fill="#fde68a" />
+          <line x1="298" y1="4" x2="298" y2="0" stroke="#f59e0b" strokeWidth="1.5" />
+          <line x1="308" y1="8" x2="311" y2="5" stroke="#f59e0b" strokeWidth="1.5" />
+          <line x1="312" y1="18" x2="317" y2="18" stroke="#f59e0b" strokeWidth="1.5" />
+          <line x1="308" y1="28" x2="311" y2="31" stroke="#f59e0b" strokeWidth="1.5" />
+        </g>
+
+        {/* Butterfly — mid-area */}
+        <g opacity="0.5" transform="translate(250,115)">
           <path d="M0,0 Q-10,-12 -18,-4 Q-10,4 0,0" fill="#fb923c" />
           <path d="M0,0 Q10,-12 18,-4 Q10,4 0,0" fill="#fb923c" />
           <path d="M0,0 Q-8,8 -14,4 Q-8,0 0,0" fill="#fdba74" />
@@ -37,8 +41,8 @@ export default function GameAreaBg() {
           <line x1="0" y1="-3" x2="4" y2="-10" stroke="#78350f" strokeWidth="0.8" />
         </g>
 
-        {/* Ground group — shifted up so it aligns with the activity buttons row */}
-        <g transform="translate(0,-75)">
+        {/* Ground group — raised high so it aligns with activity buttons */}
+        <g transform="translate(0,-120)">
           {/* Ground strip */}
           <ellipse cx="170" cy="295" rx="175" ry="18" fill="#8dc63f" opacity="0.35" />
           {/* Grass tufts left */}
