@@ -26,9 +26,9 @@ export default function GameAreaBg() {
         <g opacity="0.35">
           <circle cx="298" cy="18" r="9" fill="#fde68a" />
           <line x1="298" y1="4" x2="298" y2="0" stroke="#f59e0b" strokeWidth="1.5" />
-          <line x1="308" y1="8" x2="311" y2="5" stroke="#f59e0b" strokeWidth="1.5" />
-          <line x1="312" y1="18" x2="317" y2="18" stroke="#f59e0b" strokeWidth="1.5" />
-          <line x1="308" y1="28" x2="311" y2="31" stroke="#f59e0b" strokeWidth="1.5" />
+          <line x1="288" y1="8" x2="285" y2="5" stroke="#f59e0b" strokeWidth="1.5" />
+          <line x1="284" y1="18" x2="279" y2="18" stroke="#f59e0b" strokeWidth="1.5" />
+          <line x1="288" y1="28" x2="285" y2="31" stroke="#f59e0b" strokeWidth="1.5" />
         </g>
 
         {/* Butterfly — mid-area */}
