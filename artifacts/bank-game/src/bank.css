@@ -564,10 +564,6 @@ body {
   display: block;
 }
 
-.game-area > *:not(.game-area-bg-wrap) {
-  position: relative;
-  z-index: 1;
-}
 
 .game-floater {
   position: absolute;
