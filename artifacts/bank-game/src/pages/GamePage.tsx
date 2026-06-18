@@ -863,7 +863,7 @@ export default function GamePage({ state, onStateChange }: Props) {
               onClick={e => e.stopPropagation()}
             >
               <div className="streak-widget-header">
-                <span className="streak-widget-title">🔥 Награды посещений</span>
+                <span className="streak-widget-title">Награды посещений</span>
                 <button className="help-modal-close" onClick={dismissStreakWidget}>✕</button>
               </div>
               <p className="streak-widget-sub">Заходите каждый день, чтобы получать бонусы</p>
@@ -899,10 +899,10 @@ export default function GamePage({ state, onStateChange }: Props) {
               <div className="streak-widget-streak">
                 {state.game.streakDays > 0
                   ? `Текущая серия: ${state.game.streakDays} ${state.game.streakDays === 1 ? "день" : state.game.streakDays < 5 ? "дня" : "дней"}`
-                  : "Начните серию сегодня!"}
+                  : "Начните уход сегодня!"}
               </div>
               <button className="streak-widget-btn" onClick={dismissStreakWidget}>
-                Войти в сессию
+                Забрать
               </button>
             </motion.div>
           </motion.div>
