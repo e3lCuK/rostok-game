@@ -864,9 +864,12 @@ export default function GamePage({ state, onStateChange }: Props) {
             >
               <div className="xp-history-modal-topbar">
                 <span className="xp-history-modal-nick">{user?.nickname ?? user?.username}</span>
-                <button className="xp-history-modal-logout" onClick={logout} title="Выйти">
-                  <LogOut size={15} />
-                </button>
+                <div className="xp-topbar-actions">
+                  <button className="xp-history-modal-logout" onClick={logout} title="Выйти">
+                    <LogOut size={15} />
+                  </button>
+                  <button className="help-modal-close" onClick={() => setShowXpHistory(false)}>✕</button>
+                </div>
               </div>
 
               <div className="xp-modal-tabs">
@@ -878,7 +881,6 @@ export default function GamePage({ state, onStateChange }: Props) {
                   className={`xp-modal-tab${xpModalTab === "rating" ? " xp-modal-tab-active" : ""}`}
                   onClick={() => setXpModalTab("rating")}
                 >Рейтинг</button>
-                <button className="help-modal-close xp-modal-close" onClick={() => setShowXpHistory(false)}>✕</button>
               </div>
 
               {xpModalTab === "history" && (
