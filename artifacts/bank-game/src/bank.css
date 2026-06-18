@@ -1319,6 +1319,122 @@ body.modal-open {
   color: #84cc16;
 }
 
+/* ============================
+   STREAK WIDGET
+   ============================ */
+
+.streak-widget-modal {
+  max-width: 380px;
+}
+
+.streak-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.streak-widget-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #365314;
+}
+
+.streak-widget-sub {
+  font-size: 0.78rem;
+  color: #6b7280;
+  margin-bottom: 18px;
+}
+
+.streak-days-row {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+
+.streak-day-slot {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 4px;
+  border-radius: 14px;
+  border: 1.5px solid transparent;
+}
+
+.streak-day-done {
+  background: #4d7c0f;
+  border-color: #365314;
+}
+
+.streak-day-active {
+  background: #d9f99d;
+  border-color: #a3e635;
+}
+
+.streak-day-upcoming {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+}
+
+.streak-day-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.streak-day-done .streak-day-icon {
+  color: #f7fee7;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.streak-day-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.streak-day-done .streak-day-label { color: #d9f99d; }
+.streak-day-active .streak-day-label { color: #365314; }
+.streak-day-upcoming .streak-day-label { color: #9ca3af; }
+
+.streak-day-reward {
+  font-size: 0.6rem;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.streak-day-done .streak-day-reward { color: #a3e635; }
+.streak-day-active .streak-day-reward { color: #4d7c0f; font-weight: 600; }
+.streak-day-upcoming .streak-day-reward { color: #d1d5db; }
+
+.streak-widget-streak {
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4d7c0f;
+  background: #ecfccb;
+  border-radius: 10px;
+  padding: 7px 12px;
+  margin-bottom: 14px;
+}
+
+.streak-widget-btn {
+  width: 100%;
+  padding: 11px;
+  border-radius: 12px;
+  border: none;
+  background: #4d7c0f;
+  color: #f7fee7;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.streak-widget-btn:hover { background: #365314; }
+
 /* Water */
 .water-drop {
   position: absolute;

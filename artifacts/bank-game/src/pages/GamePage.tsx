@@ -59,6 +59,13 @@ export default function GamePage({ state, onStateChange }: Props) {
   const animParticlesRef = useRef<number[]>([]);
   const [showHelp, setShowHelp] = useState(false);
   const [showXpHistory, setShowXpHistory] = useState(false);
+  const [showStreakWidget, setShowStreakWidget] = useState(() => {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const seen = localStorage.getItem("streak_widget_date");
+    const notMidSession = !state.game.sessionInProgress;
+    const noPending = (state.game.pendingBaseReward ?? 0) === 0 && (state.game.pendingBonusReward ?? 0) === 0;
+    return seen !== todayStr && notMidSession && noPending;
+  });
   const [editingNick, setEditingNick] = useState(false);
   const [nickInput, setNickInput] = useState("");
   const [nickSaving, setNickSaving] = useState(false);
@@ -66,6 +73,12 @@ export default function GamePage({ state, onStateChange }: Props) {
   const [xpModalTab, setXpModalTab] = useState<"history" | "rating">("history");
   const [leaderboard, setLeaderboard] = useState<LeaderboardPlayer[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+
+  function dismissStreakWidget() {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    localStorage.setItem("streak_widget_date", todayStr);
+    setShowStreakWidget(false);
+  }
   const [helpPulsing, setHelpPulsing] = useState(() => !localStorage.getItem("active_help_seen"));
   useEffect(() => {
     if (!helpPulsing) return;
@@ -828,6 +841,72 @@ export default function GamePage({ state, onStateChange }: Props) {
           )
         )}
       </div>
+
+      {/* Streak widget — first visit today */}
+      <AnimatePresence>
+        {showStreakWidget && (
+          <motion.div
+            className="help-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={dismissStreakWidget}
+          >
+            <motion.div
+              className="help-modal streak-widget-modal"
+              initial={{ y: 32, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 32, opacity: 0 }}
+              transition={{ duration: 0.22 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="streak-widget-header">
+                <span className="streak-widget-title">🔥 Награды посещений</span>
+                <button className="help-modal-close" onClick={dismissStreakWidget}>✕</button>
+              </div>
+              <p className="streak-widget-sub">Заходите каждый день, чтобы получать бонусы</p>
+
+              {(() => {
+                const cycleDay = state.game.streakDays % 5; // 0-indexed today's slot
+                const days = [
+                  { label: "День 1", reward: "+2% бонус" },
+                  { label: "День 2", reward: "+5% бонус" },
+                  { label: "День 3", reward: "+8% бонус" },
+                  { label: "День 4", reward: "+12% бонус" },
+                  { label: "День 5", reward: "🏆 Максимум" },
+                ];
+                return (
+                  <div className="streak-days-row">
+                    {days.map((d, i) => {
+                      const done = i < cycleDay;
+                      const active = i === cycleDay;
+                      return (
+                        <div key={i} className={`streak-day-slot${done ? " streak-day-done" : active ? " streak-day-active" : " streak-day-upcoming"}`}>
+                          <div className="streak-day-icon">
+                            {done ? "✓" : active ? "⭐" : "🔒"}
+                          </div>
+                          <div className="streak-day-label">{d.label}</div>
+                          <div className="streak-day-reward">{d.reward}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+
+              <div className="streak-widget-streak">
+                {state.game.streakDays > 0
+                  ? `Текущая серия: ${state.game.streakDays} ${state.game.streakDays === 1 ? "день" : state.game.streakDays < 5 ? "дня" : "дней"}`
+                  : "Начните серию сегодня!"}
+              </div>
+              <button className="streak-widget-btn" onClick={dismissStreakWidget}>
+                Войти в сессию
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Full-screen mini-game modal — outside game-area to avoid clipping */}
       {activeMinigame && (
