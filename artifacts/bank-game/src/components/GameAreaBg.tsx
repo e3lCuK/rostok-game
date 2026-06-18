@@ -1,33 +1,34 @@
 interface Props {
   groundY?: number;
+  skyOffset?: number;
 }
 
-export default function GameAreaBg({ groundY = -120 }: Props) {
+export default function GameAreaBg({ groundY = -120, skyOffset = 0 }: Props) {
   return (
     <div className="game-area-bg-wrap">
       <svg className="game-area-bg" viewBox="0 0 340 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 
         {/* Clouds — mid-sky, clear of top widgets (level, growth label, help btn) */}
-        <g opacity="0.55">
+        <g opacity="0.55" transform={`translate(0,${skyOffset})`}>
           <ellipse cx="55" cy="68" rx="22" ry="13" fill="#fff" />
           <ellipse cx="39" cy="74" rx="14" ry="10" fill="#fff" />
           <ellipse cx="72" cy="74" rx="13" ry="9" fill="#fff" />
         </g>
-        <g opacity="0.45">
+        <g opacity="0.45" transform={`translate(0,${skyOffset})`}>
           <ellipse cx="282" cy="56" rx="18" ry="10" fill="#fff" />
           <ellipse cx="268" cy="61" rx="11" ry="8" fill="#fff" />
           <ellipse cx="296" cy="61" rx="10" ry="7" fill="#fff" />
         </g>
 
         {/* Birds */}
-        <g stroke="#365314" strokeWidth="1.3" fill="none" opacity="0.45">
+        <g stroke="#365314" strokeWidth="1.3" fill="none" opacity="0.45" transform={`translate(0,${skyOffset})`}>
           <path d="M148 68 Q151 64 154 68" />
           <path d="M158 62 Q161 58 164 62" />
           <path d="M168 71 Q170 67 173 71" />
         </g>
 
         {/* Sun — top-right, shifted left to avoid help btn overlap */}
-        <g opacity="0.35">
+        <g opacity="0.35" transform={`translate(0,${skyOffset})`}>
           <circle cx="298" cy="18" r="9" fill="#fde68a" />
           <line x1="284" y1="18" x2="279" y2="18" stroke="#f59e0b" strokeWidth="1.5" />
           <line x1="288" y1="28" x2="285" y2="33" stroke="#f59e0b" strokeWidth="1.5" />
@@ -36,7 +37,7 @@ export default function GameAreaBg({ groundY = -120 }: Props) {
         </g>
 
         {/* Butterfly — mid-area */}
-        <g opacity="0.5" transform="translate(250,115)">
+        <g opacity="0.5" transform={`translate(250,${115 + skyOffset})`}>
           <path d="M0,0 Q-10,-12 -18,-4 Q-10,4 0,0" fill="#fb923c" />
           <path d="M0,0 Q10,-12 18,-4 Q10,4 0,0" fill="#fb923c" />
           <path d="M0,0 Q-8,8 -14,4 Q-8,0 0,0" fill="#fdba74" />
