@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Home, PiggyBank, TrendingUp, Zap, LogOut } from "lucide-react";
@@ -31,6 +31,10 @@ function AppShell() {
   const [loading, setLoading] = useState(true);
   const [state, setState] = useState<UserState | null>(null);
   const [onboarding, setOnboarding] = useState(false);
+  const [notifHome, setNotifHome] = useState(false);
+  const [notifStandard, setNotifStandard] = useState(false);
+  const prevHistoryLenRef = useRef(0);
+  const prevStdHistoryLenRef = useRef(0);
 
   const loadState = useCallback(async () => {
     try {
@@ -69,6 +73,16 @@ function AppShell() {
 
   function handleStateChange(next: UserState) { setState(next); }
   function handleTabChange(t: Tab) { setTab(t); }
+
+  useEffect(() => {
+    if (!state) return;
+    const total = state.history.length;
+    const stdTotal = state.history.filter(h => h.type === "standard").length;
+    if (total > prevHistoryLenRef.current && tab !== "home") setNotifHome(true);
+    if (stdTotal > prevStdHistoryLenRef.current && tab !== "standard") setNotifStandard(true);
+    prevHistoryLenRef.current = total;
+    prevStdHistoryLenRef.current = stdTotal;
+  }, [state?.history.length]);
 
   if (loading) {
     return (
@@ -133,9 +147,9 @@ function AppShell() {
             transition={{ duration: 0.18 }}
             className="bank-page"
           >
-            {tab === "home"     && <HomePage state={state} />}
+            {tab === "home"     && <HomePage state={state} notif={notifHome} onClearNotif={() => setNotifHome(false)} />}
             {tab === "savings"  && <SavingsPage state={state} onTabChange={handleTabChange} />}
-            {tab === "standard" && <StandardPage state={state} />}
+            {tab === "standard" && <StandardPage state={state} notif={notifStandard} onClearNotif={() => setNotifStandard(false)} />}
             {tab === "active"   && (
               <GamePage state={state} onStateChange={handleStateChange} />
             )}
@@ -144,16 +158,22 @@ function AppShell() {
       </main>
 
       <nav className="bank-nav">
-        {TABS.map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            className={`bank-nav-btn ${tab === id ? "bank-nav-btn-active" : ""}`}
-            onClick={() => setTab(id)}
-          >
-            <Icon size={22} strokeWidth={tab === id ? 2.2 : 1.6} />
-            <span>{label}</span>
-          </button>
-        ))}
+        {TABS.map(({ id, label, icon: Icon }) => {
+          const hasNotif = (id === "home" && notifHome) || (id === "standard" && notifStandard);
+          return (
+            <button
+              key={id}
+              className={`bank-nav-btn ${tab === id ? "bank-nav-btn-active" : ""}`}
+              onClick={() => setTab(id)}
+            >
+              <span className="bank-nav-icon-wrap">
+                <Icon size={22} strokeWidth={tab === id ? 2.2 : 1.6} />
+                {hasNotif && <span className="nav-notif-dot" />}
+              </span>
+              <span>{label}</span>
+            </button>
+          );
+        })}
       </nav>
 
       {state && (

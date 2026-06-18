@@ -14,9 +14,11 @@ import { TrendingUp, Sprout, Zap } from "lucide-react";
 
 interface Props {
   state: UserState;
+  notif?: boolean;
+  onClearNotif?: () => void;
 }
 
-export default function HomePage({ state }: Props) {
+export default function HomePage({ state, notif, onClearNotif }: Props) {
   const [historyOpen, setHistoryOpen] = useState(false);
   const { standard, active, standardEarned, activeEarned } = state.balances;
   const totalBalance = standard + active;
@@ -106,8 +108,11 @@ export default function HomePage({ state }: Props) {
         }
         return (
           <div className="history-card">
-            <div className="history-title-row" onClick={() => setHistoryOpen(!historyOpen)}>
-              <h3 className="history-title">История начислений</h3>
+            <div className="history-title-row" onClick={() => { setHistoryOpen(!historyOpen); if (!historyOpen) onClearNotif?.(); }}>
+              <h3 className="history-title">
+                История начислений
+                {notif && <span className="history-notif-dot" />}
+              </h3>
               <span className="history-chevron">{historyOpen ? "▼" : "▶"}</span>
             </div>
             {historyOpen && (

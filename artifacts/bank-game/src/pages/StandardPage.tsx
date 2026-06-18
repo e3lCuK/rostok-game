@@ -8,9 +8,11 @@ import { TrendingUp, Lock } from "lucide-react";
 
 interface Props {
   state: UserState;
+  notif?: boolean;
+  onClearNotif?: () => void;
 }
 
-export default function StandardPage({ state }: Props) {
+export default function StandardPage({ state, notif, onClearNotif }: Props) {
   const [historyOpen, setHistoryOpen] = useState(false);
   const { standard, standardEarned } = state.balances;
   const stdDaily = calcStandardDaily(standard);
@@ -70,8 +72,11 @@ export default function StandardPage({ state }: Props) {
       </div>
 
       <div className="history-card">
-        <div className="history-title-row" onClick={() => setHistoryOpen(!historyOpen)}>
-          <h3 className="history-title">История начислений</h3>
+        <div className="history-title-row" onClick={() => { setHistoryOpen(!historyOpen); if (!historyOpen) onClearNotif?.(); }}>
+          <h3 className="history-title">
+            История начислений
+            {notif && <span className="history-notif-dot" />}
+          </h3>
           <span className="history-chevron">{historyOpen ? "▼" : "▶"}</span>
         </div>
         {historyOpen && (

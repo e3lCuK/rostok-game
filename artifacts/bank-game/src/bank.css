@@ -146,6 +146,25 @@ body {
   transition: color 0.15s;
 }
 
+.bank-nav-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-notif-dot {
+  position: absolute;
+  top: -2px;
+  right: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f97316;
+  animation: notif-pulse 1.2s ease-in-out infinite;
+  border: 1.5px solid var(--surface);
+}
+
 .history-empty {
   text-align: center;
   color: #9ca3af;
