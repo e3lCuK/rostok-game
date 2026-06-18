@@ -1,9 +1,8 @@
 interface Props {
-  raiseGround?: boolean;
+  groundY?: number;
 }
 
-export default function GameAreaBg({ raiseGround = false }: Props) {
-  const groundY = raiseGround ? -120 : -115;
+export default function GameAreaBg({ groundY = -120 }: Props) {
   return (
     <div className="game-area-bg-wrap">
       <svg className="game-area-bg" viewBox="0 0 340 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
