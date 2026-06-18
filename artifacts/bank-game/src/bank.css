@@ -613,17 +613,17 @@ body {
 .start-session-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 28px;
+  gap: 6px;
+  margin-top: 14px;
   background: #16a34a;
   color: white;
   border: none;
-  border-radius: 14px;
-  padding: 13px 28px;
-  font-size: 0.92rem;
+  border-radius: 12px;
+  padding: 9px 20px;
+  font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(22,163,74,0.32);
+  box-shadow: 0 3px 12px rgba(22,163,74,0.28);
   transition: background 0.15s, box-shadow 0.15s;
 }
 
