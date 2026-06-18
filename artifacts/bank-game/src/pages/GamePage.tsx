@@ -895,7 +895,7 @@ export default function GamePage({ state, onStateChange }: Props) {
               <div className="streak-widget-streak">
                 {state.game.streakDays > 0
                   ? `Текущая серия: ${state.game.streakDays} ${state.game.streakDays === 1 ? "день" : state.game.streakDays < 5 ? "дня" : "дней"}`
-                  : "Начните уход сегодня!"}
+                  : "Начните ухаживать сегодня!"}
               </div>
               <button className="streak-widget-btn" onClick={dismissStreakWidget}>
                 Забрать
