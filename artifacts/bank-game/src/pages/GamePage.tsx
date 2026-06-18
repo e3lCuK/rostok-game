@@ -490,7 +490,7 @@ export default function GamePage({ state, onStateChange }: Props) {
 
   const avgPercent = sessionHistory.length > 0
     ? sessionHistory.reduce((sum, s) => sum + (s.base > 0 ? (s.total / s.base) * 12 : 12), 0) / sessionHistory.length
-    : 12;
+    : 0;
 
   return (
     <div className="game-page">
