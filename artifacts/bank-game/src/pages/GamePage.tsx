@@ -713,7 +713,6 @@ export default function GamePage({ state, onStateChange }: Props) {
               style={showCompletionStage ? { cursor: "pointer" } : undefined}
             >
               {!showCompletionStage && (
-                <p className="session-actions-title">Ухаживайте за деревом</p>
               )}
               <div className="action-buttons-row">
                 {[
