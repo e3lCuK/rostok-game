@@ -724,6 +724,38 @@ body.modal-open {
   transition: background 0.15s;
 }
 .level-widget:hover { background: rgba(255, 255, 255, 0.92); }
+.level-widget.level-widget-clickable { cursor: pointer; }
+.level-widget.level-widget-clickable:hover { background: rgba(255, 255, 255, 0.95); }
+
+.xp-history-modal { max-width: 340px; }
+.xp-history-empty {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.85rem;
+  padding: 12px 0;
+  margin: 0;
+}
+.xp-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.xp-history-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: #f9fafb;
+  font-size: 0.84rem;
+}
+.xp-history-row-new { background: #f0fdf4; }
+.xp-history-date { color: #374151; font-weight: 500; }
+.xp-history-n { color: #9ca3af; font-size: 0.75rem; }
+.xp-history-xp { color: #16a34a; font-weight: 700; }
 
 .level-widget-top {
   display: flex;

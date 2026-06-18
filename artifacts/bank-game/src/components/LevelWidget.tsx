@@ -6,9 +6,10 @@ interface Props {
   totalXP: number;
   level: number;
   xpGain?: number | null;
+  onClick?: () => void;
 }
 
-export default function LevelWidget({ totalXP, level, xpGain }: Props) {
+export default function LevelWidget({ totalXP, level, xpGain, onClick }: Props) {
   const progress = getLevelProgress(totalXP);
   const [showGain, setShowGain] = useState(false);
   const [gainVal, setGainVal] = useState(0);
@@ -39,7 +40,8 @@ export default function LevelWidget({ totalXP, level, xpGain }: Props) {
   return (
     <div className="level-widget-wrap">
       <motion.div
-        className="level-widget"
+        className={`level-widget${onClick ? " level-widget-clickable" : ""}`}
+        onClick={onClick}
         animate={showGain
           ? { scale: [1, 1.1, 1], boxShadow: ["0 0 0px rgba(134,239,172,0)", "0 0 14px rgba(134,239,172,0.8)", "0 0 0px rgba(134,239,172,0)"] }
           : { scale: 1, boxShadow: "0 0 0px rgba(134,239,172,0)" }

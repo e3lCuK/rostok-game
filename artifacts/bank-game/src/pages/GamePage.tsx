@@ -19,7 +19,6 @@ import ClickGameSun from "@/components/ClickGameSun";
 import FertilizerMatchGame from "@/components/FertilizerMatchGame";
 import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2, HelpCircle, X } from "lucide-react";
 import LevelWidget from "@/components/LevelWidget";
-import SessionHistoryWidget from "@/components/SessionHistoryWidget";
 import LevelUpAnimation from "@/components/LevelUpAnimation";
 
 interface Props {
@@ -57,6 +56,7 @@ export default function GamePage({ state, onStateChange }: Props) {
   const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animParticlesRef = useRef<number[]>([]);
   const [showHelp, setShowHelp] = useState(false);
+  const [showXpHistory, setShowXpHistory] = useState(false);
   const [helpPulsing, setHelpPulsing] = useState(() => !localStorage.getItem("active_help_seen"));
   useEffect(() => {
     if (!helpPulsing) return;
@@ -535,8 +535,7 @@ export default function GamePage({ state, onStateChange }: Props) {
         ))}
 
         <div className="game-left-widgets">
-          <LevelWidget level={game.playerLevel ?? 1} totalXP={game.playerXP ?? 0} xpGain={xpGainAmount} />
-          <SessionHistoryWidget xpHistory={game.xpHistory ?? []} highlightFirst={historyHighlight} />
+          <LevelWidget level={game.playerLevel ?? 1} totalXP={game.playerXP ?? 0} xpGain={xpGainAmount} onClick={() => setShowXpHistory(true)} />
         </div>
 
         <button
@@ -831,6 +830,47 @@ export default function GamePage({ state, onStateChange }: Props) {
           )}
         </div>
       )}
+      <AnimatePresence>
+        {showXpHistory && (
+          <motion.div
+            className="help-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setShowXpHistory(false)}
+          >
+            <motion.div
+              className="help-modal xp-history-modal"
+              initial={{ y: 32, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 32, opacity: 0 }}
+              transition={{ duration: 0.22 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="help-modal-header">
+                <span className="help-modal-title">История опыта</span>
+                <button className="help-modal-close" onClick={() => setShowXpHistory(false)}>✕</button>
+              </div>
+              {(game.xpHistory ?? []).length === 0 ? (
+                <p className="xp-history-empty">Пока нет сессий</p>
+              ) : (
+                <div className="xp-history-list">
+                  {(game.xpHistory ?? []).map((e, i) => {
+                    const [y, m, d] = e.date.split("-");
+                    return (
+                      <div key={i} className={`xp-history-row${i === 0 && historyHighlight ? " xp-history-row-new" : ""}`}>
+                        <span className="xp-history-date">{d}.{m}.{y.slice(2)} <span className="xp-history-n">#{e.n}</span></span>
+                        <span className="xp-history-xp">+{e.xp} опыт</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <AnimatePresence>
         {showHelp && (
           <motion.div
