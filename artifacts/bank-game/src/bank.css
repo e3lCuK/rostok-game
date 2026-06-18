@@ -543,8 +543,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  height: 390px;
-  min-height: 390px;
+  min-height: 300px;
   position: relative;
   overflow: visible;
   box-shadow: var(--shadow-md);
@@ -552,7 +551,10 @@ body {
 
 .game-area-bg-wrap {
   position: absolute;
-  inset: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 300px;
   border-radius: inherit;
   overflow: hidden;
   pointer-events: none;
