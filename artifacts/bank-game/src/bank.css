@@ -746,7 +746,13 @@ body.modal-open {
 .level-widget.level-widget-clickable { cursor: pointer; }
 .level-widget.level-widget-clickable:hover { background: rgba(255, 255, 255, 0.95); }
 
-.xp-history-modal { max-width: 360px; padding-top: 14px; }
+.xp-history-modal {
+  max-width: 360px;
+  padding-top: 14px;
+  height: 480px;
+  display: flex;
+  flex-direction: column;
+}
 
 .xp-modal-tabs {
   display: flex;
@@ -755,6 +761,7 @@ body.modal-open {
   margin-bottom: 14px;
   border-bottom: 1px solid #f0f0f0;
   padding-bottom: 10px;
+  flex-shrink: 0;
 }
 .xp-modal-tab {
   flex: 1;
@@ -776,7 +783,7 @@ body.modal-open {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 360px;
+  flex: 1;
   overflow-y: auto;
   padding-right: 2px;
 }
@@ -846,6 +853,7 @@ body.modal-open {
   margin-bottom: 14px;
   padding-bottom: 12px;
   border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
 }
 
 .xp-history-modal-nick {
@@ -880,7 +888,7 @@ body.modal-open {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 340px;
+  flex: 1;
   overflow-y: auto;
   padding-right: 2px;
 }
