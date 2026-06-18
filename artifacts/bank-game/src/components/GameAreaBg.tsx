@@ -42,7 +42,7 @@ export default function GameAreaBg() {
         </g>
 
         {/* Ground group — raised high so it aligns with activity buttons */}
-        <g transform="translate(0,-127)">
+        <g transform="translate(0,-110)">
           {/* Ground strip */}
           <ellipse cx="170" cy="295" rx="175" ry="18" fill="#8dc63f" opacity="0.35" />
           {/* Grass tufts left */}
