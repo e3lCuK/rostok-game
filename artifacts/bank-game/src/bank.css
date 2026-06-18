@@ -619,7 +619,7 @@ body {
   color: white;
   border: none;
   border-radius: 12px;
-  padding: 9px;
+  padding: 9px 20px;
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
@@ -1561,7 +1561,7 @@ body.modal-open {
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  width: 100%;
+  width: auto;
   margin-top: 20px;
   border-radius: 16px;
   transition: box-shadow 0.3s ease;
