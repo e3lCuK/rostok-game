@@ -66,7 +66,15 @@ function AppShell() {
   useEffect(() => { loadState(); }, [loadState]);
 
   async function handleOnboardingComplete(capital: number) {
-    await api.initAccount(capital);
+    try {
+      await api.initAccount(capital);
+    } catch (err: any) {
+      if (err?.status === 401) {
+        await logout();
+        return;
+      }
+      throw err;
+    }
     setOnboarding(false);
     await loadState();
   }
