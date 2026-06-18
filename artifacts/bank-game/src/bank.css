@@ -870,7 +870,7 @@ body.modal-open {
 }
 
 .xp-nick-tree-icon {
-  color: #9ca3af;
+  color: #65a30d;
   flex-shrink: 0;
 }
 
@@ -882,13 +882,13 @@ body.modal-open {
   height: 26px;
   border-radius: 50%;
   border: none;
-  background: #f3f4f6;
-  color: #9ca3af;
+  background: #ecfccb;
+  color: #65a30d;
   cursor: pointer;
   flex-shrink: 0;
   transition: background 0.15s, color 0.15s;
 }
-.xp-nick-pencil:hover { background: #e5e7eb; color: #374151; }
+.xp-nick-pencil:hover { background: #d9f99d; color: #365314; }
 
 .xp-nick-edit {
   display: flex;
@@ -902,17 +902,17 @@ body.modal-open {
 .xp-nick-input {
   flex: 1;
   min-width: 80px;
-  border: 1.5px solid #d1d5db;
+  border: 1.5px solid #a3e635;
   border-radius: 8px;
   padding: 4px 8px;
   font-size: 0.84rem;
   font-weight: 600;
-  color: #111827;
+  color: #365314;
   outline: none;
-  background: #fff;
+  background: #f7fee7;
   transition: border-color 0.15s;
 }
-.xp-nick-input:focus { border-color: #6366f1; }
+.xp-nick-input:focus { border-color: #65a30d; }
 
 .xp-nick-confirm {
   display: flex;
