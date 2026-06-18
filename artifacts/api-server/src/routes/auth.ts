@@ -90,6 +90,29 @@ router.post("/auth/logout", (req: any, res: any) => {
   });
 });
 
+// PATCH /api/auth/nickname
+router.patch("/auth/nickname", async (req: any, res: any) => {
+  const userId = req.session?.userId;
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+  const { nickname } = req.body ?? {};
+  const n = String(nickname ?? "").trim();
+  if (n.length < 1 || n.length > 50) {
+    return res.status(400).json({ error: "Ник: от 1 до 50 символов" });
+  }
+  try {
+    const result = await pool.query(
+      "UPDATE users SET nickname = $1 WHERE id = $2 RETURNING id, username, nickname",
+      [n, userId],
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: "Not found" });
+    const user = result.rows[0];
+    return res.json({ id: user.id, username: user.username, nickname: user.nickname });
+  } catch (err) {
+    req.log.error({ err }, "Nickname update error");
+    return res.status(500).json({ error: "Ошибка сервера" });
+  }
+});
+
 // GET /api/auth/me
 router.get("/auth/me", async (req: any, res: any) => {
   const userId = req.session?.userId;

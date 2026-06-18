@@ -7,6 +7,7 @@ interface AuthCtx {
   login: (username: string, password: string) => Promise<void>;
   register: (username: string, nickname: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  updateNickname: (nickname: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthCtx | null>(null);
@@ -37,8 +38,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }
 
+  async function updateNickname(nickname: string) {
+    const u = await api.updateNickname(nickname);
+    setUser(u);
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateNickname }}>
       {children}
     </AuthContext.Provider>
   );

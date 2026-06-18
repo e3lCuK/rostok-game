@@ -118,6 +118,9 @@ export const api = {
       body: JSON.stringify({ xp }),
     }),
 
+  updateNickname: (nickname: string) =>
+    request<AuthUser>("/auth/nickname", { method: "PATCH", body: JSON.stringify({ nickname }) }),
+
   debugResetAll: () =>
     request<{ success: boolean }>("/game/debug/reset-all", { method: "DELETE" }),
 

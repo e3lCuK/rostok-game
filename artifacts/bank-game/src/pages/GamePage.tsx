@@ -18,7 +18,7 @@ import TreeSVG from "@/components/TreeSVG";
 import FallingGameWater, { GameType } from "@/components/FallingGameWater";
 import ClickGameSun from "@/components/ClickGameSun";
 import FertilizerMatchGame from "@/components/FertilizerMatchGame";
-import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2, HelpCircle, X, LogOut } from "lucide-react";
+import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2, HelpCircle, X, LogOut, Pencil, Check } from "lucide-react";
 import LevelWidget from "@/components/LevelWidget";
 import LevelUpAnimation from "@/components/LevelUpAnimation";
 
@@ -35,7 +35,7 @@ interface Floater {
 }
 
 export default function GamePage({ state, onStateChange }: Props) {
-  const { user, logout } = useAuth();
+  const { user, logout, updateNickname } = useAuth();
   const [now, setNow] = useState(Date.now());
   const [floaters, setFloaters] = useState<Floater[]>([]);
   const [actionLoading, setActionLoading] = useState(false);
@@ -59,6 +59,10 @@ export default function GamePage({ state, onStateChange }: Props) {
   const animParticlesRef = useRef<number[]>([]);
   const [showHelp, setShowHelp] = useState(false);
   const [showXpHistory, setShowXpHistory] = useState(false);
+  const [editingNick, setEditingNick] = useState(false);
+  const [nickInput, setNickInput] = useState("");
+  const [nickSaving, setNickSaving] = useState(false);
+  const [nickError, setNickError] = useState<string | null>(null);
   const [xpModalTab, setXpModalTab] = useState<"history" | "rating">("history");
   const [leaderboard, setLeaderboard] = useState<LeaderboardPlayer[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
@@ -863,7 +867,53 @@ export default function GamePage({ state, onStateChange }: Props) {
               onClick={e => e.stopPropagation()}
             >
               <div className="xp-history-modal-topbar">
-                <span className="xp-history-modal-nick">{user?.nickname ?? user?.username}</span>
+                {editingNick ? (
+                  <div className="xp-nick-edit">
+                    <input
+                      className="xp-nick-input"
+                      value={nickInput}
+                      onChange={e => { setNickInput(e.target.value); setNickError(null); }}
+                      maxLength={50}
+                      autoFocus
+                      onKeyDown={async e => {
+                        if (e.key === "Enter") {
+                          setNickSaving(true);
+                          try { await updateNickname(nickInput); setEditingNick(false); }
+                          catch (err: any) { setNickError(err.message ?? "Ошибка"); }
+                          finally { setNickSaving(false); }
+                        }
+                        if (e.key === "Escape") { setEditingNick(false); setNickError(null); }
+                      }}
+                    />
+                    {nickError && <span className="xp-nick-error">{nickError}</span>}
+                    <button
+                      className="xp-nick-confirm"
+                      disabled={nickSaving}
+                      onClick={async () => {
+                        setNickSaving(true);
+                        try { await updateNickname(nickInput); setEditingNick(false); }
+                        catch (err: any) { setNickError(err.message ?? "Ошибка"); }
+                        finally { setNickSaving(false); }
+                      }}
+                    >
+                      <Check size={14} />
+                    </button>
+                    <button className="xp-nick-cancel" onClick={() => { setEditingNick(false); setNickError(null); }}>
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="xp-nick-row">
+                    <button
+                      className="xp-nick-pencil"
+                      onClick={() => { setNickInput(user?.nickname ?? ""); setEditingNick(true); setNickError(null); }}
+                      title="Изменить ник"
+                    >
+                      <Pencil size={13} />
+                    </button>
+                    <span className="xp-history-modal-nick">{user?.nickname ?? user?.username}</span>
+                  </div>
+                )}
                 <div className="xp-topbar-actions">
                   <button className="xp-history-modal-logout" onClick={logout} title="Выйти">
                     <LogOut size={15} />
