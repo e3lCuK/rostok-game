@@ -664,7 +664,6 @@ export default function GamePage({ state, onStateChange }: Props) {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.35 }}
               >
-                <p className="session-actions-title">Дождитесь следующей сессии</p>
                 <div className="action-buttons-row">
                   {[
                     { key: "water", icon: <Droplets size={22} />, label: "Вода" },
