@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Home, PiggyBank, TrendingUp, Zap, LogOut } from "lucide-react";
+import { Home, PiggyBank, TrendingUp, Zap, LogOut, TreePine } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { api } from "@/lib/api";
 import { AuthProvider, useAuth } from "@/lib/auth";
@@ -119,7 +119,7 @@ function AppShell() {
       <header className="bank-header">
         <div className="bank-header-inner">
           <div className="bank-logo">
-            <span className="bank-logo-icon">🌳</span>
+            <TreePine size={22} className="bank-logo-icon" />
             <span className="bank-logo-text">{APP_NAME}</span>
           </div>
           <div className="bank-header-right">

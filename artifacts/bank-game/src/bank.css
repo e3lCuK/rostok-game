@@ -79,7 +79,7 @@ body {
   gap: 8px;
 }
 
-.bank-logo-icon { font-size: 1.4rem; }
+.bank-logo-icon { color: #65a30d; flex-shrink: 0; }
 
 .bank-logo-text {
   font-size: 1.1rem;
