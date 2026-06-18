@@ -922,7 +922,7 @@ export default function GamePage({ state, onStateChange }: Props) {
                 <button
                   className={`xp-modal-tab${xpModalTab === "history" ? " xp-modal-tab-active" : ""}`}
                   onClick={() => setXpModalTab("history")}
-                >История опыта</button>
+                >История</button>
                 <button
                   className={`xp-modal-tab${xpModalTab === "rating" ? " xp-modal-tab-active" : ""}`}
                   onClick={() => setXpModalTab("rating")}
