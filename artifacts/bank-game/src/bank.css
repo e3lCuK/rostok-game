@@ -996,10 +996,10 @@ body.modal-open {
   justify-content: space-between;
   padding: 7px 10px;
   border-radius: 10px;
-  background: #f9fafb;
+  background: #ecfccb;
   font-size: 0.84rem;
 }
-.xp-history-row-new { background: #f0fdf4; }
+.xp-history-row-new { background: #d9f99d; border: 1px solid #a3e635; }
 .xp-history-date { color: #374151; font-weight: 500; }
 .xp-history-n { color: #9ca3af; font-size: 0.75rem; }
 .xp-history-xp { color: #16a34a; font-weight: 700; }
