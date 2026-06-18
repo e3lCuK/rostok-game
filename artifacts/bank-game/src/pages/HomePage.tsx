@@ -54,7 +54,7 @@ export default function HomePage({ state, notif, onClearNotif }: Props) {
               <Sprout size={13} />
               {TREE_STAGE_NAMES[stage]}
             </span>
-            <span className="tree-growth-pct">Рост дерева: {formatTreeGrowth(treeGrowthMM)}</span>
+            <span className="tree-growth-pct">{formatTreeGrowth(treeGrowthMM)}</span>
           </div>
           <p className="tree-growth-caption">Дерево растёт вместе с активным доходом</p>
         </div>

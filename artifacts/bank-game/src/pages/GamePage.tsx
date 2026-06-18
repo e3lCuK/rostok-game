@@ -570,7 +570,7 @@ export default function GamePage({ state, onStateChange }: Props) {
           <HelpCircle size={20} />
         </button>
 
-        <p className="tree-growth-label">Рост дерева: {formatTreeGrowth(displayGrowthMM)}</p>
+        <p className="tree-growth-label">{formatTreeGrowth(displayGrowthMM)}</p>
 
         <AnimatePresence>
           {levelUpData && (
