@@ -708,9 +708,9 @@ export default function GamePage({ state, onStateChange }: Props) {
               onClick={showCompletionStage ? handleGoToRewards : undefined}
               style={showCompletionStage ? { cursor: "pointer" } : undefined}
             >
-              <p className="session-actions-title">
-                {showCompletionStage ? "Ухаживать" : "Ухаживайте за деревом"}
-              </p>
+              {!showCompletionStage && (
+                <p className="session-actions-title">Ухаживайте за деревом</p>
+              )}
               <div className="action-buttons-row">
                 {[
                   { key: "water" as const, icon: <Droplets size={22} />, label: "Вода", color: "#3b82f6", done: game.water, pct: waterResultPct },
