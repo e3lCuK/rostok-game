@@ -922,13 +922,13 @@ body.modal-open {
   height: 26px;
   border-radius: 50%;
   border: none;
-  background: #dcfce7;
-  color: #16a34a;
+  background: #4d7c0f;
+  color: #f7fee7;
   cursor: pointer;
   flex-shrink: 0;
   transition: background 0.15s;
 }
-.xp-nick-confirm:hover { background: #bbf7d0; }
+.xp-nick-confirm:hover { background: #365314; }
 .xp-nick-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .xp-nick-cancel {
@@ -939,13 +939,13 @@ body.modal-open {
   height: 26px;
   border-radius: 50%;
   border: none;
-  background: #f3f4f6;
-  color: #6b7280;
+  background: #d9f99d;
+  color: #65a30d;
   cursor: pointer;
   flex-shrink: 0;
   transition: background 0.15s;
 }
-.xp-nick-cancel:hover { background: #fee2e2; color: #ef4444; }
+.xp-nick-cancel:hover { background: #bef264; color: #365314; }
 
 .xp-nick-error {
   width: 100%;
