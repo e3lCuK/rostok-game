@@ -3,7 +3,7 @@ interface Props {
 }
 
 export default function GameAreaBg({ raiseGround = false }: Props) {
-  const groundY = raiseGround ? -130 : -115;
+  const groundY = raiseGround ? -120 : -115;
   return (
     <div className="game-area-bg-wrap">
       <svg className="game-area-bg" viewBox="0 0 340 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
