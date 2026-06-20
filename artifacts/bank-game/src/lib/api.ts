@@ -50,6 +50,7 @@ export interface GameStateResponse {
     treeGrowthRemainder: number;
     playerXP: number;
     playerLevel: number;
+    xpHistory?: import("@/lib/engine").XpHistoryEntry[];
   };
   history?: { amount: number; type: "standard" | "active" | "base" | "bonus"; date: string }[];
 }

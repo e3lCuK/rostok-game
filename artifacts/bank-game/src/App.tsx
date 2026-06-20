@@ -190,8 +190,9 @@ function AppShell() {
   const [onboarding, setOnboarding] = useState(false);
   const [notifHome, setNotifHome] = useState(false);
   const [notifStandard, setNotifStandard] = useState(false);
+  const [notifActive, setNotifActive] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const prevHistoryLenRef = useRef(0);
+  const prevActiveHistoryLenRef = useRef(0);
   const prevStdHistoryLenRef = useRef(0);
   const settingsRef = useRef<HTMLDivElement>(null);
 
@@ -217,7 +218,7 @@ function AppShell() {
       }
       let userState: UserState = {
         balances: data.balances!,
-        game: data.game!,
+        game: { ...data.game!, xpHistory: data.game!.xpHistory ?? [] },
         history: data.history!,
       };
       const { state: accrued } = applyOfflineAccrual(userState);
@@ -250,17 +251,30 @@ function AppShell() {
     await loadState();
   }
 
+  function clearPair(t: Tab) {
+    if (t === "home")     { setNotifHome(false); setNotifActive(false); setNotifStandard(false); }
+    if (t === "active")   { setNotifHome(false); setNotifActive(false); }
+    if (t === "standard") { setNotifHome(false); setNotifStandard(false); }
+  }
   function handleStateChange(next: UserState) { setState(next); }
-  function handleTabChange(t: Tab) { setTab(t); }
+  function handleTabChange(t: Tab) { clearPair(t); setTab(t); }
 
   useEffect(() => {
     if (!state) return;
-    const total = state.history.length;
-    const stdTotal = state.history.filter(h => h.type === "standard").length;
-    if (total > prevHistoryLenRef.current && tab !== "home") setNotifHome(true);
-    if (stdTotal > prevStdHistoryLenRef.current && tab !== "standard") setNotifStandard(true);
-    prevHistoryLenRef.current = total;
-    prevStdHistoryLenRef.current = stdTotal;
+    const activeTotal = state.history.filter(h => h.type === "base" || h.type === "bonus").length;
+    const stdTotal    = state.history.filter(h => h.type === "standard").length;
+
+    if (activeTotal > prevActiveHistoryLenRef.current) {
+      if (tab !== "home")   setNotifHome(true);
+      if (tab !== "active") setNotifActive(true);
+    }
+    if (stdTotal > prevStdHistoryLenRef.current) {
+      if (tab !== "home")     setNotifHome(true);
+      if (tab !== "standard") setNotifStandard(true);
+    }
+
+    prevActiveHistoryLenRef.current = activeTotal;
+    prevStdHistoryLenRef.current    = stdTotal;
   }, [state?.history.length]);
 
   if (loading) {
@@ -340,9 +354,9 @@ function AppShell() {
             transition={{ duration: 0.18 }}
             className="bank-page"
           >
-            {tab === "home"     && <HomePage state={state} notif={notifHome} onClearNotif={() => setNotifHome(false)} />}
+            {tab === "home"     && <HomePage state={state} notif={notifHome} onClearNotif={() => { setNotifHome(false); setNotifActive(false); setNotifStandard(false); }} />}
             {tab === "savings"  && <SavingsPage state={state} onTabChange={handleTabChange} />}
-            {tab === "standard" && <StandardPage state={state} notif={notifStandard} onClearNotif={() => setNotifStandard(false)} />}
+            {tab === "standard" && <StandardPage state={state} notif={notifStandard} onClearNotif={() => { setNotifStandard(false); setNotifHome(false); }} />}
             {tab === "active"   && (
               <GamePage state={state} onStateChange={handleStateChange} />
             )}
@@ -352,12 +366,12 @@ function AppShell() {
 
       <nav className="bank-nav">
         {TABS.map(({ id, label, icon: Icon }) => {
-          const hasNotif = (id === "home" && notifHome) || (id === "standard" && notifStandard);
+          const hasNotif = (id === "home" && notifHome) || (id === "standard" && notifStandard) || (id === "active" && notifActive);
           return (
             <button
               key={id}
               className={`bank-nav-btn ${tab === id ? "bank-nav-btn-active" : ""}`}
-              onClick={() => setTab(id)}
+              onClick={() => { clearPair(id); setTab(id); }}
             >
               <span className="bank-nav-icon-wrap">
                 <Icon size={22} strokeWidth={tab === id ? 2.2 : 1.6} />
