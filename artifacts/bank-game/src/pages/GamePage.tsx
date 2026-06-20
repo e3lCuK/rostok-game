@@ -745,6 +745,11 @@ export default function GamePage({ state, onStateChange }: Props) {
                       animate={{ scale: 1 }}
                       transition={{ type: "spring", stiffness: 320, damping: 22 }}
                     >
+                      {(() => {
+                        const pts = [waterResultPct, lightResultPct, fertilizerResultPct];
+                        const avg = Math.round(pts.reduce((s, p) => s + (p ?? 0), 0) / 3);
+                        return <div className="action-btn-fill" style={{ height: `${avg}%`, background: "#92400e" }} />;
+                      })()}
                       <Shovel size={20} />
                       <span>УХОД</span>
                     </motion.button>

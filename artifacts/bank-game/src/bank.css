@@ -1793,6 +1793,8 @@ body.modal-open {
   cursor: pointer;
   animation: care-pulse 1.5s ease-in-out infinite;
   backdrop-filter: blur(4px);
+  position: relative;
+  overflow: hidden;
 }
 
 @keyframes care-pulse {
