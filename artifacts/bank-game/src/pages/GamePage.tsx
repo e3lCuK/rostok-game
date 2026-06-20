@@ -274,7 +274,7 @@ export default function GamePage({ state, onStateChange }: Props) {
     animateGrowth(displayGrowthMMRef.current, newMM);
   }
 
-  async function handleStartSession() {
+  async function handleStartSession(openMinigame?: "water" | "sun" | "fertilizer") {
     if (locked || game.sessionInProgress || actionLoading) return;
     console.log("[Session] Start button clicked, locked:", locked, "inProgress:", game.sessionInProgress);
     setActionLoading(true);
@@ -296,6 +296,7 @@ export default function GamePage({ state, onStateChange }: Props) {
         ...state,
         game: { ...game, sessionInProgress: true, water: false, sun: false, fertilizer: false },
       });
+      if (openMinigame) setActiveMinigame(openMinigame);
     } catch (err: any) {
       const status = err?.status ?? 0;
       if (status === 429) {
@@ -715,7 +716,7 @@ export default function GamePage({ state, onStateChange }: Props) {
                     key={btn.key}
                     className="action-btn-bank"
                     style={locked ? undefined : { "--ac": btn.color } as React.CSSProperties}
-                    onClick={locked ? undefined : handleStartSession}
+                    onClick={locked ? undefined : () => handleStartSession(btn.key)}
                     disabled={locked || actionLoading}
                   >
                     <div className="action-btn-content">
