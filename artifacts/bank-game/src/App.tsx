@@ -246,6 +246,7 @@ function AppShell() {
       throw err;
     }
     setOnboarding(false);
+    setTab("home");
     await loadState();
   }
 
