@@ -87,10 +87,6 @@ function SettingsWidget({ onClose }: { onClose: () => void }) {
   return (
     <div className="settings-widget">
       <div className="settings-icon-row">
-        <button className="settings-action-btn settings-action-logout" onClick={() => logout()} title="Выйти">
-          <LogOut size={18} />
-          <span>Выход</span>
-        </button>
         <button className={`settings-action-btn${panel === "nick" ? " settings-action-active" : ""}`} onClick={() => togglePanel("nick")} title="Сменить ник">
           <Pencil size={18} />
           <span>Ник</span>
@@ -102,6 +98,10 @@ function SettingsWidget({ onClose }: { onClose: () => void }) {
         <button className={`settings-action-btn${panel === "password" ? " settings-action-active" : ""}`} onClick={() => togglePanel("password")} title="Пароль">
           <Lock size={18} />
           <span>Пароль</span>
+        </button>
+        <button className="settings-action-btn settings-action-logout" onClick={() => logout()} title="Выйти">
+          <LogOut size={18} />
+          <span>Выход</span>
         </button>
       </div>
 
