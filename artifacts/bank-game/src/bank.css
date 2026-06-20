@@ -568,6 +568,118 @@ body {
   display: block;
 }
 
+/* ── Tree growth label button ─────────────────────── */
+.tree-growth-label-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font-family: inherit;
+  color: inherit;
+  text-decoration: underline dotted rgba(101, 163, 13, 0.5);
+  text-underline-offset: 3px;
+  transition: color 0.15s, text-decoration-color 0.15s;
+}
+.tree-growth-label-btn:hover {
+  color: #4d7c0f;
+  text-decoration-color: rgba(77, 124, 15, 0.7);
+}
+
+/* ── Tree stages modal ────────────────────────────── */
+.tree-stages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.tree-stage-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #f0fdf4;
+  border-radius: 14px;
+  border: 1.5px solid #d1fae5;
+  transition: background 0.15s;
+}
+
+.tree-stage-row-current {
+  background: #ecfccb;
+  border-color: #a3e635;
+}
+
+.tree-stage-row-done {
+  opacity: 0.6;
+}
+
+.tree-stage-emoji {
+  font-size: 1.6rem;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 2rem;
+  text-align: center;
+}
+
+.tree-stage-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tree-stage-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #365314;
+  margin: 0 0 2px;
+}
+
+.tree-stage-range {
+  font-size: 0.78rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.tree-stage-progress-wrap {
+  margin-top: 7px;
+  height: 5px;
+  border-radius: 99px;
+  background: #d9f99d;
+  overflow: hidden;
+}
+
+.tree-stage-progress-bar {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #65a30d, #84cc16);
+  transition: width 0.4s ease;
+}
+
+.tree-stage-badge {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #4d7c0f;
+  background: #d9f99d;
+  border-radius: 99px;
+  padding: 2px 9px;
+  white-space: nowrap;
+}
+
+.tree-stage-badge-done {
+  background: #e5e7eb;
+  color: #9ca3af;
+}
+
+.tree-stage-hint {
+  text-align: center;
+  font-size: 0.78rem;
+  color: #6b7280;
+  margin: 0;
+  padding-top: 4px;
+  border-top: 1px solid #d9f99d;
+}
+
 @keyframes bg-cloud-drift-left {
   0%, 100% { transform: translateX(0px); }
   50%       { transform: translateX(8px); }

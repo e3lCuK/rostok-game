@@ -9,6 +9,7 @@ import {
   isSessionLocked,
   getNextSessionTime,
   getTreeStage,
+  TREE_STAGE_NAMES,
   getSessionActionsLeft,
   getStreakBonusSeconds,
   SESSION_COOLDOWN_MS,
@@ -36,6 +37,14 @@ interface Floater {
   label: string;
 }
 
+const TREE_STAGE_DATA = [
+  { emoji: "🌱", from: 0,    fromFmt: "0 мм",    toFmt: "49.9 см" },
+  { emoji: "🪴", from: 500,  fromFmt: "50.0 см", toFmt: "1.99 м"  },
+  { emoji: "🌲", from: 2000, fromFmt: "2.00 м",  toFmt: "4.99 м"  },
+  { emoji: "🌳", from: 5000, fromFmt: "5.00 м",  toFmt: "8.49 м"  },
+  { emoji: "🏔️", from: 8500, fromFmt: "8.50 м",  toFmt: null      },
+];
+
 export default function GamePage({ state, onStateChange }: Props) {
   const { user, logout, updateNickname } = useAuth();
   const [now, setNow] = useState(Date.now());
@@ -60,6 +69,7 @@ export default function GamePage({ state, onStateChange }: Props) {
   const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animParticlesRef = useRef<number[]>([]);
   const [showHelp, setShowHelp] = useState(false);
+  const [showTreeInfo, setShowTreeInfo] = useState(false);
   const [showXpHistory, setShowXpHistory] = useState(false);
   const [showStreakWidget, setShowStreakWidget] = useState(() => {
     const todayStr = new Date().toISOString().slice(0, 10);
@@ -583,7 +593,9 @@ export default function GamePage({ state, onStateChange }: Props) {
           <HelpCircle size={20} />
         </button>
 
-        <p className="tree-growth-label">{formatTreeGrowth(displayGrowthMM)}</p>
+        <button className="tree-growth-label tree-growth-label-btn" onClick={() => setShowTreeInfo(true)}>
+          {formatTreeGrowth(displayGrowthMM)}
+        </button>
 
         <AnimatePresence>
           {levelUpData && (
@@ -1015,6 +1027,69 @@ export default function GamePage({ state, onStateChange }: Props) {
                   </div>
                 )
               )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showTreeInfo && (
+          <motion.div
+            className="help-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setShowTreeInfo(false)}
+          >
+            <motion.div
+              className="help-modal"
+              initial={{ y: 32, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 32, opacity: 0 }}
+              transition={{ duration: 0.22 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="help-modal-header">
+                <h3 className="help-modal-title">🌳 Этапы роста дерева</h3>
+                <button className="help-modal-close" onClick={() => setShowTreeInfo(false)}>
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="tree-stages-list">
+                {TREE_STAGE_DATA.map((stage, i) => {
+                  const isCurrent = getTreeStage(displayGrowthMM) === i;
+                  const nextFrom = TREE_STAGE_DATA[i + 1]?.from ?? null;
+                  const isDone = nextFrom !== null && displayGrowthMM >= nextFrom;
+                  const hasProgress = isCurrent && nextFrom !== null;
+                  const progressPct = hasProgress
+                    ? Math.min(100, ((displayGrowthMM - stage.from) / (nextFrom - stage.from)) * 100)
+                    : 0;
+                  return (
+                    <div key={i} className={`tree-stage-row${isCurrent ? " tree-stage-row-current" : ""}${!isCurrent && isDone ? " tree-stage-row-done" : ""}`}>
+                      <span className="tree-stage-emoji">{stage.emoji}</span>
+                      <div className="tree-stage-info">
+                        <p className="tree-stage-name">{TREE_STAGE_NAMES[i]}</p>
+                        <p className="tree-stage-range">
+                          {stage.fromFmt}{stage.toFmt ? ` — ${stage.toFmt}` : " и выше"}
+                        </p>
+                        {hasProgress && (
+                          <div className="tree-stage-progress-wrap">
+                            <div
+                              className="tree-stage-progress-bar"
+                              style={{ width: `${progressPct.toFixed(1)}%` }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                      {isCurrent && <span className="tree-stage-badge">Сейчас</span>}
+                      {!isCurrent && isDone && <span className="tree-stage-badge tree-stage-badge-done">✓</span>}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <p className="tree-stage-hint">1 ₽ активного дохода = 1 мм роста</p>
             </motion.div>
           </motion.div>
         )}
