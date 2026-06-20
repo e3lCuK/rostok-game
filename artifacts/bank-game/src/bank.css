@@ -1573,15 +1573,13 @@ body.modal-open {
 
 @keyframes session-ready-pulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
-  50%       { box-shadow: 0 0 0 14px rgba(74, 222, 128, 0.28); }
+  50%       { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0.28); }
 }
 
 .session-actions-ready {
   animation: session-ready-pulse 1.6s ease-in-out infinite;
-  border-radius: 18px;
+  border-radius: 16px;
   background: rgba(255,255,255,0.18);
-  padding: 8px;
-  margin: -8px;
 }
 
 .session-actions-title {
