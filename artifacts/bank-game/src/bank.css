@@ -533,7 +533,7 @@ body {
 }
 .session-timer svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--text3); }
 .session-timer span { line-height: 1; }
-.session-ready-text { font-size: 0.78rem; font-weight: 700; color: var(--green); }
+.session-ready-text { font-size: 0.78rem; font-weight: 700; color: var(--green); text-align: center; }
 .session-earn-hint { font-size: 0.65rem; color: var(--text3); margin-top: 6px; }
 
 /* Game area */
