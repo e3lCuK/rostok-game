@@ -687,7 +687,7 @@ export default function GamePage({ state, onStateChange }: Props) {
               <motion.div
                 key="start"
                 className="session-actions"
-                style={{ marginTop: storedSessions > 1 ? 6 : 36 }}
+                style={{ marginTop: 6 }}
                 initial={{ opacity: 0, scale: 0.92 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.92 }}
