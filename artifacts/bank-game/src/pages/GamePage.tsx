@@ -67,6 +67,8 @@ export default function GamePage({ state, onStateChange }: Props) {
   const [historyNotif, setHistoryNotif] = useState(false);
   const [levelUpData, setLevelUpData] = useState<{ level: number } | null>(null);
   const [xpGainAmount, setXpGainAmount] = useState<number | null>(null);
+  const [showXpPopup, setShowXpPopup] = useState(false);
+  const [showMmPopup, setShowMmPopup] = useState(false);
   const [activeAnim, setActiveAnim] = useState<GameType | null>(null);
   const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animParticlesRef = useRef<number[]>([]);
@@ -305,14 +307,14 @@ export default function GamePage({ state, onStateChange }: Props) {
   function handleGoToRewards() {
     const px = pendingXpRef.current;
     pendingXpRef.current = null;
+    const scores = sessionScores;
 
-    // Step 1 — tree grow animation + apply MM (с задержкой)
+    // Step 1 — immediately show +XP and +мм popups below icons
+    if (scores && scores.xp > 0) setShowXpPopup(true);
+    if (scores && scores.mm > 0) setShowMmPopup(true);
+
+    // Step 2 — small delay, then apply XP/MM: bar fills, level/growth numbers update
     setTimeout(() => {
-      treeControls.start({
-        scale: [1, 1.20, 1],
-        filter: ["brightness(1)", "brightness(1.65)", "brightness(1)"],
-        transition: { duration: 0.85, ease: "easeInOut" },
-      });
       if (px) {
         const cur = stateRef.current;
         onStateChange({
@@ -327,18 +329,23 @@ export default function GamePage({ state, onStateChange }: Props) {
           },
         });
         animateGrowth(displayGrowthMMRef.current, px.newMM);
+        if (scores) setXpGainAmount(scores.xp);
         if (px.levelUp && px.newLevel) setLevelUpData({ level: px.newLevel });
       }
-    }, 1000);
+    }, 700);
 
-    const scores = sessionScores;
-
-    // Step 2 — XP floater on level widget
+    // Step 3 — tree flashes, popups fade out
     setTimeout(() => {
-      if (scores) setXpGainAmount(scores.xp);
-    }, 3000);
+      treeControls.start({
+        scale: [1, 1.20, 1],
+        filter: ["brightness(1)", "brightness(1.65)", "brightness(1)"],
+        transition: { duration: 0.85, ease: "easeInOut" },
+      });
+      setShowXpPopup(false);
+      setShowMmPopup(false);
+    }, 1400);
 
-    // Step 3 — history highlight + fade widget + open rewards
+    // Step 4 — show rewards
     setTimeout(() => {
       setHistoryHighlight(true);
       setTimeout(() => setHistoryHighlight(false), 2800);
@@ -588,6 +595,19 @@ export default function GamePage({ state, onStateChange }: Props) {
 
         <div className="game-left-widgets">
           <LevelWidget level={game.playerLevel ?? 1} totalXP={game.playerXP ?? 0} xpGain={xpGainAmount} onClick={() => setShowXpHistory(true)} />
+          <AnimatePresence>
+            {showXpPopup && sessionScores && (
+              <motion.div
+                className="reward-popup reward-popup-xp"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+              >
+                +{sessionScores.xp} оп.
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <button
@@ -600,9 +620,24 @@ export default function GamePage({ state, onStateChange }: Props) {
           <HelpCircle size={20} />
         </button>
 
-        <button className="tree-growth-label tree-growth-label-btn" onClick={() => setShowTreeInfo(true)}>
-          {formatTreeGrowth(displayGrowthMM)}
-        </button>
+        <div className="growth-label-wrap">
+          <button className="tree-growth-label tree-growth-label-btn" onClick={() => setShowTreeInfo(true)}>
+            {formatTreeGrowth(displayGrowthMM)}
+          </button>
+          <AnimatePresence>
+            {showMmPopup && sessionScores && sessionScores.mm > 0 && (
+              <motion.div
+                className="reward-popup reward-popup-mm"
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 8 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+              >
+                +{sessionScores.mm} мм.
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         <AnimatePresence>
           {levelUpData && (
