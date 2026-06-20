@@ -20,7 +20,7 @@ import TreeSVG from "@/components/TreeSVG";
 import FallingGameWater, { GameType } from "@/components/FallingGameWater";
 import ClickGameSun from "@/components/ClickGameSun";
 import FertilizerMatchGame from "@/components/FertilizerMatchGame";
-import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2, HelpCircle, X, TreePine } from "lucide-react";
+import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2, HelpCircle, X, TreePine, Shovel } from "lucide-react";
 import LevelWidget from "@/components/LevelWidget";
 import LevelUpAnimation from "@/components/LevelUpAnimation";
 import GameAreaBg from "@/components/GameAreaBg";
@@ -60,6 +60,8 @@ export default function GamePage({ state, onStateChange }: Props) {
   const notInSessionInit = !state.game.sessionInProgress;
   const [showCompletionStage, setShowCompletionStage] = useState(hasPendingInit && notInSessionInit);
   const [showRewards, setShowRewards] = useState(hasPendingInit && notInSessionInit);
+  const [merging, setMerging] = useState(false);
+  const [showCareButton, setShowCareButton] = useState(false);
   const [fadeActivities, setFadeActivities] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false); // collapsed by default
   const [historyNotif, setHistoryNotif] = useState(false);
@@ -148,6 +150,17 @@ export default function GamePage({ state, onStateChange }: Props) {
       setFadeActivities(false);
     }
   }, [state.game.pendingBaseReward, state.game.pendingBonusReward, showCompletionStage]);
+
+  useEffect(() => {
+    if (!showCompletionStage) {
+      setMerging(false);
+      setShowCareButton(false);
+      return;
+    }
+    const t1 = setTimeout(() => setMerging(true), 700);
+    const t2 = setTimeout(() => setShowCareButton(true), 1100);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [showCompletionStage]);
 
   const { balances, game } = state;
   const totalBalance = balances.standard + balances.active;
@@ -713,48 +726,71 @@ export default function GamePage({ state, onStateChange }: Props) {
           </AnimatePresence>
         ) : (
           !showRewards && (
-            <motion.div
-              className={`session-actions ${fadeActivities ? "activities-fade" : ""}${showCompletionStage ? " session-actions-ready" : ""}`}
-              onClick={showCompletionStage ? handleGoToRewards : undefined}
-              style={showCompletionStage ? { cursor: "pointer" } : undefined}
-              initial={{ opacity: 0, scale: 0.92 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="action-buttons-row">
-                {[
-                  { key: "water" as const, icon: <Droplets size={22} />, label: "Вода", color: "#3b82f6", done: game.water, pct: waterResultPct },
-                  { key: "sun" as const, icon: <Sun size={22} />, label: "Свет", color: "#f59e0b", done: game.sun, pct: lightResultPct },
-                  { key: "fertilizer" as const, icon: <Leaf size={22} />, label: "Удобрение", color: "#22c55e", done: game.fertilizer, pct: fertilizerResultPct },
-                ].map(btn => (
-                  <motion.button
-                    key={btn.key}
-                    className={`action-btn-bank ${btn.done ? "action-btn-done" : ""}`}
-                    style={{ "--ac": btn.color, ...(showCompletionStage ? { pointerEvents: "none" } : {}) } as React.CSSProperties}
-                    onClick={!btn.done ? () => setActiveMinigame(btn.key) : undefined}
-                    disabled={!!btn.done || actionLoading}
-                    whileTap={!btn.done ? { scale: 0.91 } : {}}
-                  >
-                    {btn.done ? (
-                      <>
-                        {btn.pct !== null && (
-                          <div className="action-btn-fill" style={{ height: `${btn.pct}%` }} />
-                        )}
-                        <div className="action-btn-top">
-                          <CheckCircle2 size={20} />
-                          <span>{btn.label}</span>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="action-btn-content">
-                        {btn.icon}
-                        <span>{btn.label}</span>
-                      </div>
-                    )}
-                  </motion.button>
-                ))}
-              </div>
-            </motion.div>
+            <AnimatePresence mode="wait">
+              {showCareButton ? (
+                <motion.div
+                  key="care-btn"
+                  className="care-btn-wrap"
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.5, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 320, damping: 22 }}
+                >
+                  <button className="care-btn" onClick={handleGoToRewards}>
+                    <Shovel size={24} />
+                    <span>УХАЖИВАТЬ</span>
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="activity-btns"
+                  className={`session-actions ${fadeActivities ? "activities-fade" : ""}${showCompletionStage && !merging ? " session-actions-ready" : ""}`}
+                  initial={{ opacity: 0, scale: 0.92 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="action-buttons-row">
+                    {([
+                      { key: "water" as const, icon: <Droplets size={22} />, label: "Вода", color: "#3b82f6", done: game.water, pct: waterResultPct },
+                      { key: "sun" as const, icon: <Sun size={22} />, label: "Свет", color: "#f59e0b", done: game.sun, pct: lightResultPct },
+                      { key: "fertilizer" as const, icon: <Leaf size={22} />, label: "Удобрение", color: "#22c55e", done: game.fertilizer, pct: fertilizerResultPct },
+                    ] as const).map((btn, i) => {
+                      const mergeX = [58, 0, -58][i];
+                      return (
+                        <motion.button
+                          key={btn.key}
+                          className={`action-btn-bank ${btn.done ? "action-btn-done" : ""}`}
+                          style={{ "--ac": btn.color, ...(showCompletionStage ? { pointerEvents: "none" } : {}) } as React.CSSProperties}
+                          onClick={!btn.done ? () => setActiveMinigame(btn.key) : undefined}
+                          disabled={!!btn.done || actionLoading}
+                          whileTap={!btn.done ? { scale: 0.91 } : {}}
+                          animate={merging ? { x: mergeX, opacity: 0, scale: 0.3 } : { x: 0, opacity: 1, scale: 1 }}
+                          transition={merging ? { duration: 0.36, ease: "easeIn" } : { duration: 0.2 }}
+                        >
+                          {btn.done ? (
+                            <>
+                              {btn.pct !== null && (
+                                <div className="action-btn-fill" style={{ height: `${btn.pct}%` }} />
+                              )}
+                              <div className="action-btn-top">
+                                <CheckCircle2 size={20} />
+                                <span>{btn.label}</span>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="action-btn-content">
+                              {btn.icon}
+                              <span>{btn.label}</span>
+                            </div>
+                          )}
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           )
         )}
       </div>
