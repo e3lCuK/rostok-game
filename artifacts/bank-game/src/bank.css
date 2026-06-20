@@ -691,11 +691,10 @@ body {
   100% { transform: translateX(0px); }
 }
 @keyframes bg-birds-float {
-  0%   { transform: translateY(0px) translateX(0px); }
-  25%  { transform: translateY(-10px) translateX(6px); }
-  50%  { transform: translateY(-14px) translateX(14px); }
-  75%  { transform: translateY(-7px) translateX(8px); }
-  100% { transform: translateY(0px) translateX(0px); }
+  0%   { transform: translateY(0px)  translateX(0px); }
+  33%  { transform: translateY(-3px) translateX(2px); }
+  66%  { transform: translateY(-2px) translateX(-2px); }
+  100% { transform: translateY(0px)  translateX(0px); }
 }
 @keyframes bg-sun-pulse {
   0%, 100% { transform: scale(1)    rotate(0deg);   opacity: 0.35; }
