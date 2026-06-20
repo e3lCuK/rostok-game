@@ -705,7 +705,7 @@ export default function GamePage({ state, onStateChange }: Props) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="action-buttons-row">
+              <div className={`action-buttons-row${locked ? " activities-disabled" : ""}`}>
                 {([
                   { key: "water", icon: <Droplets size={22} />, label: "Вода", color: "#3b82f6" },
                   { key: "sun",   icon: <Sun size={22} />,      label: "Свет", color: "#f59e0b" },
@@ -714,7 +714,7 @@ export default function GamePage({ state, onStateChange }: Props) {
                   <button
                     key={btn.key}
                     className="action-btn-bank"
-                    style={{ "--ac": locked ? "#9ca3af" : btn.color } as React.CSSProperties}
+                    style={locked ? undefined : { "--ac": btn.color } as React.CSSProperties}
                     onClick={locked ? undefined : handleStartSession}
                     disabled={locked || actionLoading}
                   >
@@ -738,7 +738,7 @@ export default function GamePage({ state, onStateChange }: Props) {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.25 }}
                 >
-                  <div className="action-buttons-row">
+                  <div className="action-buttons-row activities-disabled">
                     {([
                       { key: "water", icon: <Droplets size={22} />, label: "Вода", ox: 76 },
                       { key: "sun",   icon: <Sun size={22} />,      label: "Свет", ox: 0 },
@@ -747,7 +747,6 @@ export default function GamePage({ state, onStateChange }: Props) {
                       <motion.div
                         key={btn.key}
                         className="action-btn-bank"
-                        style={{ "--ac": "#9ca3af" } as React.CSSProperties}
                         initial={{ opacity: 0, x: btn.ox, scale: 0.7 }}
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         transition={{ type: "spring", stiffness: 260, damping: 22, delay: i * 0.05 }}
