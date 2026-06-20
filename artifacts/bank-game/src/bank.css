@@ -2471,6 +2471,7 @@ body.modal-open {
   flex-direction: column;
   gap: 10px;
   text-align: center;
+  margin-top: -10px;
 }
 
 .onboarding-info-text {
