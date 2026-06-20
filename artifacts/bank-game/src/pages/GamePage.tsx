@@ -557,7 +557,7 @@ export default function GamePage({ state, onStateChange }: Props) {
 
       {/* Tree + game area */}
       <div className="game-area" ref={gameAreaRef}>
-        <GameAreaBg groundY={-117} skyOffset={20} />
+        <GameAreaBg groundY={-117} skyOffset={12} />
 
         {floaters.map(fl => (
           <div key={fl.id} className="game-floater" style={{ left: fl.x, top: fl.y }}>
