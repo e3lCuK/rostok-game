@@ -200,6 +200,9 @@ export default function GamePage({ state, onStateChange }: Props) {
   const locked = isSessionLocked(game.lastSessionTime, now);
   const nextTime = getNextSessionTime(game.lastSessionTime);
   const msLeft = nextTime ? Math.max(0, nextTime - now) : null;
+  const chargePercent = locked && msLeft !== null
+    ? Math.min(100, Math.round(((SESSION_COOLDOWN_MS - msLeft) / SESSION_COOLDOWN_MS) * 100))
+    : 100;
   const sessionMax = balances.active * 0.15 / 365 / 3;
   const actionsLeft = getSessionActionsLeft(game);
 
@@ -548,7 +551,14 @@ export default function GamePage({ state, onStateChange }: Props) {
         <div className="session-counter-left">
           <p className="session-counter-label">Статус сессии</p>
           <div className={`session-status-badge ${showCompletionStage && !showRewards ? "session-status-ready" : locked ? "session-status-locked" : "session-status-ready"}`}>
-            {game.sessionInProgress || (showCompletionStage && !showRewards) ? "В процессе" : locked ? "Перезарядка" : "Готова"}
+            {game.sessionInProgress || (showCompletionStage && !showRewards) ? "В процессе" : locked ? (
+              <svg width="34" height="16" viewBox="0 0 34 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="0.5" y="0.5" width="28" height="15" rx="3" stroke="#ef4444" strokeWidth="1.2"/>
+                <rect x="29" y="5" width="4.5" height="6" rx="2" fill="#ef4444"/>
+                <rect x="2" y="2" width={Math.round(24 * chargePercent / 100)} height="12" rx="2" fill="#fca5a5"/>
+                <text x="15" y="11.5" textAnchor="middle" fontSize="7" fontWeight="700" fill="#b91c1c" fontFamily="sans-serif">{chargePercent}%</text>
+              </svg>
+            ) : "Готова"}
           </div>
         </div>
 
@@ -747,7 +757,7 @@ export default function GamePage({ state, onStateChange }: Props) {
                     >
                       {(() => {
                         const pts = [waterResultPct, lightResultPct, fertilizerResultPct];
-                        const avg = Math.round(pts.reduce((s, p) => s + (p ?? 0), 0) / 3);
+                        const avg = Math.round(pts.reduce<number>((s, p) => s + (p ?? 0), 0) / 3);
                         return <div className="action-btn-fill" style={{ height: `${avg}%`, background: "#92400e" }} />;
                       })()}
                       <Shovel size={20} />
