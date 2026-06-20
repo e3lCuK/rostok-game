@@ -265,12 +265,12 @@ function AppShell() {
     const stdTotal    = state.history.filter(h => h.type === "standard").length;
 
     if (activeTotal > prevActiveHistoryLenRef.current) {
-      if (tab !== "home")   setNotifHome(true);
-      if (tab !== "active") setNotifActive(true);
+      if (tab !== "home" && tab !== "active") setNotifHome(true);
+      if (tab !== "active" && tab !== "home") setNotifActive(true);
     }
     if (stdTotal > prevStdHistoryLenRef.current) {
-      if (tab !== "home")     setNotifHome(true);
-      if (tab !== "standard") setNotifStandard(true);
+      if (tab !== "home" && tab !== "standard") setNotifHome(true);
+      if (tab !== "standard" && tab !== "home") setNotifStandard(true);
     }
 
     prevActiveHistoryLenRef.current = activeTotal;
