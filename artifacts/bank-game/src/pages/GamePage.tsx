@@ -20,7 +20,7 @@ import TreeSVG from "@/components/TreeSVG";
 import FallingGameWater, { GameType } from "@/components/FallingGameWater";
 import ClickGameSun from "@/components/ClickGameSun";
 import FertilizerMatchGame from "@/components/FertilizerMatchGame";
-import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2, HelpCircle, X, TreePine, Shovel, Lock } from "lucide-react";
+import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2, HelpCircle, X, Shovel, Lock } from "lucide-react";
 import LevelWidget from "@/components/LevelWidget";
 import LevelUpAnimation from "@/components/LevelUpAnimation";
 import GameAreaBg from "@/components/GameAreaBg";
@@ -999,7 +999,7 @@ export default function GamePage({ state, onStateChange, notif, onClearNotif }: 
             >
               <div className="xp-history-modal-topbar">
                 <div className="xp-nick-row">
-                  <TreePine size={15} className="xp-nick-tree-icon" />
+                  <span className="xp-nick-tree-icon">🌳</span>
                   <span className="xp-history-modal-nick">{user?.nickname ?? user?.username}</span>
                 </div>
                 <button className="help-modal-close" onClick={() => setShowXpHistory(false)}>✕</button>
