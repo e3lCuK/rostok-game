@@ -948,7 +948,10 @@ body.modal-open {
 }
 
 .reward-popup-mm {
-  margin-top: 4px;
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
   text-align: center;
 }
 .level-widget-wrap {
