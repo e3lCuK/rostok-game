@@ -2858,6 +2858,10 @@ body.modal-open {
   background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
 }
 
+.collect-btn-all {
+  background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+}
+
 .collect-btn:hover:not(:disabled) {
   opacity: 0.92;
 }

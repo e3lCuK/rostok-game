@@ -391,6 +391,64 @@ router.post("/game/session/action", requireAuth, async (req: any, res) => {
   }
 });
 
+// POST /api/game/session/claimAll — claim both base and bonus in one request
+router.post("/game/session/claimAll", requireAuth, async (req: any, res) => {
+  const userId = req.userId;
+  try {
+    const gameRow = await pool.query("SELECT * FROM game_state WHERE user_id = $1", [userId]);
+    if (gameRow.rows.length === 0) return res.status(404).json({ error: "Account not found" });
+
+    const g = gameRow.rows[0];
+    const baseAmount = parseFloat(g.pending_base_reward) || 0;
+    const bonusAmount = parseFloat(g.pending_bonus_reward) || 0;
+    const totalAmount = baseAmount + bonusAmount;
+
+    if (totalAmount <= 0) {
+      return res.status(409).json({ error: "Nothing to claim" });
+    }
+
+    const earnedDate = new Date().toLocaleDateString("ru-RU");
+
+    // Apply tree growth for combined amount
+    const wholeMM = Math.floor(totalAmount);
+    const growRemainder = totalAmount - wholeMM;
+    let newGrowthMM = (parseInt(g.tree_growth_mm) || 0) + wholeMM;
+    let newGrowthRemainder = (parseFloat(g.tree_growth_remainder) || 0) + growRemainder;
+    if (newGrowthRemainder >= 1) {
+      const extraMM = Math.floor(newGrowthRemainder);
+      newGrowthMM += extraMM;
+      newGrowthRemainder -= extraMM;
+    }
+
+    await pool.query(
+      `UPDATE game_state SET pending_base_reward = 0, pending_bonus_reward = 0, tree_growth_mm = $2, tree_growth_remainder = $3, updated_at = NOW() WHERE user_id = $1`,
+      [userId, newGrowthMM, newGrowthRemainder],
+    );
+    await pool.query(
+      `UPDATE accounts SET active_balance = active_balance + $1, active_earned = active_earned + $1 WHERE user_id = $2`,
+      [totalAmount, userId],
+    );
+    if (baseAmount > 0) {
+      await pool.query(
+        `INSERT INTO income_history(user_id, amount, type, earned_date) VALUES($1, $2, 'base', $3)`,
+        [userId, baseAmount, earnedDate],
+      );
+    }
+    if (bonusAmount > 0) {
+      await pool.query(
+        `INSERT INTO income_history(user_id, amount, type, earned_date) VALUES($1, $2, 'bonus', $3)`,
+        [userId, bonusAmount, earnedDate],
+      );
+    }
+
+    req.log.info({ baseAmount, bonusAmount, totalAmount, newGrowthMM }, "All rewards claimed");
+    return res.json({ success: true, totalAmount, baseAmount, bonusAmount, treeGrowthMM: newGrowthMM, treeGrowthRemainder: newGrowthRemainder });
+  } catch (err) {
+    req.log.error({ err }, "Error claiming all rewards");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // POST /api/game/session/claim — claim base or bonus reward
 router.post("/game/session/claim", requireAuth, async (req: any, res) => {
   const userId = req.userId;

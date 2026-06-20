@@ -53,8 +53,7 @@ export default function GamePage({ state, onStateChange, notif, onClearNotif }: 
   const [floaters, setFloaters] = useState<Floater[]>([]);
   const [actionLoading, setActionLoading] = useState(false);
   const [activeMinigame, setActiveMinigame] = useState<GameType | null>(null);
-  const [claimingBase, setClaimingBase] = useState(false);
-  const [claimingBonus, setClaimingBonus] = useState(false);
+  const [claiming, setClaiming] = useState(false);
   const [waterResultPct, setWaterResultPct] = useState<number | null>(null);
   const [lightResultPct, setLightResultPct] = useState<number | null>(null);
   const [fertilizerResultPct, setFertilizerResultPct] = useState<number | null>(null);
@@ -462,63 +461,36 @@ export default function GamePage({ state, onStateChange, notif, onClearNotif }: 
     }
   }
 
-  async function handleClaimBase() {
-    if (claimingBase || pendingBase <= 0) return;
-    setClaimingBase(true);
+  async function handleClaimAll() {
+    if (claiming || (pendingBase <= 0 && pendingBonus <= 0)) return;
+    setClaiming(true);
     try {
-      const result = await api.claim("base");
-      const amount = result.amount ?? 0;
+      const result = await api.claimAll();
+      const total = result.totalAmount ?? 0;
       const rect = gameAreaRef.current?.getBoundingClientRect();
-      addFloater(`+${formatRub(amount)}`, (rect?.width ?? 200) / 2, 40);
+      addFloater(`+${formatRub(total)}`, (rect?.width ?? 200) / 2, 40);
       const cur = stateRef.current;
+      const today = new Date().toLocaleDateString("ru-RU");
+      const newHistory = [...cur.history];
+      if ((result.baseAmount ?? 0) > 0)
+        newHistory.push({ date: today, amount: result.baseAmount, type: "base" as const });
+      if ((result.bonusAmount ?? 0) > 0)
+        newHistory.push({ date: today, amount: result.bonusAmount, type: "bonus" as const });
       onStateChange({
         ...cur,
         balances: {
           ...cur.balances,
-          active: cur.balances.active + amount,
-          activeEarned: cur.balances.activeEarned + amount,
+          active: cur.balances.active + total,
+          activeEarned: cur.balances.activeEarned + total,
         },
-        game: { ...cur.game, pendingBaseReward: 0 },
-        history: [
-          ...cur.history,
-          { date: new Date().toLocaleDateString("ru-RU"), amount, type: "base" as const },
-        ].slice(-30),
+        game: { ...cur.game, pendingBaseReward: 0, pendingBonusReward: 0 },
+        history: newHistory.slice(-30),
       });
-      if ((stateRef.current.game.pendingBonusReward ?? 0) === 0) setHistoryNotif(true);
+      setHistoryNotif(true);
     } catch (err) {
-      console.error("[Claim base] failed:", err);
+      console.error("[Claim all] failed:", err);
     } finally {
-      setClaimingBase(false);
-    }
-  }
-
-  async function handleClaimBonus() {
-    if (claimingBonus || pendingBonus <= 0) return;
-    setClaimingBonus(true);
-    try {
-      const result = await api.claim("bonus");
-      const amount = result.amount ?? 0;
-      const rect = gameAreaRef.current?.getBoundingClientRect();
-      addFloater(`+${formatRub(amount)}`, (rect?.width ?? 200) / 2 + 60, 40);
-      const cur = stateRef.current;
-      onStateChange({
-        ...cur,
-        balances: {
-          ...cur.balances,
-          active: cur.balances.active + amount,
-          activeEarned: cur.balances.activeEarned + amount,
-        },
-        game: { ...cur.game, pendingBonusReward: 0 },
-        history: [
-          ...cur.history,
-          { date: new Date().toLocaleDateString("ru-RU"), amount, type: "bonus" as const },
-        ].slice(-30),
-      });
-      if ((stateRef.current.game.pendingBaseReward ?? 0) === 0) setHistoryNotif(true);
-    } catch (err) {
-      console.error("[Claim bonus] failed:", err);
-    } finally {
-      setClaimingBonus(false);
+      setClaiming(false);
     }
   }
 
@@ -850,32 +822,17 @@ export default function GamePage({ state, onStateChange, notif, onClearNotif }: 
       {/* Reward claim area — shown after session complete */}
       {showRewards && (pendingBase > 0 || pendingBonus > 0) && (
         <div className="collect-area">
-          {pendingBase > 0 && (
-            <motion.button
-              className="collect-btn collect-btn-base"
-              onClick={handleClaimBase}
-              disabled={claimingBase}
-              whileTap={{ scale: 0.95 }}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            >
-              Базовый доход ×{pendingStoredSessions} +{formatRub(pendingBase)}
-            </motion.button>
-          )}
-          {pendingBonus > 0 && (
-            <motion.button
-              className="collect-btn collect-btn-bonus"
-              onClick={handleClaimBonus}
-              disabled={claimingBonus}
-              whileTap={{ scale: 0.95 }}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.07 }}
-            >
-              Бонус за активность ×{pendingStoredSessions} +{formatRub(pendingBonus)}
-            </motion.button>
-          )}
+          <motion.button
+            className="collect-btn collect-btn-all"
+            onClick={handleClaimAll}
+            disabled={claiming}
+            whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+          >
+            Доход за сессию ×{pendingStoredSessions}&nbsp;&nbsp;+{formatRub(pendingBase + pendingBonus)}
+          </motion.button>
         </div>
       )}
 

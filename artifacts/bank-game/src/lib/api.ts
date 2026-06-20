@@ -109,6 +109,12 @@ export const api = {
       { method: "POST", body: JSON.stringify({ type }) },
     ),
 
+  claimAll: () =>
+    request<{ success: boolean; totalAmount: number; baseAmount: number; bonusAmount: number; treeGrowthMM: number; treeGrowthRemainder: number }>(
+      "/game/session/claimAll",
+      { method: "POST" },
+    ),
+
   debugAddSessions: () =>
     request<{ success: boolean; missedSessions: number; lastSessionTime: number }>("/game/debug/add-sessions", {
       method: "POST",
