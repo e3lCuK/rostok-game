@@ -206,8 +206,8 @@ export default function FertilizerMatchGame({ onComplete, bonusSeconds = 0 }: Pr
       await sleep(150);
 
       if (newCount >= MAX_MATCHES) {
-        endGame();
-        return;
+        matchRef.current = MAX_MATCHES;
+        setMatchCount(MAX_MATCHES);
       }
 
       if (!hasMove(cur)) {

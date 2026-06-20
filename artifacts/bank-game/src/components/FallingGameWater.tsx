@@ -80,6 +80,7 @@ type Drop = ReturnType<typeof makeDrop>;
 
 export default function FallingGameWater({ type = "water", onComplete, bonusSeconds = 0 }: Props) {
   const totalMs = GAME_MS + bonusSeconds * 1000;
+  const bonusDrops = Math.round((bonusSeconds * 1000 / GAME_MS) * TOTAL_DROPS);
   const canvasRef  = useRef<HTMLCanvasElement>(null);
   const barX       = useRef(W / 2);
   const doneRef    = useRef(false);
@@ -116,7 +117,14 @@ export default function FallingGameWater({ type = "water", onComplete, bonusSeco
     canvas.addEventListener("touchmove", onTouchMove, { passive: false });
     canvas.style.cursor = "none";
 
-    const drops: Drop[] = Array.from({ length: TOTAL_DROPS }, (_, i) => makeDrop(i, totalMs));
+    const baseDuration = GAME_MS;
+    const baseDrops: Drop[] = Array.from({ length: TOTAL_DROPS }, (_, i) => makeDrop(i, baseDuration));
+    const extraDrops: Drop[] = Array.from({ length: bonusDrops }, (_, i) => {
+      const d = makeDrop(TOTAL_DROPS + i, bonusSeconds * 1000);
+      d.spawnAt = GAME_MS + Math.max(0, d.spawnAt);
+      return d;
+    });
+    const drops: Drop[] = [...baseDrops, ...extraDrops];
     let catches = 0;
     let spawned = 0;
     let rafId   = 0;
@@ -142,7 +150,7 @@ export default function FallingGameWater({ type = "water", onComplete, bonusSeco
       doneRef.current = true;
       cancelAnimationFrame(rafId);
       canvas.style.cursor = "default";
-      const skillScore = Math.min(80, Math.round((catches / TOTAL_DROPS) * 80));
+      const skillScore = Math.min(80, Math.round((Math.min(catches, TOTAL_DROPS) / TOTAL_DROPS) * 80));
       console.log(`[FallingGame:${type}] catches: ${catches}/${TOTAL_DROPS}  skillScore: ${skillScore}/80`);
       setResult({ catches, skillScore });
     }
