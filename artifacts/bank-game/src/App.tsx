@@ -267,7 +267,7 @@ function AppShell() {
 
     if (activeTotal > prevActiveHistoryLenRef.current) {
       if (tab !== "home") setNotifHome(true);
-      if (tab !== "active") setNotifActive(true);
+      setNotifActive(true);
     }
     if (stdTotal > prevStdHistoryLenRef.current) {
       if (tab !== "home") setNotifHome(true);
