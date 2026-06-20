@@ -253,7 +253,7 @@ function AppShell() {
   }
 
   function clearPair(t: Tab) {
-    if (t === "home")     { setNotifHome(false); setNotifActive(false); setNotifStandard(false); }
+    if (t === "home")     { setNotifActive(false); setNotifStandard(false); }
     if (t === "active")   { setNotifHome(false); setNotifActive(false); }
     if (t === "standard") { setNotifHome(false); setNotifStandard(false); }
   }
@@ -367,7 +367,7 @@ function AppShell() {
 
       <nav className="bank-nav">
         {TABS.map(({ id, label, icon: Icon }) => {
-          const hasNotif = (id === "home" && notifHome) || (id === "standard" && notifStandard) || (id === "active" && notifActive);
+          const hasNotif = (id === "home" && notifHome && tab !== "home") || (id === "standard" && notifStandard) || (id === "active" && notifActive);
           return (
             <button
               key={id}
