@@ -20,7 +20,7 @@ import TreeSVG from "@/components/TreeSVG";
 import FallingGameWater, { GameType } from "@/components/FallingGameWater";
 import ClickGameSun from "@/components/ClickGameSun";
 import FertilizerMatchGame from "@/components/FertilizerMatchGame";
-import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2, HelpCircle, X, TreePine, Shovel } from "lucide-react";
+import { Droplets, Sun, Leaf, Clock, Play, CheckCircle2, HelpCircle, X, TreePine, Shovel, Lock } from "lucide-react";
 import LevelWidget from "@/components/LevelWidget";
 import LevelUpAnimation from "@/components/LevelUpAnimation";
 import GameAreaBg from "@/components/GameAreaBg";
@@ -70,6 +70,7 @@ export default function GamePage({ state, onStateChange }: Props) {
   const [showXpPopup, setShowXpPopup] = useState(false);
   const [showMmPopup, setShowMmPopup] = useState(false);
   const [careClicked, setCareClicked] = useState(false);
+  const [showActivityGhost, setShowActivityGhost] = useState(false);
   const [activeAnim, setActiveAnim] = useState<GameType | null>(null);
   const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animParticlesRef = useRef<number[]>([]);
@@ -159,6 +160,7 @@ export default function GamePage({ state, onStateChange }: Props) {
       setMerging(false);
       setShowCareButton(false);
       setCareClicked(false);
+      setShowActivityGhost(false);
       return;
     }
     const t1 = setTimeout(() => setMerging(true), 2200);
@@ -348,7 +350,12 @@ export default function GamePage({ state, onStateChange }: Props) {
       setShowMmPopup(false);
     }, 1400);
 
-    // Step 4 — right after animations: care button exits, income buttons appear
+    // Step 3b — care button exits, 3 ghost buttons split in
+    setTimeout(() => {
+      setShowActivityGhost(true);
+    }, 800);
+
+    // Step 4 — ghost buttons exit, income buttons appear
     setTimeout(() => {
       setHistoryHighlight(true);
       setTimeout(() => setHistoryHighlight(false), 2800);
@@ -693,30 +700,14 @@ export default function GamePage({ state, onStateChange }: Props) {
             {locked ? (
               <motion.div
                 key="cooldown"
-                className="session-actions activities-disabled"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                className="session-actions-locked"
+                initial={{ opacity: 0, scale: 0.92 }}
+                animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.35 }}
               >
-                <div className="action-buttons-row">
-                  {[
-                    { key: "water", icon: <Droplets size={22} />, label: "Вода" },
-                    { key: "sun",   icon: <Sun size={22} />,      label: "Свет" },
-                    { key: "fertilizer", icon: <Leaf size={22} />, label: "Удобрение" },
-                  ].map(btn => (
-                    <div
-                      key={btn.key}
-                      className="action-btn-bank"
-                      style={{ "--ac": "#9ca3af" } as React.CSSProperties}
-                    >
-                      <div className="action-btn-content">
-                        {btn.icon}
-                        <span>{btn.label}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <Lock size={18} />
+                <span>Перезарядка</span>
               </motion.div>
             ) : (
               <motion.div
@@ -744,9 +735,9 @@ export default function GamePage({ state, onStateChange }: Props) {
         ) : (
           !showRewards && (
             <AnimatePresence mode="wait">
-              {showCareButton ? (
+              {showActivityGhost ? (
                 <motion.div
-                  key="care-btn"
+                  key="activity-ghost"
                   className="session-actions"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -754,12 +745,43 @@ export default function GamePage({ state, onStateChange }: Props) {
                   transition={{ duration: 0.25 }}
                 >
                   <div className="action-buttons-row">
+                    {([
+                      { key: "water", icon: <Droplets size={22} />, label: "Вода", ox: 76 },
+                      { key: "sun",   icon: <Sun size={22} />,      label: "Свет", ox: 0 },
+                      { key: "fertilizer", icon: <Leaf size={22} />, label: "Удобрение", ox: -76 },
+                    ]).map((btn, i) => (
+                      <motion.div
+                        key={btn.key}
+                        className="action-btn-bank"
+                        style={{ "--ac": "#9ca3af" } as React.CSSProperties}
+                        initial={{ opacity: 0, x: btn.ox, scale: 0.7 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        transition={{ type: "spring", stiffness: 260, damping: 22, delay: i * 0.05 }}
+                      >
+                        <div className="action-btn-content">
+                          {btn.icon}
+                          <span>{btn.label}</span>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              ) : showCareButton ? (
+                <motion.div
+                  key="care-btn"
+                  className="session-actions"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="action-buttons-row">
                     <div className="action-btn-bank" style={{ opacity: 0, pointerEvents: "none" }} />
                     <button
                       className={`care-btn${careClicked ? " care-btn-clicked" : ""}`}
                       onClick={careClicked ? undefined : handleGoToRewards}
                     >
-                      {(() => {
+                      {!careClicked && (() => {
                         const pts = [waterResultPct, lightResultPct, fertilizerResultPct];
                         const avg = Math.round(pts.reduce<number>((s, p) => s + (p ?? 0), 0) / 3);
                         return <div className="action-btn-fill" style={{ height: `${avg}%`, background: "#92400e" }} />;
