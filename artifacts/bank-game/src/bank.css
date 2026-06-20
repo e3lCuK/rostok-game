@@ -1573,7 +1573,7 @@ body.modal-open {
 
 @keyframes session-ready-pulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
-  50%       { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0.28); }
+  50%       { box-shadow: 0 0 0 14px rgba(74, 222, 128, 0.28); }
 }
 
 .session-actions-ready {
