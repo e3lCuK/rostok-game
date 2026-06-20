@@ -653,24 +653,6 @@ export default function GamePage({ state, onStateChange }: Props) {
           )}
         </div>
 
-        <AnimatePresence>
-          {showCompletionStage && !showRewards && sessionScores && (
-            <motion.div
-              className="xp-result-badge"
-              initial={{ opacity: 0, x: 14 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              transition={{ type: "spring", stiffness: 220, damping: 22, delay: 0.15 }}
-            >
-              <div className="xp-result-row">
-                <span className="xp-result-xp">+{sessionScores.xp} оп.</span>
-              </div>
-              {sessionScores.mm > 0 && (
-                <span className="xp-result-mm">+{sessionScores.mm} мм.</span>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {!game.sessionInProgress && !showCompletionStage ? (
           <AnimatePresence mode="wait">
