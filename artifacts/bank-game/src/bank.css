@@ -1035,38 +1035,36 @@ body.modal-open {
 }
 .xp-rating-subtab:hover { background: #f0fdf4; color: #365314; border-color: #86efac; }
 .xp-rating-subtab-active { background: #dcfce7 !important; color: #15803d !important; border-color: #4ade80 !important; }
-.xp-rating-subtab-capital { flex: 1; }
-
-.xp-rating-divider {
+.xp-rating-subtab-capital {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  position: relative;
-  padding: 0 2px;
+  gap: 2px;
 }
-.xp-rating-divider::before {
-  content: "";
-  display: block;
+
+.xp-rating-divider {
   width: 1px;
-  height: 100%;
   background: #d1fae5;
-  position: absolute;
-  top: 0;
-  left: 50%;
+  flex-shrink: 0;
+  align-self: stretch;
+  margin: 2px 3px;
 }
-.xp-rating-divider-label {
-  font-size: 0.62rem;
-  color: #86efac;
-  background: #fff;
-  position: relative;
-  z-index: 1;
-  padding: 1px 3px;
-  white-space: nowrap;
-  line-height: 1.2;
-  text-align: center;
+
+.coin-stack {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 0;
+  line-height: 1;
 }
+.coin-stack-item {
+  display: block;
+  font-size: 0.75rem;
+  line-height: 0.85;
+  margin-top: -3px;
+}
+.coin-stack-item:first-child { margin-top: 0; }
 
 .xp-topbar-actions {
   display: flex;

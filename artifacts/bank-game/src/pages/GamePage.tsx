@@ -1023,19 +1023,24 @@ export default function GamePage({ state, onStateChange, notif, onClearNotif }: 
                     className={`xp-rating-subtab${ratingSubTab === "xp" ? " xp-rating-subtab-active" : ""}`}
                     onClick={() => setRatingSubTab("xp")}
                   >🏆 Опыт</button>
-                  <div className="xp-rating-divider">
-                    <span className="xp-rating-divider-label">по вкладу</span>
-                  </div>
+                  <div className="xp-rating-divider" />
                   {([
-                    { id: "small",  label: "Малый" },
-                    { id: "medium", label: "Средний" },
-                    { id: "large",  label: "Крупный" },
+                    { id: "small",  label: "Малый",   coins: 1 },
+                    { id: "medium", label: "Средний",  coins: 2 },
+                    { id: "large",  label: "Крупный",  coins: 3 },
                   ] as const).map(s => (
                     <button
                       key={s.id}
                       className={`xp-rating-subtab xp-rating-subtab-capital${ratingSubTab === s.id ? " xp-rating-subtab-active" : ""}`}
                       onClick={() => setRatingSubTab(s.id)}
-                    >{s.label}</button>
+                    >
+                      <span className="coin-stack">
+                        {Array.from({ length: s.coins }).map((_, i) => (
+                          <span key={i} className="coin-stack-item">🪙</span>
+                        ))}
+                      </span>
+                      <span>{s.label}</span>
+                    </button>
                   ))}
                 </div>
               )}
