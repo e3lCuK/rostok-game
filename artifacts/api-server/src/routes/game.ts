@@ -582,10 +582,10 @@ router.get("/game/leaderboard", requireAuth, async (req: any, res) => {
   const type = (req.query.type as string) || "xp";
   const me = req.userId;
 
-  const capitalBounds: Record<string, [number, number]> = {
-    small:  [1,       15000],
-    medium: [15001,   150000],
-    large:  [150001,  99999999],
+  const depositBounds: Record<string, [number, number]> = {
+    small:  [0,      49999],
+    medium: [50000,  499999],
+    large:  [500000, 999999999],
   };
 
   try {
@@ -604,7 +604,7 @@ router.get("/game/leaderboard", requireAuth, async (req: any, res) => {
       `;
       queryParams = [];
     } else {
-      const [minCap, maxCap] = capitalBounds[type] ?? [0, 99999999];
+      const [minDep, maxDep] = depositBounds[type] ?? [0, 999999999];
       queryText = `
         SELECT u.id::text AS user_id, u.nickname,
                gs.player_xp, gs.player_level, gs.streak_days,
@@ -612,11 +612,12 @@ router.get("/game/leaderboard", requireAuth, async (req: any, res) => {
         FROM game_state gs
         JOIN users u ON u.id::text = gs.user_id
         JOIN accounts a ON a.user_id = gs.user_id
-        WHERE a.starting_capital >= $1 AND a.starting_capital <= $2
+        WHERE (a.standard_balance + a.active_balance) >= $1
+          AND (a.standard_balance + a.active_balance) <= $2
         ORDER BY gs.tree_growth_mm DESC
         LIMIT 100
       `;
-      queryParams = [minCap, maxCap];
+      queryParams = [minDep, maxDep];
     }
 
     const result = await pool.query(queryText, queryParams);
