@@ -22,10 +22,7 @@ export default function HomePage({ state, notif, onClearNotif }: Props) {
   const [historyOpen, setHistoryOpen] = useState(false);
 
   useEffect(() => {
-    if (notif) {
-      setHistoryOpen(true);
-      onClearNotif?.();
-    }
+    if (notif) onClearNotif?.();
   }, []);
   const { standard, active, standardEarned, activeEarned } = state.balances;
   const totalBalance = standard + active;
