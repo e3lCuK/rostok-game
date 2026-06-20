@@ -349,6 +349,11 @@ export default function GamePage({ state, onStateChange }: Props) {
 
     animParticlesRef.current = [14, 22, 31, 40, 50, 60, 69, 78];
     setActiveAnim(type);
+    void treeControls.start({
+      filter: ["brightness(1)", "brightness(1.35)", "brightness(1)"],
+      scale: [1, 1.04, 1],
+      transition: { duration: 0.38, ease: "easeInOut" },
+    });
     if (animTimerRef.current) clearTimeout(animTimerRef.current);
     animTimerRef.current = setTimeout(() => setActiveAnim(null), 2800);
 
