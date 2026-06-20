@@ -583,9 +583,9 @@ router.get("/game/leaderboard", requireAuth, async (req: any, res) => {
   const me = req.userId;
 
   const depositBounds: Record<string, [number, number]> = {
-    small:  [0,      49999],
-    medium: [50000,  499999],
-    large:  [500000, 999999999],
+    small:  [1,       15000],
+    medium: [15001,   150000],
+    large:  [150001,  999999999],
   };
 
   try {
@@ -612,8 +612,8 @@ router.get("/game/leaderboard", requireAuth, async (req: any, res) => {
         FROM game_state gs
         JOIN users u ON u.id::text = gs.user_id
         JOIN accounts a ON a.user_id = gs.user_id
-        WHERE (a.standard_balance + a.active_balance) >= $1
-          AND (a.standard_balance + a.active_balance) <= $2
+        WHERE a.starting_capital >= $1
+          AND a.starting_capital <= $2
         ORDER BY gs.tree_growth_mm DESC
         LIMIT 100
       `;
