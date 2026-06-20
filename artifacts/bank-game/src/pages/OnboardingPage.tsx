@@ -56,8 +56,8 @@ export default function OnboardingPage({ onComplete }: Props) {
           Вкладывать ничего не нужно — это учебный счёт. В дальнейшем рост дерева зависит от того, сколько вы готовы выделить под накопления: чем больше сумма, тем заметнее влияние на скорость роста (хоть и совсем незначительное).
         </p>
         <div className="onboarding-rates">
-          <span className="onboarding-rate-badge">📈 Стандартный вклад — <strong>12%</strong> годовых</span>
-          <span className="onboarding-rate-badge">⚡ Активный вклад — <strong>15%</strong> годовых</span>
+          <span className="onboarding-rate-badge">Стандартный вклад — <strong>12%</strong> годовых</span>
+          <span className="onboarding-rate-badge">Активный вклад — <strong>15%</strong> годовых</span>
         </div>
       </div>
 
