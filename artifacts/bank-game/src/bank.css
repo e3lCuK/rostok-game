@@ -2462,6 +2462,38 @@ body.modal-open {
   max-width: 280px;
 }
 
+.onboarding-info {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.onboarding-info-text {
+  font-size: 0.82rem;
+  color: var(--text2);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.onboarding-rates {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.onboarding-rate-badge {
+  font-size: 0.8rem;
+  color: var(--text2);
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 5px 10px;
+  display: block;
+}
+
 .onboarding-options {
   display: flex;
   flex-direction: column;

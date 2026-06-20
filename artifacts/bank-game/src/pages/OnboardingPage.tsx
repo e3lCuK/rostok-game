@@ -51,6 +51,16 @@ export default function OnboardingPage({ onComplete }: Props) {
         <p className="onboarding-sub">Капитал делится поровну между стандартным и активным вкладами</p>
       </div>
 
+      <div className="onboarding-info">
+        <p className="onboarding-info-text">
+          Вкладывать ничего не нужно — это учебный счёт. В дальнейшем рост дерева зависит от того, сколько вы готовы выделить под накопления: чем больше сумма, тем заметнее влияние на скорость роста (хоть и совсем незначительное).
+        </p>
+        <div className="onboarding-rates">
+          <span className="onboarding-rate-badge">📈 Стандартный вклад — <strong>12%</strong> годовых</span>
+          <span className="onboarding-rate-badge">⚡ Активный вклад — <strong>15%</strong> годовых</span>
+        </div>
+      </div>
+
       <div className="onboarding-options">
         {CAPITAL_OPTIONS.map((cap) => {
           const half = cap / 2;
