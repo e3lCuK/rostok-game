@@ -1823,6 +1823,12 @@ body.modal-open {
   50%       { box-shadow: 0 0 0 10px rgba(146,64,14,0.18); }
 }
 
+.care-btn-clicked {
+  animation: none;
+  cursor: default;
+  pointer-events: none;
+}
+
 .session-actions-title {
   font-size: 0.8rem;
   color: #2d5a1a;

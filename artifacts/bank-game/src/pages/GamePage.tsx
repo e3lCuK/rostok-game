@@ -69,6 +69,7 @@ export default function GamePage({ state, onStateChange }: Props) {
   const [xpGainAmount, setXpGainAmount] = useState<number | null>(null);
   const [showXpPopup, setShowXpPopup] = useState(false);
   const [showMmPopup, setShowMmPopup] = useState(false);
+  const [careClicked, setCareClicked] = useState(false);
   const [activeAnim, setActiveAnim] = useState<GameType | null>(null);
   const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animParticlesRef = useRef<number[]>([]);
@@ -157,6 +158,7 @@ export default function GamePage({ state, onStateChange }: Props) {
     if (!showCompletionStage) {
       setMerging(false);
       setShowCareButton(false);
+      setCareClicked(false);
       return;
     }
     const t1 = setTimeout(() => setMerging(true), 2200);
@@ -309,7 +311,8 @@ export default function GamePage({ state, onStateChange }: Props) {
     pendingXpRef.current = null;
     const scores = sessionScores;
 
-    // Step 1 — immediately show +XP and +мм popups below icons
+    // Step 1 — immediately show +XP and +мм popups; freeze care button
+    setCareClicked(true);
     if (scores && scores.xp > 0) setShowXpPopup(true);
     if (scores && scores.mm > 0) setShowMmPopup(true);
 
@@ -345,16 +348,12 @@ export default function GamePage({ state, onStateChange }: Props) {
       setShowMmPopup(false);
     }, 1400);
 
-    // Step 4 — show rewards
+    // Step 4 — right after animations: care button exits, income buttons appear
     setTimeout(() => {
       setHistoryHighlight(true);
       setTimeout(() => setHistoryHighlight(false), 2800);
-      setFadeActivities(true);
-      setTimeout(() => {
-        setShowRewards(true);
-        setFadeActivities(false);
-      }, 400);
-    }, 4000);
+      setShowRewards(true);
+    }, 2200);
   }
 
   function handleMinigameComplete(type: GameType, skillScore: number) {
@@ -757,10 +756,10 @@ export default function GamePage({ state, onStateChange }: Props) {
                   <div className="action-buttons-row">
                     <div className="action-btn-bank" style={{ opacity: 0, pointerEvents: "none" }} />
                     <motion.button
-                      className="care-btn"
-                      onClick={handleGoToRewards}
+                      className={`care-btn${careClicked ? " care-btn-clicked" : ""}`}
+                      onClick={careClicked ? undefined : handleGoToRewards}
                       initial={{ scale: 0.5 }}
-                      animate={{ scale: 1 }}
+                      animate={{ scale: careClicked ? 0.92 : 1, opacity: careClicked ? 0.75 : 1 }}
                       transition={{ type: "spring", stiffness: 320, damping: 22 }}
                     >
                       {(() => {
