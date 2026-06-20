@@ -680,14 +680,14 @@ body {
 
 @keyframes bg-cloud-drift-left {
   0%   { transform: translateX(0px); }
-  40%  { transform: translateX(30px); }
-  70%  { transform: translateX(18px); }
+  45%  { transform: translateX(55px); }
+  75%  { transform: translateX(34px); }
   100% { transform: translateX(0px); }
 }
 @keyframes bg-cloud-drift-right {
   0%   { transform: translateX(0px); }
-  35%  { transform: translateX(-26px); }
-  65%  { transform: translateX(-10px); }
+  40%  { transform: translateX(-50px); }
+  70%  { transform: translateX(-22px); }
   100% { transform: translateX(0px); }
 }
 @keyframes bg-birds-float {
@@ -712,8 +712,8 @@ body {
   100% { transform: translateY(0px)   translateX(0px); }
 }
 
-.bg-cloud-left  { animation: bg-cloud-drift-left  7s  ease-in-out infinite; transform-origin: center; }
-.bg-cloud-right { animation: bg-cloud-drift-right  9s  ease-in-out infinite; transform-origin: center; }
+.bg-cloud-left  { animation: bg-cloud-drift-left  24s ease-in-out infinite; transform-origin: center; }
+.bg-cloud-right { animation: bg-cloud-drift-right 32s ease-in-out infinite; transform-origin: center; }
 .bg-birds       { animation: bg-birds-float         5s  ease-in-out infinite; transform-origin: center; }
 .bg-sun         { animation: bg-sun-pulse            4s  ease-in-out infinite; transform-origin: 298px 18px; }
 .bg-butterfly   { animation: bg-butterfly-float      5s  ease-in-out infinite; transform-origin: center; }
