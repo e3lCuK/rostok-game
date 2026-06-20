@@ -759,7 +759,7 @@ export default function GamePage({ state, onStateChange }: Props) {
                       className={`care-btn${careClicked ? " care-btn-clicked" : ""}`}
                       onClick={careClicked ? undefined : handleGoToRewards}
                       initial={{ scale: 0.5 }}
-                      animate={{ scale: careClicked ? 0.92 : 1, opacity: careClicked ? 0.75 : 1 }}
+                      animate={{ scale: 1, opacity: 1 }}
                       transition={{ type: "spring", stiffness: 320, damping: 22 }}
                     >
                       {(() => {
