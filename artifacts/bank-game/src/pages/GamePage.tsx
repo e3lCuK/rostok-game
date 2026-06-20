@@ -781,8 +781,8 @@ export default function GamePage({ state, onStateChange }: Props) {
                           onClick={!btn.done ? () => setActiveMinigame(btn.key) : undefined}
                           disabled={!!btn.done || actionLoading}
                           whileTap={!btn.done ? { scale: 0.91 } : {}}
-                          animate={merging ? { x: mergeX, opacity: 0, scale: 0.3 } : { x: 0, opacity: 1, scale: 1 }}
-                          transition={merging ? { duration: 0.36, ease: "easeIn" } : { duration: 0.2 }}
+                          animate={merging ? { x: mergeX, opacity: 0, scale: 0.6 } : { x: 0, opacity: 1, scale: 1 }}
+                          transition={merging ? { duration: 0.55, ease: "easeInOut" } : { duration: 0.2 }}
                         >
                           {btn.done ? (
                             <>
