@@ -1,9 +1,8 @@
 interface Props {
-  raiseGround?: boolean;
+  groundY?: number;
 }
 
-export default function GameAreaBg({ raiseGround = false }: Props) {
-  const groundY = raiseGround ? -120 : -115;
+export default function GameAreaBg({ groundY = -115 }: Props) {
   return (
     <div className="game-area-bg-wrap">
       <svg className="game-area-bg" viewBox="0 0 340 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -46,7 +45,7 @@ export default function GameAreaBg({ raiseGround = false }: Props) {
           <line x1="0" y1="-3" x2="4" y2="-10" stroke="#78350f" strokeWidth="0.8" />
         </g>
 
-        {/* Ground group — raised high so it aligns with activity buttons */}
+        {/* Ground group */}
         <g transform={`translate(0,${groundY})`}>
           {/* Ground strip */}
           <ellipse cx="170" cy="295" rx="175" ry="18" fill="#8dc63f" opacity="0.35" />
