@@ -582,10 +582,11 @@ router.get("/game/leaderboard", requireAuth, async (req: any, res) => {
   const type = (req.query.type as string) || "xp";
   const me = req.userId;
 
+  // Capital options: 20_000 / 200_000 / 2_000_000
   const depositBounds: Record<string, [number, number]> = {
-    small:  [1,       15000],
-    medium: [15001,   150000],
-    large:  [150001,  999999999],
+    small:  [1,       50000],
+    medium: [50001,   500000],
+    large:  [500001,  999999999],
   };
 
   try {
