@@ -80,7 +80,6 @@ type Drop = ReturnType<typeof makeDrop>;
 
 export default function FallingGameWater({ type = "water", onComplete, bonusSeconds = 0 }: Props) {
   const totalMs = GAME_MS + bonusSeconds * 1000;
-  const bonusDrops = Math.round((bonusSeconds * 1000 / GAME_MS) * TOTAL_DROPS);
   const canvasRef  = useRef<HTMLCanvasElement>(null);
   const barX       = useRef(W / 2);
   const doneRef    = useRef(false);
@@ -117,16 +116,11 @@ export default function FallingGameWater({ type = "water", onComplete, bonusSeco
     canvas.addEventListener("touchmove", onTouchMove, { passive: false });
     canvas.style.cursor = "none";
 
-    const baseDuration = GAME_MS;
-    const baseDrops: Drop[] = Array.from({ length: TOTAL_DROPS }, (_, i) => makeDrop(i, baseDuration));
-    const extraDrops: Drop[] = Array.from({ length: bonusDrops }, (_, i) => {
-      const d = makeDrop(TOTAL_DROPS + i, bonusSeconds * 1000);
-      d.spawnAt = GAME_MS + Math.max(0, d.spawnAt);
-      return d;
-    });
-    const drops: Drop[] = [...baseDrops, ...extraDrops];
+    const SPAWN_INTERVAL = GAME_MS / TOTAL_DROPS;
+    const activeDrops: Drop[] = [];
+    let dropIdCounter = 0;
     let catches = 0;
-    let spawned = 0;
+    let lastSpawnAt = -SPAWN_INTERVAL;
     let rafId   = 0;
     let lastTs  = -1;
     const start = performance.now();
@@ -162,13 +156,21 @@ export default function FallingGameWater({ type = "water", onComplete, bonusSeco
       lastTs        = ts;
       const elapsed = ts - start;
 
-      while (spawned < TOTAL_DROPS && drops[spawned].spawnAt <= elapsed) {
-        drops[spawned].active = true;
-        spawned++;
+      if (elapsed >= totalMs) { finish(); return; }
+
+      while (elapsed - lastSpawnAt >= SPAWN_INTERVAL) {
+        lastSpawnAt += SPAWN_INTERVAL;
+        activeDrops.push({
+          id: dropIdCounter++,
+          x: DROP_R + Math.random() * (W - DROP_R * 2),
+          y: -DROP_R,
+          spawnAt: lastSpawnAt,
+          active: true,
+          caught: false,
+        });
       }
 
-      let activeCnt = 0;
-      for (const d of drops) {
+      for (const d of activeDrops) {
         if (!d.active) continue;
         d.y += DROP_SPEED * dt;
         if (!d.caught && d.y + DROP_R >= BAR_Y - BAR_H && d.y - DROP_R <= BAR_Y + BAR_H) {
@@ -177,21 +179,18 @@ export default function FallingGameWater({ type = "water", onComplete, bonusSeco
             d.caught = true;
             d.active = false;
             catches++;
-            setCatchCount(catches);
+            setCatchCount(Math.min(catches, TOTAL_DROPS));
             continue;
           }
         }
-        if (d.y - DROP_R > H) { d.active = false; continue; }
-        activeCnt++;
+        if (d.y - DROP_R > H) { d.active = false; }
       }
-
-      if (elapsed >= totalMs && activeCnt === 0) { finish(); return; }
 
       ctx.clearRect(0, 0, W, H);
       ctx.fillStyle = cfg.bg;
       ctx.fillRect(0, 0, W, H);
 
-      for (const d of drops) {
+      for (const d of activeDrops) {
         if (!d.active) continue;
         ctx.beginPath();
         ctx.arc(d.x + 2, d.y + 2, DROP_R, 0, Math.PI * 2);
