@@ -86,6 +86,7 @@ export default function GamePage({ state, onStateChange, notif, onClearNotif }: 
     return seen !== todayStr && notMidSession && noPending;
   });
   const [xpModalTab, setXpModalTab] = useState<"history" | "rating">("history");
+  const [ratingSubTab, setRatingSubTab] = useState<"xp" | "small" | "medium" | "large">("xp");
   const [leaderboard, setLeaderboard] = useState<LeaderboardPlayer[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
 
@@ -98,11 +99,11 @@ export default function GamePage({ state, onStateChange, notif, onClearNotif }: 
   useEffect(() => {
     if (!showXpHistory || xpModalTab !== "rating") return;
     setLeaderboardLoading(true);
-    api.getLeaderboard()
+    api.getLeaderboard(ratingSubTab)
       .then(r => setLeaderboard(r.players))
       .catch(() => {})
       .finally(() => setLeaderboardLoading(false));
-  }, [showXpHistory, xpModalTab]);
+  }, [showXpHistory, xpModalTab, ratingSubTab]);
 
   const [sessionScores, setSessionScores] = useState<{ water: number; sun: number; fert: number; xp: number; base: number; bonus: number; mm: number } | null>(null);
   const [historyHighlight, setHistoryHighlight] = useState(false);
@@ -1016,6 +1017,23 @@ export default function GamePage({ state, onStateChange, notif, onClearNotif }: 
                 >Рейтинг</button>
               </div>
 
+              {xpModalTab === "rating" && (
+                <div className="xp-rating-subtabs">
+                  {([
+                    { id: "xp",     label: "Опыт" },
+                    { id: "small",  label: "Малый" },
+                    { id: "medium", label: "Средний" },
+                    { id: "large",  label: "Крупный" },
+                  ] as const).map(s => (
+                    <button
+                      key={s.id}
+                      className={`xp-rating-subtab${ratingSubTab === s.id ? " xp-rating-subtab-active" : ""}`}
+                      onClick={() => setRatingSubTab(s.id)}
+                    >{s.label}</button>
+                  ))}
+                </div>
+              )}
+
               {xpModalTab === "history" && (
                 (game.xpHistory ?? []).length === 0 ? (
                   <p className="xp-history-empty">Пока нет сессий</p>
@@ -1048,11 +1066,24 @@ export default function GamePage({ state, onStateChange, notif, onClearNotif }: 
                         </span>
                         <div className="xp-lb-info">
                           <span className="xp-lb-nick">{p.nickname}{p.isMe ? " (я)" : ""}</span>
-                          <span className="xp-lb-meta">Ур.{p.level} · {p.streakDays > 0 ? `🔥${p.streakDays}д` : "нет стрика"}</span>
+                          {ratingSubTab === "xp"
+                            ? <span className="xp-lb-meta">Ур.{p.level} · {p.streakDays > 0 ? `🔥${p.streakDays}д` : "нет стрика"}</span>
+                            : <span className="xp-lb-meta">Ур.{p.level} · {p.streakDays > 0 ? `🔥${p.streakDays}д` : "нет стрика"}</span>
+                          }
                         </div>
                         <div className="xp-lb-right">
-                          <span className="xp-lb-xp">{p.xp} оп.</span>
-                          {p.lastSessionXp > 0 && <span className="xp-lb-last">+{p.lastSessionXp}</span>}
+                          {ratingSubTab === "xp" ? (
+                            <>
+                              <span className="xp-lb-xp">{p.xp} оп.</span>
+                              {p.lastSessionXp > 0 && <span className="xp-lb-last">+{p.lastSessionXp}</span>}
+                            </>
+                          ) : (
+                            <span className="xp-lb-xp">
+                              {p.treeGrowthMM >= 1000
+                                ? `${(p.treeGrowthMM / 1000).toFixed(2)} м`
+                                : `${p.treeGrowthMM} мм`}
+                            </span>
+                          )}
                         </div>
                       </div>
                     ))}

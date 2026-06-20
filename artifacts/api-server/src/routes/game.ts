@@ -113,9 +113,9 @@ router.post("/game/init", requireAuth, async (req: any, res) => {
     }
 
     await pool.query(
-      `INSERT INTO accounts(user_id, standard_balance, active_balance, standard_earned, active_earned, total_days_earned, start_date)
-       VALUES($1, $2, $3, 0, 0, 0, $4)`,
-      [userId, half, half, now],
+      `INSERT INTO accounts(user_id, standard_balance, active_balance, standard_earned, active_earned, total_days_earned, start_date, starting_capital)
+       VALUES($1, $2, $3, 0, 0, 0, $4, $5)`,
+      [userId, half, half, now, capital],
     );
     await pool.query(
       `INSERT INTO game_state(user_id, last_session_time, session_in_progress, current_session_water, current_session_sun, current_session_fertilizer, pending_base_reward, pending_bonus_reward)
@@ -577,24 +577,49 @@ router.post("/game/debug/add-xp", requireAuth, async (req: any, res) => {
   }
 });
 
-// GET /api/game/leaderboard — top players by XP
+// GET /api/game/leaderboard — top players, type=xp|small|medium|large
 router.get("/game/leaderboard", requireAuth, async (req: any, res) => {
+  const type = (req.query.type as string) || "xp";
+  const me = req.userId;
+
+  const capitalBounds: Record<string, [number, number]> = {
+    small:  [1,       15000],
+    medium: [15001,   150000],
+    large:  [150001,  99999999],
+  };
+
   try {
-    const result = await pool.query(`
-      SELECT
-        u.id::text AS user_id,
-        u.nickname,
-        gs.player_xp,
-        gs.player_level,
-        gs.streak_days,
-        gs.tree_growth_mm,
-        gs.xp_history
-      FROM game_state gs
-      JOIN users u ON u.id::text = gs.user_id
-      ORDER BY gs.player_xp DESC
-      LIMIT 100
-    `);
-    const me = req.userId;
+    let queryText: string;
+    let queryParams: any[];
+
+    if (type === "xp") {
+      queryText = `
+        SELECT u.id::text AS user_id, u.nickname,
+               gs.player_xp, gs.player_level, gs.streak_days,
+               gs.tree_growth_mm, gs.xp_history
+        FROM game_state gs
+        JOIN users u ON u.id::text = gs.user_id
+        ORDER BY gs.player_xp DESC
+        LIMIT 100
+      `;
+      queryParams = [];
+    } else {
+      const [minCap, maxCap] = capitalBounds[type] ?? [0, 99999999];
+      queryText = `
+        SELECT u.id::text AS user_id, u.nickname,
+               gs.player_xp, gs.player_level, gs.streak_days,
+               gs.tree_growth_mm, gs.xp_history
+        FROM game_state gs
+        JOIN users u ON u.id::text = gs.user_id
+        JOIN accounts a ON a.user_id = gs.user_id
+        WHERE a.starting_capital >= $1 AND a.starting_capital <= $2
+        ORDER BY gs.tree_growth_mm DESC
+        LIMIT 100
+      `;
+      queryParams = [minCap, maxCap];
+    }
+
+    const result = await pool.query(queryText, queryParams);
     const rows = result.rows.map((r: any, i: number) => {
       const history: { xp: number; date: string; n: number }[] = r.xp_history ?? [];
       const lastSession = history.length > 0 ? history[0] : null;

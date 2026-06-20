@@ -144,8 +144,8 @@ export const api = {
   debugResetAll: () =>
     request<{ success: boolean }>("/game/debug/reset-all", { method: "DELETE" }),
 
-  getLeaderboard: () =>
-    request<{ players: LeaderboardPlayer[] }>("/game/leaderboard"),
+  getLeaderboard: (type: "xp" | "small" | "medium" | "large" = "xp") =>
+    request<{ players: LeaderboardPlayer[] }>(`/game/leaderboard?type=${type}`),
 };
 
 export interface LeaderboardPlayer {
