@@ -1147,21 +1147,12 @@ export default function GamePage({ state, onStateChange, notif, onClearNotif }: 
                           {stage.fromFmt}{stage.toFmt ? ` — ${stage.toFmt}` : " и выше"}
                         </p>
                         {hasProgress && (
-                          <>
-                            <div className="tree-stage-progress-wrap">
-                              <div
-                                className="tree-stage-progress-bar"
-                                style={{ width: `${progressPct.toFixed(1)}%` }}
-                              />
-                            </div>
-                            <p className="tree-stage-progress-text">
-                              {displayGrowthMM - stage.from} мм / {nextFrom! - stage.from} мм
-                              <span className="tree-stage-progress-pct"> ({progressPct.toFixed(1)}%)</span>
-                            </p>
-                          </>
-                        )}
-                        {!hasProgress && isCurrent && (
-                          <p className="tree-stage-progress-text">{displayGrowthMM - stage.from} мм — максимальный этап</p>
+                          <div className="tree-stage-progress-wrap">
+                            <div
+                              className="tree-stage-progress-bar"
+                              style={{ width: `${progressPct.toFixed(1)}%` }}
+                            />
+                          </div>
                         )}
                       </div>
                       {isCurrent && <span className="tree-stage-badge">Сейчас</span>}
