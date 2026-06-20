@@ -40,9 +40,9 @@ interface Floater {
 const TREE_STAGE_DATA = [
   { emoji: "🌱", from: 0,    fromFmt: "0 мм",    toFmt: "49.9 см" },
   { emoji: "🌿", from: 500,  fromFmt: "50.0 см", toFmt: "1.99 м"  },
-  { emoji: "🌲", from: 2000, fromFmt: "2.00 м",  toFmt: "4.99 м"  },
+  { emoji: "🌴", from: 2000, fromFmt: "2.00 м",  toFmt: "4.99 м"  },
   { emoji: "🌳", from: 5000, fromFmt: "5.00 м",  toFmt: "8.49 м"  },
-  { emoji: "🎄", from: 8500, fromFmt: "8.50 м",  toFmt: null      },
+  { emoji: "🌲", from: 8500, fromFmt: "8.50 м",  toFmt: null      },
 ];
 
 export default function GamePage({ state, onStateChange }: Props) {
