@@ -610,35 +610,7 @@ export default function GamePage({ state, onStateChange, notif, onClearNotif }: 
 
         <div className="growth-label-wrap">
           <button className="tree-growth-label tree-growth-label-btn" onClick={() => setShowTreeInfo(true)}>
-            {(() => {
-              const stageData = TREE_STAGE_DATA[currentStage];
-              const nextStageData = TREE_STAGE_DATA[currentStage + 1];
-              const stageFrom = stageData.from;
-              const stageTo = nextStageData?.from ?? null;
-              const progressPct = stageTo
-                ? Math.min(100, ((displayGrowthMM - stageFrom) / (stageTo - stageFrom)) * 100)
-                : 100;
-              const mmInStage = displayGrowthMM - stageFrom;
-              const mmToNext = stageTo ? stageTo - displayGrowthMM : null;
-              return (
-                <span className="tree-stage-compact">
-                  <span className="tree-stage-compact-title">
-                    {stageData.emoji} {TREE_STAGE_NAMES[currentStage]}
-                  </span>
-                  <span className="tree-stage-compact-sub">
-                    {mmToNext !== null
-                      ? `+${mmInStage} мм · до след. ${mmToNext} мм`
-                      : `+${mmInStage} мм · максимальный этап`}
-                  </span>
-                  <span className="tree-stage-compact-bar-wrap">
-                    <span
-                      className="tree-stage-compact-bar"
-                      style={{ width: `${progressPct.toFixed(1)}%` }}
-                    />
-                  </span>
-                </span>
-              );
-            })()}
+            {formatTreeGrowth(displayGrowthMM)}
           </button>
           <AnimatePresence>
             {showMmPopup && sessionScores && sessionScores.mm > 0 && (
