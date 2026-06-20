@@ -246,6 +246,7 @@ function AppShell() {
       }
       throw err;
     }
+    setNotifHome(false); setNotifActive(false); setNotifStandard(false);
     setOnboarding(false);
     setTab("home");
     await loadState();
@@ -387,7 +388,12 @@ function AppShell() {
         <DebugPanel
           state={state}
           onStateChange={handleStateChange}
-          onResetAccount={() => { setState(null); setOnboarding(true); }}
+          onResetAccount={() => {
+            setNotifHome(false); setNotifActive(false); setNotifStandard(false);
+            prevActiveHistoryLenRef.current = 0;
+            prevStdHistoryLenRef.current = 0;
+            setState(null); setOnboarding(true);
+          }}
           onSignOut={logout}
         />
       )}
