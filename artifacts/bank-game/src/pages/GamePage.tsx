@@ -697,44 +697,38 @@ export default function GamePage({ state, onStateChange }: Props) {
 
         {!game.sessionInProgress && !showCompletionStage ? (
           <AnimatePresence mode="wait">
-            {locked ? (
-              <motion.div
-                key="cooldown"
-                className="session-actions-locked"
-                initial={{ opacity: 0, scale: 0.92 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.35 }}
-              >
-                <Lock size={18} />
-                <span>Перезарядка</span>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="start"
-                className="session-actions"
-                style={{ marginTop: 6 }}
-                initial={{ opacity: 0, scale: 0.92 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.92 }}
-                transition={{ duration: 0.35 }}
-              >
-                <div className="action-buttons-row" style={{ minHeight: 68, alignItems: "center", justifyContent: "center" }}>
+            <motion.div
+              key={locked ? "cooldown" : "ready"}
+              className="session-actions"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="action-buttons-row">
+                {([
+                  { key: "water", icon: <Droplets size={22} />, label: "Вода", color: "#3b82f6" },
+                  { key: "sun",   icon: <Sun size={22} />,      label: "Свет", color: "#f59e0b" },
+                  { key: "fertilizer", icon: <Leaf size={22} />, label: "Удобрение", color: "#22c55e" },
+                ] as const).map(btn => (
                   <button
-                    className="start-session-btn"
-                    onClick={handleStartSession}
-                    disabled={actionLoading}
+                    key={btn.key}
+                    className="action-btn-bank"
+                    style={{ "--ac": locked ? "#9ca3af" : btn.color } as React.CSSProperties}
+                    onClick={locked ? undefined : handleStartSession}
+                    disabled={locked || actionLoading}
                   >
-                    <Play size={16} />
-                    {storedSessions > 1 ? "Начать суперсессию" : "Начать сессию"}
+                    <div className="action-btn-content">
+                      {btn.icon}
+                      <span>{btn.label}</span>
+                    </div>
                   </button>
-                </div>
-              </motion.div>
-            )}
+                ))}
+              </div>
+            </motion.div>
           </AnimatePresence>
         ) : (
-          !showRewards && (
-            <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait">
               {showActivityGhost ? (
                 <motion.div
                   key="activity-ghost"
@@ -842,7 +836,6 @@ export default function GamePage({ state, onStateChange }: Props) {
                 </motion.div>
               )}
             </AnimatePresence>
-          )
         )}
       </div>
 
