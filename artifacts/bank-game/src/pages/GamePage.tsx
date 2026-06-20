@@ -730,15 +730,26 @@ export default function GamePage({ state, onStateChange }: Props) {
               {showCareButton ? (
                 <motion.div
                   key="care-btn"
-                  className="care-btn-wrap"
-                  initial={{ scale: 0.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.5, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 320, damping: 22 }}
+                  className="session-actions"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25 }}
                 >
-                  <button className="care-btn" onClick={handleGoToRewards}>
-                    <Shovel size={26} />
-                  </button>
+                  <div className="action-buttons-row">
+                    <div className="action-btn-bank" style={{ opacity: 0, pointerEvents: "none" }} />
+                    <motion.button
+                      className="care-btn"
+                      onClick={handleGoToRewards}
+                      initial={{ scale: 0.5 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 320, damping: 22 }}
+                    >
+                      <Shovel size={20} />
+                      <span>УХОД</span>
+                    </motion.button>
+                    <div className="action-btn-bank" style={{ opacity: 0, pointerEvents: "none" }} />
+                  </div>
                 </motion.div>
               ) : (
                 <motion.div
