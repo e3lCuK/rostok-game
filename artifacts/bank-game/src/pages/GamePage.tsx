@@ -157,8 +157,8 @@ export default function GamePage({ state, onStateChange }: Props) {
       setShowCareButton(false);
       return;
     }
-    const t1 = setTimeout(() => setMerging(true), 700);
-    const t2 = setTimeout(() => setShowCareButton(true), 2800);
+    const t1 = setTimeout(() => setMerging(true), 2200);
+    const t2 = setTimeout(() => setShowCareButton(true), 2700);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [showCompletionStage]);
 
