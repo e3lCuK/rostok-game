@@ -689,6 +689,17 @@ body {
   transition: width 0.4s ease;
 }
 
+.tree-stage-progress-text {
+  font-size: 0.72rem;
+  color: #4d7c0f;
+  margin-top: 4px;
+  font-weight: 600;
+}
+.tree-stage-progress-pct {
+  color: #86efac;
+  font-weight: 500;
+}
+
 .tree-stage-badge {
   flex-shrink: 0;
   font-size: 0.72rem;
