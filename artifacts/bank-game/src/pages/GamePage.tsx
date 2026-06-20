@@ -708,10 +708,13 @@ export default function GamePage({ state, onStateChange }: Props) {
           </AnimatePresence>
         ) : (
           !showRewards && (
-            <div
+            <motion.div
               className={`session-actions ${fadeActivities ? "activities-fade" : ""}${showCompletionStage ? " session-actions-ready" : ""}`}
               onClick={showCompletionStage ? handleGoToRewards : undefined}
               style={showCompletionStage ? { cursor: "pointer" } : undefined}
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
             >
               <div className="action-buttons-row">
                 {[
@@ -746,7 +749,7 @@ export default function GamePage({ state, onStateChange }: Props) {
                   </motion.button>
                 ))}
               </div>
-            </div>
+            </motion.div>
           )
         )}
       </div>
