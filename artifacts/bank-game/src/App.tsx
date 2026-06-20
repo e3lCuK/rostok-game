@@ -253,8 +253,8 @@ function AppShell() {
   }
 
   function clearPair(t: Tab) {
-    if (t === "active")   { setNotifHome(false); setNotifActive(false); }
-    if (t === "standard") { setNotifHome(false); setNotifStandard(false); }
+    if (t === "active")   { setNotifActive(false); }
+    if (t === "standard") { setNotifStandard(false); }
   }
   function handleStateChange(next: UserState) { setState(next); }
   function handleTabChange(t: Tab) { clearPair(t); setTab(t); }
