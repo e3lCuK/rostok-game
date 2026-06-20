@@ -627,9 +627,9 @@ export default function GamePage({ state, onStateChange }: Props) {
             {showMmPopup && sessionScores && sessionScores.mm > 0 && (
               <motion.div
                 className="reward-popup reward-popup-mm"
-                initial={{ opacity: 0, y: -6 }}
+                initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 8 }}
+                exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.35, ease: "easeOut" }}
               >
                 +{sessionScores.mm} мм.
