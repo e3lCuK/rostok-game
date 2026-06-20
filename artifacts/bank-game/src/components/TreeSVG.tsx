@@ -58,28 +58,30 @@ export default function TreeSVG({ stage, size = 160 }: TreeSVGProps) {
       <ellipse cx="116" cy="52" rx="18" ry="16" fill="#6dbf67" />
       <ellipse cx="100" cy="34" rx="20" ry="18" fill="#7acc74" />
     </svg>,
-    // Stage 4 — mighty tree
-    <svg key={4} viewBox="0 -22 200 262" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
-      <ellipse cx="100" cy="238" rx="88" ry="13" fill="#8B6340" opacity="0.38" />
-      <path d="M90 226 Q76 234 56 238" stroke="#5a3a1a" strokeWidth="4.5" strokeLinecap="round" fill="none"/>
-      <path d="M110 226 Q124 234 144 238" stroke="#5a3a1a" strokeWidth="4.5" strokeLinecap="round" fill="none"/>
-      <path d="M95 228 Q88 236 80 240" stroke="#5a3a1a" strokeWidth="3" strokeLinecap="round" fill="none"/>
-      <rect x="85" y="72" width="30" height="160" rx="8" fill="#5a3a1a" />
-      <rect x="85" y="96" width="14" height="9" rx="3" fill="#7a5330" transform="rotate(-28 85 96)" />
-      <rect x="115" y="112" width="16" height="9" rx="3" fill="#7a5330" transform="rotate(28 115 112)" />
-      <rect x="85" y="144" width="13" height="7" rx="3" fill="#7a5330" transform="rotate(-18 85 144)" />
-      <rect x="115" y="158" width="13" height="7" rx="3" fill="#7a5330" transform="rotate(18 115 158)" />
-      <rect x="89" y="186" width="9" height="6" rx="3" fill="#7a5330" transform="rotate(-12 89 186)" />
-      <ellipse cx="100" cy="52" rx="80" ry="66" fill="#2d7028" />
-      <ellipse cx="50" cy="76" rx="50" ry="46" fill="#286623" />
-      <ellipse cx="152" cy="70" rx="46" ry="42" fill="#307a2b" />
-      <ellipse cx="100" cy="34" rx="62" ry="54" fill="#3d8c38" />
-      <ellipse cx="62" cy="54" rx="40" ry="36" fill="#2d7028" />
-      <ellipse cx="140" cy="48" rx="36" ry="32" fill="#368030" />
-      <ellipse cx="100" cy="18" rx="48" ry="40" fill="#449040" />
-      <ellipse cx="76" cy="32" rx="28" ry="26" fill="#3d8c38" />
-      <ellipse cx="126" cy="26" rx="26" ry="24" fill="#4d9c47" />
-      <ellipse cx="100" cy="6" rx="30" ry="24" fill="#5aac54" />
+    // Stage 4 — mighty tree (scaled down to fit ground, centered as sprout)
+    <svg key={4} viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
+      <g transform="translate(25, 56) scale(0.75)">
+        <ellipse cx="100" cy="238" rx="88" ry="13" fill="#8B6340" opacity="0.38" />
+        <path d="M90 226 Q76 234 56 238" stroke="#5a3a1a" strokeWidth="4.5" strokeLinecap="round" fill="none"/>
+        <path d="M110 226 Q124 234 144 238" stroke="#5a3a1a" strokeWidth="4.5" strokeLinecap="round" fill="none"/>
+        <path d="M95 228 Q88 236 80 240" stroke="#5a3a1a" strokeWidth="3" strokeLinecap="round" fill="none"/>
+        <rect x="85" y="72" width="30" height="160" rx="8" fill="#5a3a1a" />
+        <rect x="85" y="96" width="14" height="9" rx="3" fill="#7a5330" transform="rotate(-28 85 96)" />
+        <rect x="115" y="112" width="16" height="9" rx="3" fill="#7a5330" transform="rotate(28 115 112)" />
+        <rect x="85" y="144" width="13" height="7" rx="3" fill="#7a5330" transform="rotate(-18 85 144)" />
+        <rect x="115" y="158" width="13" height="7" rx="3" fill="#7a5330" transform="rotate(18 115 158)" />
+        <rect x="89" y="186" width="9" height="6" rx="3" fill="#7a5330" transform="rotate(-12 89 186)" />
+        <ellipse cx="100" cy="52" rx="80" ry="66" fill="#2d7028" />
+        <ellipse cx="50" cy="76" rx="50" ry="46" fill="#286623" />
+        <ellipse cx="152" cy="70" rx="46" ry="42" fill="#307a2b" />
+        <ellipse cx="100" cy="34" rx="62" ry="54" fill="#3d8c38" />
+        <ellipse cx="62" cy="54" rx="40" ry="36" fill="#2d7028" />
+        <ellipse cx="140" cy="48" rx="36" ry="32" fill="#368030" />
+        <ellipse cx="100" cy="18" rx="48" ry="40" fill="#449040" />
+        <ellipse cx="76" cy="32" rx="28" ry="26" fill="#3d8c38" />
+        <ellipse cx="126" cy="26" rx="26" ry="24" fill="#4d9c47" />
+        <ellipse cx="100" cy="6" rx="30" ry="24" fill="#5aac54" />
+      </g>
     </svg>
   ];
   return (
