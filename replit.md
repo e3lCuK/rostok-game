@@ -4,7 +4,7 @@
 
 pnpm workspace monorepo using TypeScript. Two main products:
 1. **Tree Idle Game** (`artifacts/tree-idle-game`) — simple SVG tree idle game at `/`
-2. **Bank** (`artifacts/bank-game`) — gamified banking app at `/bank/` with Clerk Auth + PostgreSQL
+2. **Bank** (`artifacts/bank-game`) — gamified banking app at `/bank/` with custom session auth + PostgreSQL
 
 ## Stack
 
@@ -14,7 +14,7 @@ pnpm workspace monorepo using TypeScript. Two main products:
 - **TypeScript version**: 5.9
 - **API framework**: Express 5
 - **Database**: PostgreSQL + raw `pg` pool (game state); Drizzle ORM (shared lib)
-- **Auth**: Clerk Auth (`@clerk/express` server-side, `@clerk/react` client-side)
+- **Auth**: custom session-based auth (email+password, cookie sessions via `SESSION_SECRET`)
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
@@ -32,16 +32,17 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 ## Bank App Architecture
 
 ### Authentication
-- Clerk Auth (email+password + Google OAuth)
-- Clerk proxy via `/__clerk` path, handled by api-server middleware
-- Vite dev proxy: `/api` and `/__clerk` → `http://localhost:8080`
+- Custom session auth (email + password), cookie-based
+- Sessions managed by api-server; `SESSION_SECRET` env var required
+- Vite dev proxy: `/api` → `http://localhost:8080`
 
 ### Database Schema (raw SQL, not Drizzle)
-- `accounts` — user balances, start date, accrual tracking
-- `game_state` — session state (water/sun/fertilizer flags, last session time)
+- `users` — credentials, nickname
+- `accounts` — user balances, start date, accrual tracking, `starting_capital`
+- `game_state` — session state (water/sun/fertilizer flags, last session time, pending rewards, XP, level, streak, tree growth)
 - `income_history` — audit log of all earnings
 
-### Economy Formulas (v2 — two-button reward system)
+### Economy Formulas
 - Standard daily: `balance × 0.12 / 365` (auto-accrued)
 - `storedSessions = 1 + missedSessions` — sessions accumulate, never lost
 - Base reward: `(activeBalance × 0.12 / 365 / 3) × storedSessions`
@@ -51,13 +52,13 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
   - `skillPart = (avgSkillScore/80) × 0.75`; `capitalPart`: 0.16/0.18/0.20; `randomPart`: 0–0.04
 - Super session: shown when `storedSessions > 1`; button/status text turns red
 
-### Two-Button Reward Flow
+### Reward Claim Flow
 1. Player completes all 3 mini-games (water, sun, fertilizer)
-2. Backend calculates base + bonus rewards and stores in `game_state`
+2. Backend calculates base + bonus rewards, stores in `game_state`:
    - `pending_base_reward` NUMERIC
    - `pending_bonus_reward` NUMERIC
-3. Frontend shows two claim buttons — blue "Базовый доход" + green "Бонус за активность"
-4. Each button calls `POST /api/game/session/claim { type: "base"|"bonus" }`
+3. Frontend shows single button **"Доход за сессию ×N"** (N = storedSessions)
+4. Button calls `POST /api/game/session/claimAll` — claims both base + bonus in one request
 5. Rewards persist in DB until claimed (survive page reload)
 
 ### State Flow
@@ -66,15 +67,33 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - Single 8-hour cooldown between sessions
 - Pending rewards stored in DB, not just in-memory
 
-### Starting Capital
-- First login shows onboarding screen: 10k / 100k / 1M ₽
+### Starting Capital & Leaderboard Tiers
+- First login shows onboarding screen with 3 options:
+  - **20 000 ₽** — «Начальный»
+  - **200 000 ₽** — «Стандартный»
+  - **2 000 000 ₽** — «Премиум»
+- Chosen amount stored in `accounts.starting_capital` at account creation (immutable)
 - Capital split 50/50 between standard and active deposits
 - Tree growth speed depends on total balance magnitude
 
-### Files
+### XP / Leaderboard Modal
+- Two main tabs: **История** (session XP log) and **Рейтинг**
+- Рейтинг has 4 sub-tabs:
+  | Sub-tab | Filter | Sort |
+  |---------|--------|------|
+  | Опыт | all players | player_xp DESC |
+  | Малый | starting_capital ≤ 50 000 | tree_growth_mm DESC |
+  | Средний | starting_capital 50 001–500 000 | tree_growth_mm DESC |
+  | Крупный | starting_capital > 500 000 | tree_growth_mm DESC |
+- Capital tabs show tree growth in mm/m instead of XP
+
+### Key Files
 - `artifacts/bank-game/src/lib/engine.ts` — all formulas, constants, state types
 - `artifacts/bank-game/src/lib/api.ts` — API client
+- `artifacts/bank-game/src/pages/GamePage.tsx` — main game UI
+- `artifacts/bank-game/src/pages/OnboardingPage.tsx` — starting capital selection
 - `artifacts/api-server/src/routes/game.ts` — all game API endpoints
+- `artifacts/api-server/src/index.ts` — server entry + DB migrations (`runMigrations()`)
 
 ## Artifacts
 
