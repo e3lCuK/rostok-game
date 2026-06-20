@@ -73,19 +73,19 @@ export default function GameAreaBg({ groundY = -115, skyOffset = 0 }: Props) {
             <ellipse cx="330" cy="271" rx="7" ry="5" />
           </g>
           {/* Bush left */}
-          <g opacity="0.45">
+          <g opacity="0.45" className="bg-bush-left">
             <circle cx="45" cy="258" r="14" fill="#4a8f12" />
             <circle cx="34" cy="262" r="10" fill="#5aab1a" />
             <circle cx="56" cy="263" r="10" fill="#5aab1a" />
           </g>
           {/* Bush right */}
-          <g opacity="0.45">
+          <g opacity="0.45" className="bg-bush-right">
             <circle cx="295" cy="258" r="14" fill="#4a8f12" />
             <circle cx="284" cy="262" r="10" fill="#5aab1a" />
             <circle cx="306" cy="263" r="10" fill="#5aab1a" />
           </g>
           {/* Flower left */}
-          <g opacity="0.7">
+          <g opacity="0.7" className="bg-flower-left">
             <circle cx="68" cy="267" r="3" fill="#fbbf24" />
             <circle cx="68" cy="262" r="2.5" fill="#f9a8d4" />
             <circle cx="73" cy="265" r="2.5" fill="#f9a8d4" />
@@ -94,7 +94,7 @@ export default function GameAreaBg({ groundY = -115, skyOffset = 0 }: Props) {
             <line x1="68" y1="272" x2="68" y2="278" stroke="#4d7c0f" strokeWidth="1.2" />
           </g>
           {/* Flower right */}
-          <g opacity="0.7">
+          <g opacity="0.7" className="bg-flower-right">
             <circle cx="272" cy="267" r="3" fill="#fbbf24" />
             <circle cx="272" cy="262" r="2.5" fill="#c4b5fd" />
             <circle cx="277" cy="265" r="2.5" fill="#c4b5fd" />
@@ -103,7 +103,7 @@ export default function GameAreaBg({ groundY = -115, skyOffset = 0 }: Props) {
             <line x1="272" y1="272" x2="272" y2="278" stroke="#4d7c0f" strokeWidth="1.2" />
           </g>
           {/* Mushroom */}
-          <g opacity="0.5">
+          <g opacity="0.5" className="bg-mushroom">
             <rect x="78" y="271" width="5" height="8" rx="1" fill="#e5c07b" />
             <ellipse cx="80.5" cy="271" rx="9" ry="5" fill="#e06c75" />
             <ellipse cx="78" cy="270" rx="2" ry="1.2" fill="#fff" opacity="0.6" />

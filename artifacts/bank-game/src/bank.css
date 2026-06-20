@@ -718,6 +718,47 @@ body {
 .bg-sun         { animation: bg-sun-pulse            4s  ease-in-out infinite; transform-origin: 298px 18px; }
 .bg-butterfly   { animation: bg-butterfly-float      5s  ease-in-out infinite; transform-origin: center; }
 
+@keyframes bg-bush-sway {
+  0%, 100% { transform: rotate(0deg); }
+  30%       { transform: rotate(1.8deg); }
+  70%       { transform: rotate(-1.4deg); }
+}
+@keyframes bg-flower-nod {
+  0%, 100% { transform: rotate(0deg) translateY(0px); }
+  40%       { transform: rotate(3deg) translateY(-1.5px); }
+  75%       { transform: rotate(-2.5deg) translateY(-0.5px); }
+}
+@keyframes bg-mushroom-glow {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 0.75; }
+}
+
+.bg-bush-left  {
+  animation: bg-bush-sway 5s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: bottom center;
+}
+.bg-bush-right {
+  animation: bg-bush-sway 6.5s ease-in-out infinite;
+  animation-delay: -2.5s;
+  transform-box: fill-box;
+  transform-origin: bottom center;
+}
+.bg-flower-left {
+  animation: bg-flower-nod 4s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: bottom center;
+}
+.bg-flower-right {
+  animation: bg-flower-nod 4s ease-in-out infinite;
+  animation-delay: -1.8s;
+  transform-box: fill-box;
+  transform-origin: bottom center;
+}
+.bg-mushroom {
+  animation: bg-mushroom-glow 3.5s ease-in-out infinite;
+}
+
 
 .game-floater {
   position: absolute;
