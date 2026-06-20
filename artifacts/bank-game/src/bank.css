@@ -732,7 +732,7 @@ body {
 
 .tree-growth-label {
   white-space: nowrap;
-  background: rgba(255, 255, 255, 0.72);
+  background: #ecfccb;
   padding: 5px 14px;
   border-radius: 999px;
   font-size: 13px;
