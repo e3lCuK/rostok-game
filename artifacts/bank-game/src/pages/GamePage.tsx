@@ -87,15 +87,7 @@ export default function GamePage({ state, onStateChange }: Props) {
     localStorage.setItem("streak_widget_date", todayStr);
     setShowStreakWidget(false);
   }
-  const [helpPulsing, setHelpPulsing] = useState(() => !localStorage.getItem("active_help_seen"));
-  useEffect(() => {
-    if (!helpPulsing) return;
-    const t = setTimeout(() => {
-      setHelpPulsing(false);
-      localStorage.setItem("active_help_seen", "true");
-    }, 10000);
-    return () => clearTimeout(t);
-  }, []);
+  const helpPulsing = false;
   useEffect(() => {
     if (!showXpHistory || xpModalTab !== "rating") return;
     setLeaderboardLoading(true);
@@ -583,10 +575,6 @@ export default function GamePage({ state, onStateChange }: Props) {
           className={`help-icon${helpPulsing ? " help-icon-pulse" : ""}`}
           onClick={() => {
             setShowHelp(true);
-            if (helpPulsing) {
-              setHelpPulsing(false);
-              localStorage.setItem("active_help_seen", "true");
-            }
           }}
           aria-label="Справка"
         >
