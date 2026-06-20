@@ -28,6 +28,8 @@ import GameAreaBg from "@/components/GameAreaBg";
 interface Props {
   state: UserState;
   onStateChange: (s: UserState) => void;
+  notif?: boolean;
+  onClearNotif?: () => void;
 }
 
 interface Floater {
@@ -45,7 +47,7 @@ const TREE_STAGE_DATA = [
   { emoji: "🌲", from: 8500, fromFmt: "8.50 м",  toFmt: null      },
 ];
 
-export default function GamePage({ state, onStateChange }: Props) {
+export default function GamePage({ state, onStateChange, notif, onClearNotif }: Props) {
   const { user, logout, updateNickname } = useAuth();
   const [now, setNow] = useState(Date.now());
   const [floaters, setFloaters] = useState<Floater[]>([]);
@@ -64,7 +66,7 @@ export default function GamePage({ state, onStateChange }: Props) {
   const [showCareButton, setShowCareButton] = useState(false);
   const [fadeActivities, setFadeActivities] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false); // collapsed by default
-  const [historyNotif, setHistoryNotif] = useState(false);
+  const [historyNotif, setHistoryNotif] = useState(notif ?? false);
   const [levelUpData, setLevelUpData] = useState<{ level: number } | null>(null);
   const [xpGainAmount, setXpGainAmount] = useState<number | null>(null);
   const [showXpPopup, setShowXpPopup] = useState(false);
@@ -891,7 +893,7 @@ export default function GamePage({ state, onStateChange }: Props) {
 
       {/* Session history */}
       <div className="history-card">
-        <div className="history-title-row" onClick={() => { setHistoryOpen(!historyOpen); if (!historyOpen) setHistoryNotif(false); }}>
+        <div className="history-title-row" onClick={() => { setHistoryOpen(!historyOpen); if (!historyOpen) { setHistoryNotif(false); onClearNotif?.(); } }}>
           <h3 className="history-title">
             История начислений
             {historyNotif && <span className="history-notif-dot" />}

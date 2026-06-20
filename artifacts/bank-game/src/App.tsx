@@ -253,7 +253,6 @@ function AppShell() {
   }
 
   function clearPair(t: Tab) {
-    if (t === "active")   { setNotifActive(false); }
     if (t === "standard") { setNotifStandard(false); }
   }
   function handleStateChange(next: UserState) { setState(next); }
@@ -358,7 +357,12 @@ function AppShell() {
             {tab === "savings"  && <SavingsPage state={state} onTabChange={handleTabChange} />}
             {tab === "standard" && <StandardPage state={state} notif={notifStandard} onClearNotif={() => { setNotifStandard(false); setNotifHome(false); }} />}
             {tab === "active"   && (
-              <GamePage state={state} onStateChange={handleStateChange} />
+              <GamePage
+                state={state}
+                onStateChange={handleStateChange}
+                notif={notifActive}
+                onClearNotif={() => { setNotifActive(false); setNotifHome(false); }}
+              />
             )}
           </motion.div>
         </AnimatePresence>
