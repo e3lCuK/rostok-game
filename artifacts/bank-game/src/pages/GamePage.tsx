@@ -1019,15 +1019,21 @@ export default function GamePage({ state, onStateChange, notif, onClearNotif }: 
 
               {xpModalTab === "rating" && (
                 <div className="xp-rating-subtabs">
+                  <button
+                    className={`xp-rating-subtab${ratingSubTab === "xp" ? " xp-rating-subtab-active" : ""}`}
+                    onClick={() => setRatingSubTab("xp")}
+                  >🏆 Опыт</button>
+                  <div className="xp-rating-divider">
+                    <span className="xp-rating-divider-label">по вкладу</span>
+                  </div>
                   {([
-                    { id: "xp",     label: "Опыт" },
                     { id: "small",  label: "Малый" },
                     { id: "medium", label: "Средний" },
                     { id: "large",  label: "Крупный" },
                   ] as const).map(s => (
                     <button
                       key={s.id}
-                      className={`xp-rating-subtab${ratingSubTab === s.id ? " xp-rating-subtab-active" : ""}`}
+                      className={`xp-rating-subtab xp-rating-subtab-capital${ratingSubTab === s.id ? " xp-rating-subtab-active" : ""}`}
                       onClick={() => setRatingSubTab(s.id)}
                     >{s.label}</button>
                   ))}
