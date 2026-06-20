@@ -27,9 +27,9 @@ export default function GameAreaBg({ groundY = -115, skyOffset = 0 }: Props) {
         {/* Birds */}
         <g transform={`translate(0,${skyOffset})`}>
           <g stroke="#365314" strokeWidth="1.3" fill="none" opacity="0.45" className="bg-birds">
-            <path d="M108 38 Q111 34 114 38" />
-            <path d="M120 30 Q123 26 126 30" />
-            <path d="M133 41 Q136 37 139 41" />
+            <path d="M22 120 Q25 116 28 120" />
+            <path d="M34 112 Q37 108 40 112" />
+            <path d="M47 123 Q50 119 53 123" />
           </g>
         </g>
 
