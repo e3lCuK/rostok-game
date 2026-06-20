@@ -2484,7 +2484,7 @@ body.modal-open {
 .onboarding-rates {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
 }
 
 .onboarding-rate-badge {
