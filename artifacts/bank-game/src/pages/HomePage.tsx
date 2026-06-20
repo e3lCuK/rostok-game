@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   UserState,
   formatRub,
@@ -20,6 +20,13 @@ interface Props {
 
 export default function HomePage({ state, notif, onClearNotif }: Props) {
   const [historyOpen, setHistoryOpen] = useState(false);
+
+  useEffect(() => {
+    if (notif) {
+      setHistoryOpen(true);
+      onClearNotif?.();
+    }
+  }, []);
   const { standard, active, standardEarned, activeEarned } = state.balances;
   const totalBalance = standard + active;
   const totalEarned = standardEarned + activeEarned;
