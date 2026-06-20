@@ -1579,7 +1579,6 @@ body.modal-open {
 .session-actions-ready {
   animation: session-ready-pulse 1.6s ease-in-out infinite;
   border-radius: 16px;
-  padding: 6px;
   background: rgba(255,255,255,0.18);
 }
 
