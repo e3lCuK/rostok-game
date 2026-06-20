@@ -755,12 +755,9 @@ export default function GamePage({ state, onStateChange }: Props) {
                 >
                   <div className="action-buttons-row">
                     <div className="action-btn-bank" style={{ opacity: 0, pointerEvents: "none" }} />
-                    <motion.button
+                    <button
                       className={`care-btn${careClicked ? " care-btn-clicked" : ""}`}
                       onClick={careClicked ? undefined : handleGoToRewards}
-                      initial={{ scale: 0.5 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ type: "spring", stiffness: 320, damping: 22 }}
                     >
                       {(() => {
                         const pts = [waterResultPct, lightResultPct, fertilizerResultPct];
@@ -769,7 +766,7 @@ export default function GamePage({ state, onStateChange }: Props) {
                       })()}
                       <Shovel size={20} />
                       <span>УХОД</span>
-                    </motion.button>
+                    </button>
                     <div className="action-btn-bank" style={{ opacity: 0, pointerEvents: "none" }} />
                   </div>
                 </motion.div>
