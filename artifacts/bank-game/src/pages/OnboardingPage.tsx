@@ -111,7 +111,7 @@ export default function OnboardingPage({ onComplete }: Props) {
               <p className="capital-option-desc">{descriptions[cap]}</p>
               <div className="capital-option-stats">
                 <div className="capital-stat">
-                  <p className="capital-stat-label">В день (пасс.)</p>
+                  <p className="capital-stat-label">В день (стан.)</p>
                   <p className="capital-stat-value">до {daily.toLocaleString("ru-RU", { maximumFractionDigits: 2 })} ₽</p>
                 </div>
                 <div className="capital-stat">
