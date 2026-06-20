@@ -1777,22 +1777,19 @@ body.modal-open {
 .care-btn-wrap {
   display: flex;
   justify-content: center;
-  padding: 8px 0;
+  padding: 16px 0 4px;
 }
 
 .care-btn {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 7px;
-  padding: 14px 40px;
-  border-radius: 18px;
-  border: 2.5px solid #92400e;
-  background: rgba(255, 248, 240, 0.92);
+  justify-content: center;
+  width: 76px;
+  min-height: 68px;
+  border-radius: 15px;
+  border: 2px solid #92400e;
+  background: rgba(255,255,255,0.80);
   color: #92400e;
-  font-size: 0.85rem;
-  font-weight: 800;
-  letter-spacing: 0.6px;
   cursor: pointer;
   animation: care-pulse 1.5s ease-in-out infinite;
   backdrop-filter: blur(4px);

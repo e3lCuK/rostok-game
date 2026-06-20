@@ -158,7 +158,7 @@ export default function GamePage({ state, onStateChange }: Props) {
       return;
     }
     const t1 = setTimeout(() => setMerging(true), 700);
-    const t2 = setTimeout(() => setShowCareButton(true), 1100);
+    const t2 = setTimeout(() => setShowCareButton(true), 1800);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [showCompletionStage]);
 
@@ -737,8 +737,7 @@ export default function GamePage({ state, onStateChange }: Props) {
                   transition={{ type: "spring", stiffness: 320, damping: 22 }}
                 >
                   <button className="care-btn" onClick={handleGoToRewards}>
-                    <Shovel size={24} />
-                    <span>УХАЖИВАТЬ</span>
+                    <Shovel size={26} />
                   </button>
                 </motion.div>
               ) : (
