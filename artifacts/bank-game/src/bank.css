@@ -577,13 +577,11 @@ body {
   cursor: pointer;
   font-family: inherit;
   color: inherit;
-  text-decoration: underline dotted rgba(101, 163, 13, 0.5);
-  text-underline-offset: 3px;
-  transition: color 0.15s, text-decoration-color 0.15s;
+  text-decoration: none;
+  transition: color 0.15s;
 }
 .tree-growth-label-btn:hover {
   color: #4d7c0f;
-  text-decoration-color: rgba(77, 124, 15, 0.7);
 }
 
 /* ── Tree stages modal ────────────────────────────── */
