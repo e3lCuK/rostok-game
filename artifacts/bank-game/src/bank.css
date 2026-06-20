@@ -2474,11 +2474,26 @@ body.modal-open {
   margin-top: -22px;
 }
 
+.onboarding-info-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text2);
+  padding: 0;
+}
+
 .onboarding-info-text {
   font-size: 0.82rem;
   color: var(--text2);
   line-height: 1.55;
-  margin: 0;
+  margin: 8px 0 6px;
 }
 
 .onboarding-rates {

@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown } from "lucide-react";
 import { CAPITAL_OPTIONS, formatCapital, calcStandardDaily } from "@/lib/engine";
 
 interface Props {
@@ -10,6 +11,7 @@ export default function OnboardingPage({ onComplete }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [infoOpen, setInfoOpen] = useState(false);
   const isSubmitting = useRef(false);
 
   const labels: Record<number, string> = {
@@ -52,13 +54,37 @@ export default function OnboardingPage({ onComplete }: Props) {
       </div>
 
       <div className="onboarding-info">
-        <p className="onboarding-info-text">
-          Вкладывать ничего не нужно — это учебный счёт. В дальнейшем рост дерева зависит от того, сколько вы готовы выделить под накопления: чем больше сумма, тем заметнее влияние на скорость роста.
-        </p>
-        <div className="onboarding-rates">
-          <span className="onboarding-rate-badge">Стандартный вклад — <strong>12%</strong> годовых</span>
-          <span className="onboarding-rate-badge">Активный вклад — <strong>15%</strong> годовых</span>
-        </div>
+        <button className="onboarding-info-toggle" onClick={() => setInfoOpen(v => !v)}>
+          <span>Как это работает?</span>
+          <motion.span
+            animate={{ rotate: infoOpen ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+            style={{ display: "flex" }}
+          >
+            <ChevronDown size={16} />
+          </motion.span>
+        </button>
+
+        <AnimatePresence initial={false}>
+          {infoOpen && (
+            <motion.div
+              key="info-body"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.22, ease: "easeInOut" }}
+              style={{ overflow: "hidden" }}
+            >
+              <p className="onboarding-info-text">
+                Вкладывать ничего не нужно — это учебный счёт. В дальнейшем рост дерева зависит от того, сколько вы готовы выделить под накопления: чем больше сумма, тем заметнее влияние на скорость роста.
+              </p>
+              <div className="onboarding-rates">
+                <span className="onboarding-rate-badge">Стандартный вклад — <strong>12%</strong> годовых</span>
+                <span className="onboarding-rate-badge">Активный вклад — <strong>15%</strong> годовых</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div className="onboarding-options">
