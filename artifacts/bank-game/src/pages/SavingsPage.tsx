@@ -65,7 +65,7 @@ export default function SavingsPage({ state, onTabChange }: Props) {
         </div>
 
         <div className="deposit-info-box deposit-info-box-blue">
-          <p>Пассивный доход начисляется автоматически каждые 24 часа. Никаких действий не требуется.</p>
+          <p>Пассивный доход начисляется автоматически каждые<br />24 часа. Никаких действий не требуется.</p>
         </div>
       </div>
 
